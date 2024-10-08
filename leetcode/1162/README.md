@@ -47,48 +47,17 @@ The cell (2, 2) is as far as possible from all the land with distance 4.
 **Similar Questions**:
 * [Shortest Distance from All Buildings (Hard)](https://leetcode.com/problems/shortest-distance-from-all-buildings/)
 
-## Solution 1. Brute Force
-
-For each water cell, compute its minimal distance to all lands. The maximum of those minimal distances is the answer.
-
-Note that if `dist` is already smaller than or equal to the current best answer `ans`, this cell should be skipped because it can't yield better result (`if (dist <= ans) break;`).
-
-```cpp
-// OJ: https://leetcode.com/problems/as-far-from-land-as-possible/
-// Author: github.com/lzl124631x
-// Time: O(MNL) where grid is of size M*N and L is the count of lands.
-// Space: O(L)
-class Solution {
-public:
-    int maxDistance(vector<vector<int>>& grid) {
-        vector<pair<int, int>> lands;
-        int M = grid.size(), N = grid[0].size(), ans = -1;
-        for (int i = 0; i < M; ++i) {
-            for (int j = 0; j < N; ++j) {
-                if (grid[i][j] == 1) lands.emplace_back(i, j);
-            }
-        }
-        if (lands.empty() || M * N == lands.size()) return -1;
-        for (int i = 0; i < M; ++i) {
-            for (int j = 0; j < N; ++j) {
-                if (grid[i][j] == 1) continue;
-                int dist = INT_MAX;
-                for (auto &p : lands) {
-                    int d = abs(p.first - i) + abs(p.second - j);
-                    dist = min(dist, d);
-                    if (dist <= ans) break;
-                }
-                ans = max(ans, dist);
-            }
-        }
-        return ans;
-    }
-};
-```
 
 ## Solution 2. BFS
 
-Starts from lands, do BFS layer by layer. The maximum layer number you get is the answer.
+	Initialization: Create a queue to perform BFS. Store the dimensions of the grid and initialize ans to track the maximum distance.
+	Queue Population: Iterate through the grid to enqueue all land cells (cells with value 1).
+	Boundary Check: If there are no water cells (cells with value 0) or if the grid is entirely land, return -1.
+	BFS Traversal: While there are cells in the queue:
+	    Process each cell, checking its four neighbors.
+	    If a neighbor is a water cell, enqueue it and mark it as land by changing its value to 1.
+	Distance Calculation: Increment the distance counter (ans) after processing all cells at the current distance.
+	Return Result: Finally, return the maximum distance found.
 
 ```cpp
 // OJ: https://leetcode.com/problems/as-far-from-land-as-possible/
@@ -100,13 +69,19 @@ public:
     int maxDistance(vector<vector<int>>& grid) {
         queue<pair<int, int>> q;
         int M = grid.size(), N = grid[0].size(), ans = -1;
-        int dirs[4][2] = {{0,1},{1,0},{0,-1},{-1,0}};
+        int dirs[4][2] = {{0,1},{1,0},{0,-1},{-1,0}}; // Direction vectors
+
+        // Enqueue all land cells (1s)
         for (int i = 0; i < M; ++i) {
             for (int j = 0; j < N; ++j) {
                 if (grid[i][j] == 1) q.emplace(i, j);
             }
         }
+        
+        // If there are no water cells or all cells are land
         if (q.empty() || M * N == q.size()) return -1;
+
+        // BFS to find the maximum distance
         while (q.size()) {
             int cnt = q.size();
             while (cnt--) {
@@ -114,14 +89,16 @@ public:
                 q.pop();
                 for (auto &dir : dirs) {
                     int x = p.first + dir[0], y = p.second + dir[1];
+                    // If the cell is valid and is water
                     if (x < 0 || x >= M || y < 0 || y >= N || grid[x][y]) continue;
-                    q.emplace(x, y);
-                    grid[x][y] = 1;
+                    q.emplace(x, y); // Enqueue the water cell
+                    grid[x][y] = 1; // Mark as visited (land)
                 }
             }
-            ++ans;
+            ++ans; // Increment distance
         }
-        return ans;
+        return ans; // Return the maximum distance
     }
 };
+
 ```
