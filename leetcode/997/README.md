@@ -57,6 +57,12 @@
 
 ## Solution 1.
 
+	Initialize Counts: Create two vectors, indegree and outdegree, to track the number of people who trust each person and the number of people each person trusts.
+	Count Trust Relationships: Iterate through the trust relationships to populate the indegree and outdegree vectors.
+	Identify Potential Judge: Loop through each person to find the one who has an indegree of N−1N−1 (trusted by everyone else) and an outdegree of 00 (trusts no one).
+	Check Uniqueness: Ensure that only one person meets the judge criteria; if more than one potential judge is found, return false.
+	Return Result: Return the identified judge's index or -1 if no judge exists.
+
 ```cpp
 // OJ: https://leetcode.com/problems/find-the-town-judge/
 // Author: github.com/lzl124631x
@@ -66,17 +72,21 @@ class Solution {
 public:
     int findJudge(int N, vector<vector<int>>& trust) {
         vector<int> indegree(N + 1), outdegree(N + 1);
+        
+        // Count indegrees and outdegrees for each person
         for (auto &t : trust) {
             outdegree[t[0]]++;
             indegree[t[1]]++;
         }
+        
         int judge = -1;
         for (int i = 1; i <= N; ++i) {
+            // Check for the judge conditions
             if (indegree[i] != N - 1 || outdegree[i] != 0) continue;
-            if (judge != -1) return false;
+            if (judge != -1) return false; // More than one judge found
             judge = i;
         }
-        return judge;
+        return judge; // Return the found judge or -1 if none
     }
 };
 ```
