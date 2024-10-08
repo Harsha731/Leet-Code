@@ -43,6 +43,10 @@ The 1s colored red in grid2 are those considered to be part of a sub-island. The
 
 ## Solution 1. DFS
 
+	DFS for Sinking: The algorithm first traverses matrix B and sinks (marks as water) any islands (cells with value 1) that are not present in matrix A (i.e., cells in A that are 0).
+	Count Remaining Islands: After sinking, the algorithm then counts the remaining islands in B by performing another DFS. Each time it finds an island (cell with value 1), it marks it as visited and increments the island count.
+	Return Count: Finally, it returns the count of the sub-islands that are fully contained within the land of A.
+
 **Intuition**: If an island in `B` overlaps with a water cell in `A`, then this island shouldn't be considered.
 
 **Algorithm**
@@ -50,15 +54,20 @@ The 1s colored red in grid2 are those considered to be part of a sub-island. The
 1. For each water cell `A[i][j]`, sink the island in `B` containing `B[i][j]` into water.
 2. Count the number of islands in `B`.
 
+
+
 ```cpp
 // OJ: https://leetcode.com/problems/count-sub-islands/
 // Author: github.com/lzl124631x
 // Time: O(MN)
 // Space: O(1)
+
 class Solution {
     int dirs[4][2] = {{0,1},{0,-1},{-1,0},{1,0}}, M, N;
+    
+    // DFS to sink the island
     void dfs(vector<vector<int>> &B, int x, int y, int color) {
-        if (B[x][y] == color) return;
+        if (B[x][y] == color) return; // If already visited or water
         B[x][y] = color;
         for (auto &[dx, dy] : dirs) {
             int a = x + dx, b = y + dy;
@@ -66,24 +75,31 @@ class Solution {
             dfs(B, a, b, color);
         }
     }
+    
 public:
     int countSubIslands(vector<vector<int>>& A, vector<vector<int>>& B) {
         M = A.size(), N = A[0].size();
+        
+        // Sink islands in B that don't exist in A
         for (int i = 0; i < M; ++i) {
             for (int j = 0; j < N; ++j) {
-                if (A[i][j] == 0) dfs(B, i, j, 0); // sink this island at B[i][j]
+                if (A[i][j] == 0) dfs(B, i, j, 0); 
             }
         }
+        
         int cnt = 0;
+        
+        // Count remaining islands in B
         for (int i = 0; i < M; ++i) {
             for (int j = 0; j < N; ++j) {
                 if (B[i][j] == 1) {
-                    dfs(B, i, j, 0);
-                    ++cnt; // count islands in `B`
+                    dfs(B, i, j, 0); 
+                    ++cnt;
                 }
             }
         }
         return cnt;
     }
 };
+
 ```
