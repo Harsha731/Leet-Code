@@ -47,60 +47,83 @@ The edges 2, 3, 4, and 5 are only part of some MSTs, therefore they are consider
 
 ## Solution 1. Kruskal
 
+	Union-Find Structure: The UnionFind class manages connected components, enabling efficient union and find operations to determine if two nodes are connected.
+	
+	Kruskal’s Algorithm: The kruskal function calculates the weight of the Minimum Spanning Tree (MST) while optionally including or excluding specific edges to evaluate their impact on connectivity.
+	
+	Edge Classification:
+	
+	    All edges are sorted by weight, and the MST cost is computed.
+	    Each edge is analyzed:
+	        If its removal increases the MST cost, it's marked as a critical edge.
+	        If including it does not change the MST cost, it's marked as a pseudo-critical edge.
+	
+	Final Output: The method returns two lists: one for critical edges and another for pseudo-critical edges, providing a clear classification based on their roles in the MST.
+
 ```cpp
 // OJ: https://leetcode.com/problems/find-critical-and-pseudo-critical-edges-in-minimum-spanning-tree/
 // Author: github.com/lzl124631x
 // Time: O(ElogE + E^2)
 // Space: O(N)
 // Ref: https://youtu.be/GzPUvV85kBI
+
 class UnionFind {
-    vector<int> id;
-    int size;
+    vector<int> id; // Array to track the parent of each node
+    int size; // Number of connected components
 public:
     UnionFind(int N) : id(N), size(N) {
-        iota(begin(id), end(id), 0);
+        iota(begin(id), end(id), 0); // Initialize the union-find structure
     }
+
     int find(int x) {
-        return id[x] == x ? x : (id[x] = find(id[x]));
+        return id[x] == x ? x : (id[x] = find(id[x])); // Path compression
     }
+
     bool connect(int x, int y) {
         int p = find(x), q = find(y);
-        if (p == q) return false;
-        id[p] = q;
-        --size;
+        if (p == q) return false; // Already connected
+        id[p] = q; // Union operation
+        --size; // Decrease the number of components
         return true;
     }
-    int getSize() { return size; }
+
+    int getSize() { return size; } // Return the number of connected components
 };
+
 class Solution {
     int kruskal(int n, vector<vector<int>> &E, int include = -1, int exclude = -1) {
-        int cost = 0;
-        UnionFind uf(n);
-        if (include != -1) {
+        int cost = 0; // Initialize total cost of the MST
+        UnionFind uf(n); // Create a new UnionFind for the current MST calculation
+        if (include != -1) { // If an edge should be included
             auto &e = E[include];
-            uf.connect(e[0], e[1]);
-            cost += e[2];
+            uf.connect(e[0], e[1]); // Connect nodes
+            cost += e[2]; // Add edge weight to cost
         }
+        // Process all edges except the excluded one
         for (int i = 0; i < E.size(); ++i) {
             if (i == include || i == exclude) continue;
             int u = E[i][0], v = E[i][1], w = E[i][2], id = E[i][3];
-            if (!uf.connect(u, v)) continue;
-            cost += w;
-            if (uf.getSize() == 1) break;
+            if (!uf.connect(u, v)) continue; // Connect nodes if not already connected
+            cost += w; // Add edge weight to cost
+            if (uf.getSize() == 1) break; // Stop if all nodes are connected
         }
-        return uf.getSize() == 1 ? cost : INT_MAX;
+        return uf.getSize() == 1 ? cost : INT_MAX; // Return cost if connected, else INT_MAX
     }
+
 public:
     vector<vector<int>> findCriticalAndPseudoCriticalEdges(int n, vector<vector<int>>& E) {
-        for (int i = 0; i < E.size(); ++i) E[i].push_back(i);
-        sort(begin(E), end(E), [](vector<int> &a, vector<int> &b) { return a[2] < b[2]; });
-        int cost = kruskal(n, E);        
-        vector<int> c, p;
+        for (int i = 0; i < E.size(); ++i) E[i].push_back(i); // Add original index to edges
+        sort(begin(E), end(E), [](vector<int> &a, vector<int> &b) { return a[2] < b[2]; }); // Sort edges by weight
+        int cost = kruskal(n, E); // Calculate the cost of the MST
+        vector<int> c, p; // Vectors for critical and pseudo-critical edges
+
+        // Check each edge to classify as critical or pseudo-critical
         for (int i = 0; i < E.size(); ++i) {
-            if (kruskal(n, E, -1, i) > cost) c.push_back(E[i][3]);
-            else if (kruskal(n, E, i) == cost) p.push_back(E[i][3]);
+            if (kruskal(n, E, -1, i) > cost) c.push_back(E[i][3]); // Critical edge
+            else if (kruskal(n, E, i) == cost) p.push_back(E[i][3]); // Pseudo-critical edge
         }
-        return { c, p };
+        return { c, p }; // Return both edge lists
     }
 };
+
 ```
