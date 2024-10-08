@@ -40,43 +40,59 @@ Return:
 
 ## Solution 1.
 
-We can also use a two bits for each cell to represent if it's reachable from top-left and/or bottom-right. Here for simplicity I just used two `vector<vector<int>>`.
-
+	We can also use a two bits for each cell to represent if it's reachable from top-left and/or bottom-right. Here for simplicity I just used two `vector<vector<int>>`.
+	Initialization: Define directions for movement and set up dimensions of the grid. Initialize two matrices, a and b, to track which cells can reach the Pacific and Atlantic Oceans, respectively.
+	Depth-First Search (DFS):
+    Perform DFS starting from the edges connected to the Pacific Ocean (left and top edges), marking reachable cells in matrix a.
+    Perform DFS from the edges connected to the Atlantic Ocean (right and bottom edges), marking reachable cells in matrix b.
+	Collect Results: After both DFS traversals, iterate through the matrices a and b. For each cell that is marked in both matrices, add its coordinates to the result list, indicating that it can reach both oceans.
+	Return Output: Return the list of coordinates where water can flow to both oceans.
 ```cpp
 // OJ: https://leetcode.com/problems/pacific-atlantic-water-flow/
 // Author: github.com/lzl124631x
 // Time: O(MN)
 // Space: O(MN)
+
 class Solution {
     int dirs[4][2] = {{0,1},{0,-1},{1,0},{-1,0}}, M, N;
+
+    // Depth-first search to mark reachable cells
     void dfs(vector<vector<int>> &A, int x, int y, vector<vector<int>> &m) {
-        if (m[x][y]) return;
-        m[x][y] = 1;
+        if (m[x][y]) return; // Already visited
+        m[x][y] = 1; // Mark as reachable
         for (auto &[dx, dy] : dirs) {
             int a = x + dx, b = y + dy;
+            // Check bounds and height condition
             if (a < 0 || a >= M || b < 0 || b >= N || A[a][b] < A[x][y]) continue;
-            dfs(A, a, b, m);
+            dfs(A, a, b, m); // Recur for adjacent cells
         }
     }
+
 public:
     vector<vector<int>> pacificAtlantic(vector<vector<int>>& A) {
         if (A.empty() || A[0].empty()) return {};
         M = A.size(), N = A[0].size();
         vector<vector<int>> a(M, vector<int>(N)), b(M, vector<int>(N)), ans; 
+
+        // Start DFS from Pacific Ocean edges
         for (int i = 0; i < M; ++i) {
-            dfs(A, i, 0, a);
-            dfs(A, i, N - 1, b);
+            dfs(A, i, 0, a); // Left edge
+            dfs(A, i, N - 1, b); // Right edge
         }
+        // Start DFS from Atlantic Ocean edges
         for (int j = 0; j < N; ++j) {
-            dfs(A, 0, j, a);
-            dfs(A, M - 1, j, b);
+            dfs(A, 0, j, a); // Top edge
+            dfs(A, M - 1, j, b); // Bottom edge
         }
+        
+        // Collect coordinates where both oceans can be reached
         for (int i = 0; i < M; ++i) {
             for (int j = 0; j < N; ++j) {
                 if (a[i][j] && b[i][j]) ans.push_back({i, j});
             }
         }
-        return ans;
+        return ans; // Return result
     }
 };
+
 ```
