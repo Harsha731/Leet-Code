@@ -42,6 +42,12 @@
 
 ## Solution 1. BFS
 
+	Initialization: Create arrays to track distances from the starting node to each node for red and blue edges. Initialize the starting node's distances to 0.
+	Graph Representation: Use an adjacency matrix to represent the graph, storing red edges as 1 and blue edges as 2.
+	BFS Traversal: Use a queue to perform a breadth-first search (BFS). Start from node 0, considering both colors (red and blue) simultaneously.
+	Distance Calculation: For each node, check reachable nodes with the alternating color, update distances, and enqueue the next nodes.
+	Result Compilation: After processing all nodes, return the shortest distances found for each node.
+
 ```cpp
 // OJ: https://leetcode.com/problems/shortest-path-with-alternating-colors/
 // Author: github.com/lzl124631x
@@ -51,24 +57,30 @@ class Solution {
 public:
     vector<int> shortestAlternatingPaths(int n, vector<vector<int>>& R, vector<vector<int>>& B) {
         vector<int> a(n, -1), b(n, -1), ans(n, -1);
-        a[0] = b[0] = ans[0] = 0;
+        a[0] = b[0] = ans[0] = 0; // Initialize starting point
         int G[100][100] = {};
-        for (auto &r : R) G[r[0]][r[1]] = 1;
-        for (auto &b : B) G[b[0]][b[1]] |= 2;
+        
+        // Build the graph with colors
+        for (auto &r : R) G[r[0]][r[1]] = 1; // Red edges
+        for (auto &b : B) G[b[0]][b[1]] |= 2; // Blue edges
+        
         queue<pair<int, int>> q;
-        q.emplace(0, 3);
+        q.emplace(0, 3); // Start from node 0 with both colors
         int step = 1;
+        
         while (q.size()) {
             int cnt = q.size();
             while (cnt--) {
                 auto [u, color] = q.front();
                 q.pop();
                 for (int v = 0; v < n; ++v) {
+                    // Check for red edge and alternate color
                     if (a[v] == -1 && (G[u][v] & 1) && (color & 2)) {
                         q.emplace(v, 1);
                         a[v] = step;
                         ans[v] = ans[v] == -1 ? a[v] : min(a[v], ans[v]);
                     }
+                    // Check for blue edge and alternate color
                     if (b[v] == -1 && (G[u][v] & 2) && (color & 1)) {
                         q.emplace(v, 2);
                         b[v] = step;
@@ -76,9 +88,10 @@ public:
                     }
                 }
             }
-            ++step;
+            ++step; // Increment step for distance
         }
-        return ans;
+        return ans; // Return the shortest paths
     }
 };
+
 ```
