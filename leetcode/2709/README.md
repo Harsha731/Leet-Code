@@ -55,6 +55,17 @@ To go from index 0 to index 2, we can just go directly because gcd(nums[0], nums
 * Any algorithm (i.e., BFS, DFS, or Union-Find Set) should work to find or check connected components
 
 ## Solution 1.
+	
+	Union-Find Structure: The UnionFind class is initialized to manage connected components, allowing efficient union and find operations to determine if two indices are connected.
+	
+	Finding Factors: The factors function extracts all prime factors of a given number. These factors are used to establish connections between numbers in the main array.
+	
+	Connecting Indices:
+	
+	    For each number in the array, the code retrieves its factors.
+	    It uses a hashmap to track the first occurrence of each factor and connects the current index to this first index using the union-find structure.
+	
+	Final Check: After processing all numbers, the method checks if there is only one connected component in the union-find structure. If there is only one component, it means all numbers can be traversed through shared factors; hence it returns true. If there are multiple components, it returns false.
 
 ```cpp
 // OJ: https://leetcode.com/problems/greatest-common-divisor-traversal
@@ -62,45 +73,51 @@ To go from index 0 to index 2, we can just go directly because gcd(nums[0], nums
 // Time: O(NlogN * Sqrt(D)) where D is the maximum number in `A`
 // Space: O(N)
 class UnionFind {
-    vector<int> id;
-    int cnt;
+    vector<int> id; // Array to track the parent of each node
+    int cnt; // Number of connected components
 public:
     UnionFind(int n) : id(n), cnt(n) {
-        iota(begin(id), end(id), 0);
+        iota(begin(id), end(id), 0); // Initialize the union-find structure
     }
+
     int find(int a) {
-        return id[a] == a ? a : (id[a] = find(id[a]));
+        return id[a] == a ? a : (id[a] = find(id[a])); // Path compression
     }
+
     void connect(int a, int b) {
         int p = find(a), q = find(b);
-        if (p == q) return;
-        id[p] = q;
-        --cnt;
+        if (p == q) return; // Already connected
+        id[p] = q; // Union operation
+        --cnt; // Decrease the number of components
     }
-    int count() { return cnt; }
+
+    int count() { return cnt; } // Return the number of connected components
 };
+
 class Solution {
     vector<int> factors(int n) {
         vector<int> ans;
         for (int d = 2; d * d <= n; ++d) {
-            if (n % d == 0) ans.push_back(d);
-            while (n % d == 0) n /= d;
+            if (n % d == 0) ans.push_back(d); // Add factor to list
+            while (n % d == 0) n /= d; // Remove all instances of the factor
         }
-        if (n > 1) ans.push_back(n);
+        if (n > 1) ans.push_back(n); // Add the remaining prime factor
         return ans;
     }
+
 public:
     bool canTraverseAllPairs(vector<int>& A) {
-        unordered_map<int, int> m; // map from a factor to the index of the first number containing this factor
+        unordered_map<int, int> m; // Map from a factor to the index of the first number containing this factor
         int N = A.size();
-        UnionFind uf(N);
+        UnionFind uf(N); // Create union-find for all numbers
         for (int i = 0; i < N; ++i) {
-            for (int f : factors(A[i])) {
-                if (m.count(f) == 0) m[f] = i;
-                uf.connect(i, m[f]);
+            for (int f : factors(A[i])) { // Get factors of A[i]
+                if (m.count(f) == 0) m[f] = i; // Store the first occurrence of the factor
+                uf.connect(i, m[f]); // Connect numbers sharing a factor
             }
         }
-        return uf.count() == 1;
+        return uf.count() == 1; // Check if all numbers are connected
     }
 };
+
 ```
