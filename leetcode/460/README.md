@@ -62,6 +62,11 @@ lfu.get(4);      // return 4
 
 ## Solution 1.
 
+	A map (data) to track lists of keys by their frequency, with least-recently-used keys at the front.
+	Two unordered_maps (m and freq) to map keys to their list positions and track their frequencies, respectively.
+	get(key): If the key exists, it removes the key from its current frequency list, increases its frequency, and moves it to the front of the new frequency list.
+	put(key, value): If the key is new and the cache is full, it evicts the least frequently used key. Then, the new key is added with frequency 1. If the key already exists, its value is updated.
+
 ```cpp
 // OJ: https://leetcode.com/problems/lfu-cache
 // Author: github.com/lzl124631x
@@ -72,40 +77,41 @@ lfu.get(4);      // return 4
 // Space: O(N)
 class LFUCache {
     int capacity, cnt = 0;
-    map<int, list<int>> data; // freq -> entries. The least recently used is at the front
-    unordered_map<int, list<int>::iterator> m;
-    unordered_map<int, int> vals, freq;
+    map<int, list<int>> data; // freq -> keys list, least recently used is at the front
+    unordered_map<int, list<int>::iterator> m; // key -> iterator in the list
+    unordered_map<int, int> vals, freq; // key -> value, key -> frequency
 public:
     LFUCache(int capacity) : capacity(capacity) {}
-    
+
     int get(int key) {
         if (!m.count(key)) return -1;
         int f = freq[key];
-        data[f].erase(m[key]);
-        if (data[f].empty()) data.erase(f);
-        data[f + 1].push_front(key);
-        m[key] = data[f + 1].begin();
-        freq[key]++;
+        data[f].erase(m[key]); // remove key from current frequency list
+        if (data[f].empty()) data.erase(f); // erase freq list if empty
+        data[f + 1].push_front(key); // add key to new frequency list
+        m[key] = data[f + 1].begin(); // update key's iterator
+        freq[key]++; // increment frequency
         return vals[key];
     }
-    
+
     void put(int key, int value) {
-        if (get(key) == -1) {
+        if (get(key) == -1) { // key not present
             ++cnt;
-            if (cnt > capacity) {
+            if (cnt > capacity) { // cache is full
                 int f = data.begin()->first;
-                int rm = data[f].back();
+                int rm = data[f].back(); // remove least recently used
                 data[f].pop_back();
                 m.erase(rm);
                 freq.erase(rm);
                 vals.erase(rm);
                 --cnt;
             }
-            freq[key] = 1;
-            data[1].push_front(key);
-            m[key] = data[1].begin();
-            vals[key] = value;
-        } else vals[key] = value;
+            freq[key] = 1; // set frequency to 1
+            data[1].push_front(key); // add key to frequency 1 list
+            m[key] = data[1].begin(); // store iterator
+            vals[key] = value; // set value
+        } else vals[key] = value; // update value
     }
 };
+
 ```
