@@ -59,6 +59,14 @@
 
 ## Solution 1. Union Find
 
+	Union-Find Initialization: Two Union-Find structures are created to manage connections between nodes, one for type 1 edges (Alice's edges) and one for type 2 edges (Bob's edges).
+	
+	Processing Type 3 Edges: The algorithm first processes edges of type 3, which can connect any two nodes. If two nodes are already connected, the edge is counted as removable. Otherwise, the nodes are connected in both Union-Find structures.
+	
+	Processing Type 1 and Type 2 Edges: Next, the algorithm processes type 1 and type 2 edges. If an edge connects two already connected nodes, it is counted as removable. If not, it connects the nodes in the respective Union-Find structure.
+	
+	Final Connectivity Check: Finally, the algorithm checks if both Union-Find structures indicate a single connected component. If either structure indicates multiple components, it returns -1 (indicating the graph is not fully connected). Otherwise, it returns the count of removable edges.
+
 Create two UnionFinds `a` and `b` for Alice and Bob respectively.
 
 We should take type 3 edges first, then type 1 and 2.
@@ -72,53 +80,65 @@ In the end, if `a.getSize() == 1 && b.size() == 1` meaning that the graph is all
 // Author: github.com/lzl124631x
 // Time: O(N + E)
 // Space: O(N)
-class UnionFind{
-    vector<int> id;
-    int size;
+class UnionFind {
+    vector<int> id; // Array to hold the parent of each node
+    int size; // Number of connected components
 public:
-    UnionFind(int N ): id(N), size(N) {
-        iota(begin(id), end(id), 0);
+    UnionFind(int N) : id(N), size(N) {
+        iota(begin(id), end(id), 0); // Initialize the union-find structure
     }
+    
     int find(int a) {
-        return id[a] == a ? a : (id[a] = find(id[a]));
+        return id[a] == a ? a : (id[a] = find(id[a])); // Path compression
     }
+    
     int connected(int a, int b) {
-        return find(a) == find(b);
+        return find(a) == find(b); // Check if two nodes are connected
     }
+    
     void connect(int a, int b) {
         int p = find(a), q = find(b);
-        if (p == q) return;
-        id[p] = q;
-        --size;
+        if (p == q) return; // No need to connect if already connected
+        id[p] = q; // Union operation
+        --size; // Reduce the number of components
     }
-    int getSize() { return size; }
+    
+    int getSize() { return size; } // Return the number of connected components
 };
+
 class Solution {
 public:
     int maxNumEdgesToRemove(int n, vector<vector<int>>& E) {
-        UnionFind a(n), b(n);
-        int ans = 0;
+        UnionFind a(n), b(n); // UnionFind instances for type 1 and 2 edges
+        int ans = 0; // Counter for removable edges
+
+        // Process type 3 edges (which can connect any two nodes)
         for (auto &e : E) {
-            if (e[0] != 3) continue;
+            if (e[0] != 3) continue; // Only process type 3 edges
             int u = e[1] - 1, v = e[2] - 1;
-            if (a.connected(u, v)) {
+            if (a.connected(u, v)) { // If already connected, increment removable counter
                 ++ans;
                 continue;
             }
-            a.connect(u, v);
+            a.connect(u, v); // Connect the nodes in both UnionFind instances
             b.connect(u, v);
         }
+
+        // Process type 1 and type 2 edges
         for (auto &e : E) {
             int u = e[1] - 1, v = e[2] - 1;
             if (e[0] == 1) {
-                if (a.connected(u, v)) ++ans;
-                else a.connect(u, v);
+                if (a.connected(u, v)) ++ans; // Increment counter if already connected
+                else a.connect(u, v); // Connect the nodes
             } else if (e[0] == 2) {
-                if (b.connected(u, v)) ++ans;
+                if (b.connected(u, v)) ++ans; // Same for type 2 edges
                 else b.connect(u, v);
             }
         }
-        return a.getSize() != 1 || b.getSize() != 1 ? -1 : ans;
+
+        // Check if both graphs are fully connected
+        return a.getSize() != 1 || b.getSize() != 1 ? -1 : ans; // Return -1 if not connected, else return removable edge count
     }
 };
+
 ```
