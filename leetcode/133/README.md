@@ -75,54 +75,68 @@
 
 An `unordered_map` is used to record the mapping between the original and copied nodes, and to ensure each node is only copied once.
 
+	Check Base Case: If the input node is nullptr, return nullptr.
+	Check for Clones: If the node has already been cloned, return the clone from the map.
+	Clone the Node: Create a copy of the current node and store it in the map.
+	Clone Neighbors: Recursively clone all the neighbors of the current node and add them to the new node's neighbor list.
+	Return Clone: Return the fully cloned node.
+
 ```cpp
 // OJ: https://leetcode.com/problems/clone-graph/
 // Author: github.com/lzl124631x
 // Time: O(N)
 // Space: O(N)
 class Solution {
-    unordered_map<Node*, Node*> m;
+    unordered_map<Node*, Node*> m; // Map to store cloned nodes
 public:
     Node* cloneGraph(Node* node) {
-        if (!node) return nullptr;
-        if (m.count(node)) return m[node];
-        auto cpy = new Node(node->val);
-        m[node] = cpy;
-        for (auto &n : node->neighbors) cpy->neighbors.push_back(cloneGraph(n));
-        return cpy;
+        if (!node) return nullptr; // Return null for empty graph
+        if (m.count(node)) return m[node]; // Return existing clone if already created
+        auto cpy = new Node(node->val); // Create a copy of the current node
+        m[node] = cpy; // Map original node to its clone
+        for (auto &n : node->neighbors) 
+            cpy->neighbors.push_back(cloneGraph(n)); // Recursively clone neighbors
+        return cpy; // Return the cloned node
     }
 };
+
 ```
 
 ## Solution 2. BFS
 
+	Initialize BFS: Start by creating a clone of the input node and push the original node into a queue.
+	Process Nodes: For each node in the queue, clone its neighbors if they haven't been cloned yet and add them to the queue.
+	Link Neighbors: Attach the cloned neighbors to the cloned node.
+	Return Clone: Once all nodes are processed, return the clone of the starting node.
 
 ```cpp
 // OJ: https://leetcode.com/problems/clone-graph/
 // Author: github.com/lzl124631x
 // Time: O(N)
 // Space: O(N)
+
 class Solution {
 public:
     Node* cloneGraph(Node* node) {
-        if (!node) return nullptr;
+        if (!node) return nullptr; // Return null for empty graph
         queue<Node*> q;
-        unordered_map<Node*, Node*> m;
-        m[node] = new Node(node->val);
-        q.push(node);
+        unordered_map<Node*, Node*> m; // Map to store cloned nodes
+        m[node] = new Node(node->val); // Clone the starting node
+        q.push(node); // Start BFS with the given node
         while (q.size()) {
-            auto p = q.front();
+            auto p = q.front(); 
             q.pop();
-            auto copy = m[p];
+            auto copy = m[p]; // Get the clone of the current node
             for (auto nei : p->neighbors) {
-                if (!m.count(nei)) {
-                    m[nei] = new Node(nei->val);
-                    q.push(nei);
+                if (!m.count(nei)) { // If neighbor is not cloned
+                    m[nei] = new Node(nei->val); // Clone the neighbor
+                    q.push(nei); // Add neighbor to the queue for BFS
                 }
-                copy->neighbors.push_back(m[nei]);
+                copy->neighbors.push_back(m[nei]); // Add neighbor to the cloned node's list
             }
         }
-        return m[node];
+        return m[node]; // Return the cloned graph starting node
     }
 };
+
 ```
