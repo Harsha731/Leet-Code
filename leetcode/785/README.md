@@ -48,63 +48,95 @@
 
 ## Solution 1. DFS
 
+	Graph Representation: Use an adjacency list to represent the graph as a vector of vectors.
+	Coloring States: Maintain a vector id to track the coloring of each node:
+	    0 for unvisited,     1 for one color,     -1 for the other color.
+	DFS Function: Implement a recursive DFS function that:
+	    Colors the current node.
+	    Checks adjacent nodes to ensure they are colored with the opposite color.
+	    Returns false if a conflict in coloring is found.
+	Graph Traversal: Iterate through each node in the graph:
+	    If unvisited, initiate a DFS call from that node to attempt coloring.
+	Final Result: Return true if all nodes can be properly colored; return false if any DFS call indicates a conflict in coloring.
+
 ```cpp
 // OJ: https://leetcode.com/problems/is-graph-bipartite/
 // Author: github.com/lzl124631x
 // Time: O(V + E)
 // Space: O(V + E)
+
 class Solution {
 public:
-    bool isBipartite(vector<vector<int>>& G) {
-        int N = G.size();
-        vector<int> id(N); // 0 unseen, 1 and -1 are different colors
-        function<bool(int, int)> dfs = [&](int u, int color) {
-            if (id[u]) return id[u] == color;
-            id[u] = color;
-            for (int v : G[u]) {
-                if (!dfs(v, -color)) return false;
-            }
-            return true;
-        };
-        for (int i = 0; i < N; ++i) {
-            if (!id[i] && !dfs(i, 1)) return false;
+    // Function to perform DFS and check for bipartiteness
+    bool dfs(int u, int color, vector<int>& id, const vector<vector<int>>& G) {
+        // If the node has been colored, check if it matches the expected color
+        if (id[u]) return id[u] == color;
+        // Color the node
+        id[u] = color;
+        // Check all adjacent nodes
+        for (int v : G[u]) {
+            // Recursively attempt to color the adjacent node with the opposite color
+            if (!dfs(v, -color, id, G)) return false;
         }
         return true;
     }
+
+    bool isBipartite(vector<vector<int>>& G) {
+        int N = G.size();
+        vector<int> id(N); // 0 = unseen, 1 = color 1, -1 = color 2
+        for (int i = 0; i < N; ++i) {
+            // If the node hasn't been colored, start DFS from it
+            if (!id[i] && !dfs(i, 1, id, G)) return false;
+        }
+        return true; // If all nodes can be colored correctly, the graph is bipartite
+    }
 };
+
 ```
 
 ## Solution 2. BFS
+	
+	Initialization: Create an array id to track the color of each node (unseen as 0, color 1 or -1).
+	BFS Traversal: For each unvisited node, initiate a BFS.
+	    Assign the starting node a color (e.g., 1).
+	    Use a queue to explore all connected nodes.
+	Coloring Neighbors: For each current node, check its neighbors:
+	    If a neighbor is uncolored, assign it the opposite color and enqueue it.
+	    If a neighbor is already colored, check for conflicts (if it’s the same color as the current node).
+	Conflict Detection: If a conflict is found, return false.
+	Completion: If all nodes are processed without conflicts, return true, indicating the graph is bipartite.
 
 ```cpp
 // OJ: https://leetcode.com/problems/is-graph-bipartite/
 // Author: github.com/lzl124631x
 // Time: O(V + E)
 // Space: O(V + E)
+
 class Solution {
 public:
     bool isBipartite(vector<vector<int>>& G) {
         int N = G.size();
-        vector<int> id(N); // 0 unseen, 1 and -1 are different colors
-        queue<int> q;
+        vector<int> id(N); // 0: unseen, 1 and -1: different colors
+        queue<int> q; // Queue for BFS
         for (int i = 0; i < N; ++i) {
-            if (id[i]) continue;
+            if (id[i]) continue; // Skip already colored nodes
             q.push(i);
-            id[i] = 1;
+            id[i] = 1; // Color the starting node
             while (q.size()) {
-                int u = q.front();
+                int u = q.front(); // Current node
                 q.pop();
-                for (int v : G[u]) {
+                for (int v : G[u]) { // Check adjacent nodes
                     if (id[v]) {
-                        if (id[v] != -id[u]) return false;
+                        if (id[v] != -id[u]) return false; // Conflict in coloring
                         continue;
                     }
-                    id[v] = -id[u];
+                    id[v] = -id[u]; // Color adjacent node
                     q.push(v);
                 }
             }
         }
-        return true;
+        return true; // Graph is bipartite
     }
 };
+
 ```
