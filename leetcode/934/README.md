@@ -42,26 +42,35 @@
 
 ## Solution 1.
 
+	DFS Function: This function marks the cells of the islands with different colors and adds their coordinates to respective queues (qa for one island, qb for the other).
+	BFS Function: This function expands the distance from the marked islands into the water cells, recording the distance until reaching the other island.
+	Shortest Bridge Calculation: After running DFS to color the islands and BFS to determine distances, the code checks all water cells to find the minimum distance required to connect the two islands by flipping 0s to 1s.
+
 ```cpp
 // OJ: https://leetcode.com/problems/shortest-bridge/
 // Author: github.com/lzl124631x
 // Time: O(MN)
 // Space: O(MN)
+
 class Solution {
     int M, N, dirs[4][2] = {{0,1},{0,-1},{1,0},{-1,0}};
-    queue<pair<int, int>> qa, qb;
+    queue<pair<int, int>> qa, qb; // queues for BFS
+
+    // DFS to mark islands with different colors
     void dfs(vector<vector<int>> &A, int x, int y, int color) {
-        A[x][y] = color;
-        if (color == 2) qa.emplace(x, y);
-        else qb.emplace(x, y);
+        A[x][y] = color; // mark the cell with the current color
+        if (color == 2) qa.emplace(x, y); // add to queue for the first island
+        else qb.emplace(x, y); // add to queue for the second island
         for (auto &[dx, dy] : dirs) {
             int a = x + dx, b = y + dy;
-            if (a < 0 || b < 0 || a >= M || b >= N || A[a][b] != 1) continue;
-            dfs(A, a, b, color);
+            if (a < 0 || b < 0 || a >= M || b >= N || A[a][b] != 1) continue; // boundary check
+            dfs(A, a, b, color); // continue DFS
         }
     }
+
+    // BFS to expand the island until reaching the other
     void bfs(vector<vector<int>> &A, queue<pair<int, int>> &q, vector<vector<int>> &dist) {
-        int step = 1;
+        int step = 1; // to count distance
         while (q.size()) {
             int cnt = q.size();
             while (cnt--) {
@@ -69,32 +78,40 @@ class Solution {
                 q.pop();
                 for (auto &[dx, dy] : dirs) {
                     int a = x + dx, b = y + dy;
-                    if (a < 0 || b < 0 || a >= M || b >= N || A[a][b] != 0 || dist[a][b] != INT_MAX) continue;
-                    dist[a][b] = step;
-                    q.emplace(a, b);
+                    if (a < 0 || b < 0 || a >= M || b >= N || A[a][b] != 0 || dist[a][b] != INT_MAX) continue; // boundary check
+                    dist[a][b] = step; // update distance
+                    q.emplace(a, b); // add to the queue
                 }
             }
-            ++step;
+            ++step; // increment distance for next level
         }
     }
+
 public:
     int shortestBridge(vector<vector<int>>& A) {
         M = A.size(), N = A[0].size();
         int color = 2, ans = INT_MAX;
         vector<vector<int>> da(M, vector<int>(N, INT_MAX)), db(M, vector<int>(N, INT_MAX));
+        
+        // Mark both islands
         for (int i = 0; i < M; ++i) {
             for (int j = 0; j < N; ++j) {
-                if (A[i][j] == 1) dfs(A, i, j, color++);
+                if (A[i][j] == 1) dfs(A, i, j, color++); // DFS to color islands
             }
         }
-        bfs(A, qa, da);
-        bfs(A, qb, db);
+        
+        bfs(A, qa, da); // BFS for first island
+        bfs(A, qb, db); // BFS for second island
+        
+        // Calculate the minimum distance to connect the two islands
         for (int i = 0; i < M; ++i) {
             for (int j = 0; j < N; ++j) {
-                if (A[i][j] == 0 && da[i][j] != INT_MAX && db[i][j] != INT_MAX) ans = min(ans, da[i][j] + db[i][j] - 1);
+                if (A[i][j] == 0 && da[i][j] != INT_MAX && db[i][j] != INT_MAX)
+                    ans = min(ans, da[i][j] + db[i][j] - 1); // update the answer
             }
         }
-        return ans;
+        return ans; // return the result
     }
 };
+
 ```
