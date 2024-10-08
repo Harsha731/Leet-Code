@@ -44,73 +44,105 @@
 
 ## Solution 1. DFS
 
+	Initialization: Determine the grid dimensions and set up directions for exploring adjacent cells.
+	Depth-First Search (DFS): Define a DFS function to explore and count the area of connected land cells, marking visited cells as 0.
+	Grid Traversal: Iterate through each cell in the grid. When a land cell (1) is found, call the DFS function to calculate the area and update the maximum area if needed.
+	Return Result: After processing the entire grid, return the largest island area found.
+
 ```cpp
 // OJ: https://leetcode.com/problems/max-area-of-island/
 // Author: github.com/lzl124631x
 // Time: O(MN)
 // Space: O(MN)
+
 class Solution {
 public:
     int maxAreaOfIsland(vector<vector<int>>& A) {
         int M = A.size(), N = A[0].size(), dirs[4][2] = {{0,1},{0,-1},{-1,0},{1,0}}, ans = 0;
+        
+        // Depth-first search to calculate area of the island
         function<int(int, int)> dfs = [&](int i, int j) {
-            A[i][j] = 0;
-            int cnt = 1;
+            A[i][j] = 0; // Mark the cell as visited
+            int cnt = 1; // Count the current cell
             for (auto &[dx, dy] : dirs) {
                 int x = i + dx, y = j + dy;
+                // Explore adjacent cells
                 if (x < 0 || x >= M || y < 0 || y >= N || A[x][y] == 0) continue;
-                cnt += dfs(x, y);
+                cnt += dfs(x, y); // Add area of the connected land
             }
-            return cnt;
+            return cnt; // Return the area count
         };
+        
+        // Iterate through the grid to find islands
         for (int i = 0; i < M; ++i) {
             for (int j = 0; j < N; ++j) {
-                if (A[i][j] == 0) continue;
-                ans = max(ans, dfs(i, j));
+                if (A[i][j] == 0) continue; // Skip water cells
+                ans = max(ans, dfs(i, j)); // Update maximum area
             }
         }
-        return ans;
+        return ans; // Return the maximum area found
     }
 };
+
+
 ```
 
 ## Solution 2. BFS
+	
+	Grid Traversal: Iterate through each cell in the grid.
+	BFS Initialization: When a land cell (1) is found, initialize a breadth-first search (BFS) queue, mark the cell as visited by setting it to 0, and start counting the island's area.
+	BFS Exploration: For each cell in the queue, explore its adjacent cells. If an adjacent cell is land (1), mark it as visited, add it to the queue, and increment the area count.
+	Update Maximum Area: After processing an entire island, update the maximum area found if the current island's area is larger.
+	Return Result: Finally, return the largest area of any island found in the grid.
 
 ```cpp
 // OJ: https://leetcode.com/problems/max-area-of-island/
 // Author: github.com/lzl124631x
 // Time: O(MN)
 // Space: O(M + N)
+
 class Solution {
 public:
     int maxAreaOfIsland(vector<vector<int>>& A) {
         int M = A.size(), N = A[0].size(), dirs[4][2] = {{0,1},{0,-1},{-1,0},{1,0}}, ans = 0;
+
+        // Iterate through the grid
         for (int i = 0; i < M; ++i) {
             for (int j = 0; j < N; ++j) {
-                if (A[i][j] == 0) continue;
-                queue<pair<int, int>> q{{{i, j}}};
-                A[i][j] = 0;
-                int cnt = 0;
+                if (A[i][j] == 0) continue; // Skip water cells
+                
+                queue<pair<int, int>> q{{{i, j}}}; // Initialize BFS queue
+                A[i][j] = 0; // Mark the starting land cell as visited
+                int cnt = 0; // Count the area of the island
+                
+                // Perform BFS to explore the island
                 while (q.size()) {
-                    auto [x, y] = q.front();
+                    auto [x, y] = q.front(); // Get the front cell
                     q.pop();
                     for (auto &[dx, dy] : dirs) {
                         int a = x + dx, b = y + dy;
+                        // Check boundaries and unvisited land cells
                         if (a < 0 || a >= M || b < 0 || b >= N || A[a][b] == 0) continue;
-                        A[a][b] = 0;
-                        q.emplace(a, b);
+                        A[a][b] = 0; // Mark the cell as visited
+                        q.emplace(a, b); // Add the cell to the queue
                     }
-                    ++cnt;
+                    ++cnt; // Increment the island area count
                 }
-                ans = max(ans, cnt);
+                ans = max(ans, cnt); // Update maximum area found
             }
         }
-        return ans;
+        return ans; // Return the maximum area
     }
 };
+
 ```
 
 ## Solution 3. Union Find
+
+	Initialization: Create a Union-Find structure to manage connected components (islands) in the grid.
+	Connect Land Cells: Traverse the grid and connect adjacent land cells (1) using the connect method. This establishes unions for cells that are part of the same island.
+	Calculate Maximum Area: After connecting the cells, iterate through the grid again to find the maximum size of any island by retrieving the size of each component through the getSize method.
+	Return Result: Finally, return the largest area found among all islands.
 
 ```cpp
 // OJ: https://leetcode.com/problems/max-area-of-island/
@@ -121,41 +153,47 @@ class UnionFind {
     vector<int> id, size;
 public:
     UnionFind(int N) : id(N), size(N, 1) {
-        iota(begin(id), end(id), 0);
+        iota(begin(id), end(id), 0); // Initialize id with self-references
     }
     int find(int x) {
-        return id[x] == x ? x : (id[x] = find(id[x]));
+        return id[x] == x ? x : (id[x] = find(id[x])); // Path compression
     }
     void connect(int x, int y) {
         int p = find(x), q = find(y);
-        if (p == q) return;
-        id[p] = q;
-        size[q] += size[p];
+        if (p == q) return; // Already connected
+        id[p] = q; // Union the sets
+        size[q] += size[p]; // Update size of the root
     }
-    int getSize(int x) { return size[x]; }
+    int getSize(int x) { return size[find(x)]; } // Get the size of the set
 };
+
 class Solution {
 public:
     int maxAreaOfIsland(vector<vector<int>>& A) {
         int M = A.size(), N = A[0].size(), dirs[4][2] = {{0,1},{0,-1},{-1,0},{1,0}}, ans = 0;
-        UnionFind uf(M * N);
-        auto key = [&](int x, int y) { return x * N + y; };
+        UnionFind uf(M * N); // Union-Find structure for grid cells
+        auto key = [&](int x, int y) { return x * N + y; }; // Mapping 2D index to 1D
+        
+        // Connect adjacent land cells
         for (int i = 0; i < M; ++i) {
             for (int j = 0; j < N; ++j) {
-                if (A[i][j] == 0) continue;
+                if (A[i][j] == 0) continue; // Skip water cells
                 for (auto &[dx, dy] : dirs) {
                     int a = i + dx, b = j + dy;
-                    if (a < 0 || a >= M || b < 0 || b >= N || A[a][b] == 0) continue;
-                    uf.connect(key(i, j), key(a, b));
+                    if (a < 0 || a >= M || b < 0 || b >= N || A[a][b] == 0) continue; // Check bounds and land
+                    uf.connect(key(i, j), key(a, b)); // Connect land cells
                 }
             }
         }
+
+        // Calculate maximum area of connected land
         for (int i = 0; i < M; ++i) {
             for (int j = 0; j < N; ++j) {
-                if (A[i][j] == 1) ans = max(ans, uf.getSize(key(i, j)));
+                if (A[i][j] == 1) ans = max(ans, uf.getSize(key(i, j))); // Update max area
             }
         }
-        return ans;
+        return ans; // Return the maximum area found
     }
 };
+
 ```
