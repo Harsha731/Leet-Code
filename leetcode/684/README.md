@@ -39,6 +39,12 @@ We have overhauled the problem description + test cases and specified clearly th
 </p>
 
 ## Solution 1.
+    
+    Union-Find Data Structure: This is used to efficiently manage and unite components of the graph while detecting cycles.
+    Initialization: Each node is its own parent initially. The rank is set to 0.
+    Find Function: Implements path compression to flatten the structure, speeding up future queries.
+    Union Function: Connects two nodes by linking their roots, using the rank to keep the tree flat.
+    Redundant Edge Detection: For each edge, check if the nodes are already connected. If they are, the edge is redundant and is returned.
 
 ```cpp
 // OJ: https://leetcode.com/problems/redundant-connection/
@@ -47,40 +53,52 @@ We have overhauled the problem description + test cases and specified clearly th
 // Space: O(N)
 class UnionFind {
 private:
-  vector<int> id, rank;
-  int cnt;
+    vector<int> id, rank; // Arrays for union-find structure
+    int cnt; // Number of components
 public:
-  UnionFind(int cnt) : cnt(cnt) {
-    id = vector<int>(cnt);
-    rank = vector<int>(cnt, 0);
-    for (int i = 0; i < cnt; ++i) id[i] = i;
-  }
-  int find(int p) {
-      if (id[p] == p) return p;
-      return id[p] = find(id[p]);
-  }
-  int getCount() { return cnt; }
-  bool connected(int p, int q) { return find(p) == find(q); }
-  void connect(int p, int q) {
-    int i = find(p), j = find(q);
-    if (i == j) return;
-    if (rank[i] < rank[j]) id[i] = j;
-    else {
-      id[j] = i;
-      if (rank[i] == rank[j]) rank[j]++;
+    UnionFind(int cnt) : cnt(cnt) {
+        id = vector<int>(cnt);
+        rank = vector<int>(cnt, 0); // Initialize rank for union by rank
+        for (int i = 0; i < cnt; ++i) id[i] = i; // Each node is its own parent
     }
-    --cnt;
-  }
+    
+    // Find the root of the component
+    int find(int p) {
+        if (id[p] == p) return p; // If p is its own parent
+        return id[p] = find(id[p]); // Path compression
+    }
+    
+    int getCount() { return cnt; } // Return number of components
+
+    // Check if two nodes are connected
+    bool connected(int p, int q) { return find(p) == find(q); }
+
+    // Union two components
+    void connect(int p, int q) {
+        int i = find(p), j = find(q); // Find roots of p and q
+        if (i == j) return; // Already connected
+        // Union by rank
+        if (rank[i] < rank[j]) id[i] = j; // Attach smaller rank tree
+        else {
+            id[j] = i; // Attach smaller rank tree
+            if (rank[i] == rank[j]) rank[j]++; // Increase rank if same
+        }
+        --cnt; // Decrease component count
+    }
 };
 
 class Solution {
 public:
     vector<int> findRedundantConnection(vector<vector<int>>& edges) {
-        UnionFind uf(edges.size());
+        UnionFind uf(edges.size()); // Initialize UnionFind for number of edges
         for (auto e : edges) {
-            if (uf.connected(e[0] - 1, e[1] - 1)) return e;
+            // If they are already connected, this edge is redundant
+            if (uf.connected(e[0] - 1, e[1] - 1)) return e; 
+            // Otherwise, connect them
             uf.connect(e[0] - 1, e[1] - 1);
         }
+        return {}; // Return empty if no redundant edge found
     }
 };
+
 ```
