@@ -43,24 +43,32 @@ The two good lines with the chosen cell as an endpoint are annotated above with 
 
 ## Solution 1. Brute Force
 
+	Identify Opponent Color: It determines the opposing color based on the player's color (either 'B' for black or 'W' for white).
+	Direction Exploration: The function iterates through all eight possible directions (horizontal, vertical, and diagonal) from the specified move position.
+	Piece Counting: For each direction, it checks consecutive cells for opponent pieces. If it finds at least one opponent piece and then encounters the player’s piece, the move is legal.
+	Return Result: If any direction confirms a valid move, the function returns true. If no legal moves are found in any direction, it returns false.
+
 ```cpp
 // OJ: https://leetcode.com/problems/check-if-move-is-legal/
 // Author: github.com/lzl124631x
 // Time: O(N) where `N` is the width or height of the board.
 // Space: O(1)
+
 class Solution {
 public:
     bool checkMove(vector<vector<char>>& A, int rMove, int cMove, char color) {
-        int reverse = color == 'B' ? 'W' : 'B';
-        for (int dx = -1; dx <= 1; ++dx) {
+        int reverse = color == 'B' ? 'W' : 'B'; // Determine the opposing color
+        for (int dx = -1; dx <= 1; ++dx) { // Iterate through 8 directions
             for (int dy = -1; dy <= 1; ++dy) {
-                if (dx == 0 && dy == 0) continue;
-                int x = rMove + dx, y = cMove + dy, cnt = 0;
+                if (dx == 0 && dy == 0) continue; // Skip the current position
+                int x = rMove + dx, y = cMove + dy, cnt = 0; // Initialize coordinates and counter
                 for (; x >= 0 && x < 8 && y >= 0 && y < 8 && A[x][y] == reverse; x += dx, y += dy, ++cnt);
+                // Check if we find the player's color after reversing pieces
                 if (cnt > 0 && x >= 0 && x < 8 && y >= 0 && y < 8 && A[x][y] == color) return true;
             }
         }
-        return false;
+        return false; // Return false if no valid move is found
     }
 };
+
 ```
