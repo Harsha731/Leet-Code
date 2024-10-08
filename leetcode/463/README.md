@@ -51,20 +51,33 @@
 
 ## Solution 1.
 
+	Grid Iteration: Loop through each cell in the 2D grid.
+	Check Land Cells: For each land cell (1), assess its four neighboring cells (up, down, left, right).
+	Count Perimeter: For each neighboring cell:
+	If it is out of bounds or a water cell (0), increment the perimeter count.
+
+Return Result: After checking all land cells, return the total perimeter count.
+
 ```cpp
 // OJ: https://leetcode.com/problems/island-perimeter/
 // Author: github.com/lzl124631x
 // Time: O(MN)
 // Space: O(1)
+
 class Solution {
 public:
     int islandPerimeter(vector<vector<int>>& A) {
-        int M = A.size(), N = A[0].size(), ans = 0, dirs[4][2] = {{0,1},{0,-1},{1,0},{-1,0}};
+        int M = A.size(), N = A[0].size(), ans = 0;
+        // Direction vectors for adjacent cells
+        int dirs[4][2] = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+        
         for (int i = 0; i < M; ++i) {
             for (int j = 0; j < N; ++j) {
+                // Only process land cells
                 if (A[i][j] == 0) continue;
                 for (auto &dir : dirs) {
                     int x = i + dir[0], y = j + dir[1];
+                    // Count edges touching water or boundaries
                     ans += x < 0 || x >= M || y < 0 || y >= N || A[x][y] == 0;
                 }
             }
@@ -72,4 +85,5 @@ public:
         return ans;
     }
 };
+
 ```
