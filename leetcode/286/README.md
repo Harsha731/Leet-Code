@@ -48,35 +48,42 @@
 * [Rotting Oranges (Medium)](https://leetcode.com/problems/rotting-oranges/)
 
 ## Solution 1. BFS
+	
+	Initialize BFS: Identify all gates (cells with value 0) and add them to a queue.
+	BFS Traversal: From each gate, use breadth-first search (BFS) to propagate outwards, updating neighboring cells (empty rooms) with their distance from the nearest gate.
+	Update Distances: Continue the BFS until all reachable rooms have been updated with the correct minimum distance from a gate.
 
 ```cpp
 // OJ: https://leetcode.com/problems/walls-and-gates/
 // Author: github.com/lzl124631x
 // Time: O(MN)
 // Space: O(MN)
+
 class Solution {
 public:
     void wallsAndGates(vector<vector<int>>& A) {
-       int M = A.size(), N = A[0].size(), dirs[4][2] = {{0,1},{0,-1},{1,0},{-1,0}}; 
+        int M = A.size(), N = A[0].size(), dirs[4][2] = {{0,1},{0,-1},{1,0},{-1,0}}; 
         queue<pair<int, int>> q;
+        
+        // Enqueue all gates (cells with 0)
         for (int i = 0; i < M; ++i) {
             for (int j = 0; j < N; ++j) {
                 if (A[i][j] == 0) q.emplace(i, j);
             }
         }
+
+        // BFS to update distances
         while (q.size()) {
-            int cnt = q.size();
-            while (cnt--) {
-                auto [x, y] = q.front();
-                q.pop();
-                for (auto &[dx, dy] : dirs) {
-                    int a = x + dx, b = y + dy;
-                    if (a < 0 || b < 0 || a >= M || b >= N || A[a][b] <= A[x][y] + 1) continue; 
-                    A[a][b] = A[x][y] + 1;
-                    q.emplace(a, b);
-                }
+            auto [x, y] = q.front();
+            q.pop();
+            for (auto &[dx, dy] : dirs) {
+                int a = x + dx, b = y + dy;
+                if (a < 0 || b < 0 || a >= M || b >= N || A[a][b] <= A[x][y] + 1) continue; 
+                A[a][b] = A[x][y] + 1; // Update the room with the new distance
+                q.emplace(a, b); // Enqueue the new position
             }
         }
     }
 };
+
 ```
