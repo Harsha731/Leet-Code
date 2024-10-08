@@ -53,8 +53,14 @@ The maximum of those two distances is 2. It can be proven that we cannot get a n
 
 ## Solution 1.
 
+	Initialize Variables: Set up the size of the input array and distance vectors for both nodes.
+	Update Distances: Define a helper function that updates the distance of each node from either a or b using a while loop.
+	Find Closest Node: Iterate through all nodes to find the one with the minimum maximum distance from both nodes a and b.
+	Return Result: The function returns the index of the closest meeting node or -1 if no meeting node exists.
+
 * Calculate the distances from node `a` and `b` separately as `da` and `db`.
 * Find the node with the min max distance from both nodes
+
 
 ```cpp
 // OJ: https://leetcode.com/problems/find-closest-node-to-given-two-nodes
@@ -66,23 +72,29 @@ public:
     int closestMeetingNode(vector<int>& E, int a, int b) {
         int N = E.size(), ans = -1, minDist = INT_MAX;
         vector<int> da(N, INT_MAX), db(N, INT_MAX);
+        
+        // Update distances from node a or b
         auto updateDist = [&](int u, vector<int> &dist) {
             int lv = 0;
             while (u != -1 && dist[u] == INT_MAX) {
-                dist[u] = lv++;
-                u = E[u];
+                dist[u] = lv++; // Assign level distance
+                u = E[u]; // Move to next node
             }
         };
-        updateDist(a, da);
-        updateDist(b, db);
+
+        updateDist(a, da); // Distances from node a
+        updateDist(b, db); // Distances from node b
+
+        // Find the closest meeting node
         for (int i = 0; i < N; ++i) {
             int d = max(da[i], db[i]);
             if (d < minDist) {
-                minDist = d;
-                ans = i;
+                minDist = d; // Update minimum distance
+                ans = i; // Update closest node
             }
         }
-        return ans;
+        return ans; // Return the closest meeting node
     }
 };
+
 ```
