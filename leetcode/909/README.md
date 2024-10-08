@@ -64,37 +64,52 @@ This is the lowest possible number of moves to reach the last square, so return 
 
 ## Solution 1. BFS
 
+	Initialization: A queue is initialized with the starting cell (1), and a boolean vector tracks visited cells.
+	BFS Loop: For each position, it explores the next 1 to 6 possible moves (dice rolls).
+	Coordinate Mapping: The board is converted from a 1D representation to a 2D grid to account for the zigzag layout.
+	Ladders and Snakes: It checks for ladders or snakes at each position, adjusting the target cell accordingly.
+	End Condition: If the end cell (N*N) is reached, the number of steps taken is returned; otherwise, the search continues until all options are exhausted. If unreachable, it returns -1.
+
 ```cpp
 // OJ: https://leetcode.com/problems/snakes-and-ladders/
 // Author: github.com/lzl124631x
 // Time: O(N^2)
 // Space: O(N^2)
+
+// OJ: https://leetcode.com/problems/snakes-and-ladders/
+// Author: github.com/lzl124631x
+// Time: O(N^2)
+// Space: O(N^2)
+
 class Solution {
 public:
     int snakesAndLadders(vector<vector<int>>& A) {
-        int N = A.size(), step = 0;
-        vector<bool> seen(N * N + 1);
-        seen[1] = true;
-        queue<int> q{{1}};
+        int N = A.size(), step = 0; // Size of the board and current step count
+        vector<bool> seen(N * N + 1); // Track visited cells
+        seen[1] = true; // Mark the starting cell as visited
+        queue<int> q{{1}}; // Initialize the queue with the starting position
+
         while (q.size()) {
-            int cnt = q.size();
+            int cnt = q.size(); // Number of positions to explore at this step
             while (cnt--) {
-                int u = q.front();
-                if (u == N * N) return step;
+                int u = q.front(); // Current position
+                if (u == N * N) return step; // Reached the end
                 q.pop();
+                // Explore possible moves (1 to 6)
                 for (int v = u + 1; v <= min(N * N, u + 6); ++v) {
-                    int x = (v - 1) / N, y = (v - 1) % N;
-                    if (x % 2) y = N - 1 - y;
-                    x = N - 1 - x;
-                    int next = A[x][y] == -1 ? v : A[x][y];
-                    if (seen[next]) continue;
-                    seen[next] = true;
-                    q.push(next);
+                    int x = (v - 1) / N, y = (v - 1) % N; // Convert to 2D coordinates
+                    if (x % 2) y = N - 1 - y; // Adjust for zigzag pattern
+                    x = N - 1 - x; // Flip the x-coordinate for board orientation
+                    int next = A[x][y] == -1 ? v : A[x][y]; // Check for snakes or ladders
+                    if (seen[next]) continue; // Skip if already visited
+                    seen[next] = true; // Mark the next position as visited
+                    q.push(next); // Add the next position to the queue
                 }
             }
-            ++step;
+            ++step; // Increment the step count after exploring all positions
         }
-        return -1;
+        return -1; // Return -1 if the end cannot be reached
     }
 };
+
 ```
