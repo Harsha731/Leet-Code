@@ -40,20 +40,27 @@
 
 ## Solution 1.
 
+	Initialize Degree Count: Create a degree vector to track the in-degree of each vertex in the graph.
+	Count In-Degrees: Iterate through the edges and increment the in-degree for each destination vertex (the second element of each edge).
+	Identify Zero In-Degree Vertices: After counting in-degrees, iterate through the vertices. If a vertex has an in-degree of zero, it means it has no incoming edges and can be part of the smallest set. Add such vertices to the result list.
+	Return the Result: Finally, return the list of vertices with zero in-degrees, which represent the starting points for reaching all other vertices in the graph.
+
 ```cpp
 // OJ: https://leetcode.com/problems/minimum-number-of-vertices-to-reach-all-nodes/
 // Author: github.com/lzl124631x
 // Time: O(N)
 // Space: O(N)
+
 class Solution {
 public:
     vector<int> findSmallestSetOfVertices(int n, vector<vector<int>>& E) {
-        vector<int> degree(n), ans;
-        for (auto &e : E) degree[e[1]]++;
+        vector<int> degree(n), ans; // Track in-degrees
+        for (auto &e : E) degree[e[1]]++; // Count in-degrees
         for (int i = 0; i < n; ++i) {
-            if (degree[i] == 0) ans.push_back(i);
+            if (degree[i] == 0) ans.push_back(i); // Add nodes with zero in-degrees
         }
-        return ans;
+        return ans; // Return the result
     }
 };
+
 ```
