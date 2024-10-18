@@ -48,18 +48,25 @@ Check out "[C++ Maximum Sliding Window Cheatsheet Template!](https://leetcode.co
 Shrinkable Sliding Window:
 
 ```cpp
-// OJ: https://leetcode.com/problems/longest-repeating-character-replacement/
-// Author: github.com/lzl124631x
 // Time: O(N)
 // Space: O(1)
 class Solution {
 public:
     int characterReplacement(string s, int k) {
-        int i = 0, j = 0, cnt[26] = {}, ans = 0, N = s.size();
-        while (j < N) {
-            cnt[s[j++] - 'A']++;
-            while (j - i - *max_element(cnt, cnt + 26) > k) cnt[s[i++] - 'A']--;
-            ans = max(ans, j - i);
+        int i = 0, ans = 0, N = s.size();
+        vector<int> cnt(26, 0);
+
+        for (int j = 0; j < N; ++j) {
+            cnt[s[j] - 'A']++;
+            int maxCount = *max_element(cnt.begin(), cnt.end());
+
+            while (j - i + 1 - maxCount > k) {
+                cnt[s[i] - 'A']--;
+                i++;
+                maxCount = *max_element(cnt.begin(), cnt.end());
+            }
+
+            ans = max(ans, j - i + 1);
         }
         return ans;
     }
@@ -69,74 +76,98 @@ public:
 Non-shrinkable Sliding Window:
 
 ```cpp
-// OJ: https://leetcode.com/problems/longest-repeating-character-replacement/
-// Author: github.com/lzl124631x
-// Time: O(N)
-// Space: O(1)
 class Solution {
 public:
     int characterReplacement(string s, int k) {
-        int i = 0, j = 0, cnt[26] = {}, N = s.size();
-        while (j < N) {
-            cnt[s[j++] - 'A']++;
-            if (j - i - *max_element(cnt, cnt + 26) > k) cnt[s[i++] - 'A']--;
+        int i = 0, ans = 0, N = s.size();
+        vector<int> cnt(26, 0);
+
+        for (int j = 0; j < N; ++j) {
+            cnt[s[j] - 'A']++;
+            int maxCount = *max_element(cnt.begin(), cnt.end());
+
+            if (j - i + 1 - maxCount > k) {			// only small change here
+                cnt[s[i] - 'A']--;
+                i++;
+                maxCount = *max_element(cnt.begin(), cnt.end());
+            }
+
+            ans = max(ans, j - i + 1);
         }
-        return j - i;
+        return ans;
     }
 };
 ```
 
 ## Solution 2. Sliding Window
 
+In this approach, we consider that A is what we needed and we try to change other characters to A at most K times
+
 Shrinkable Sliding Window:
 
 ```cpp
-// OJ: https://leetcode.com/problems/longest-repeating-character-replacement
-// Author: github.com/lzl124631x
-// Time: O(N)
+// Time: O(26N)
 // Space: O(1)
 class Solution {
 public:
     int characterReplacement(string s, int k) {
-        int ans = 0, N = s.size();
-        auto count = [&](char c) {
-            int i = 0, j = 0, cnt = 0, ans = 0;
-            for (; j < N; ++j) {
-                cnt += s[j] != c;
-                while (cnt > k) cnt -= s[i++] != c;
-                ans = max(ans, j - i + 1);
+        int ans = 0;
+        for (char c = 'A'; c <= 'Z'; ++c) {
+            ans = max(ans, count(s, c, k));
+        }
+        return ans;
+    }
+
+    int count(const string& s, char c, int k) {
+        int i = 0, j = 0, cnt = 0, ans = 0;
+        int N = s.size();
+        for (; j < N; ++j) {
+            cnt += s[j] != c;
+            while (cnt > k) {
+                cnt -= s[i++] != c;
             }
-            return ans;
-        };
-        for (char c = 'A'; c <= 'Z'; ++c) ans = max(ans, count(c));
+            ans = max(ans, j - i + 1);
+        }
         return ans;
     }
 };
+
 ```
 
 Non-shrinkable sliding window:
 
 ```cpp
-// OJ: https://leetcode.com/problems/longest-repeating-character-replacement
-// Author: github.com/lzl124631x
-// Time: O(N)
+// Time: O(26N)
 // Space: O(1)
+#include <string>
+#include <algorithm>
+
+using namespace std;
+
 class Solution {
 public:
     int characterReplacement(string s, int k) {
-        int ans = 0, N = s.size();
-        auto count = [&](char c) {
-            int i = 0, j = 0, cnt = 0, ans = 0;
-            for (; j < N; ++j) {
-                cnt += s[j] != c;
-                if (cnt > k) cnt -= s[i++] != c;
+        int ans = 0;
+        for (char c = 'A'; c <= 'Z'; ++c) {
+            ans = max(ans, count(s, c, k));
+        }
+        return ans;
+    }
+
+    int count(const string& s, char c, int k) {
+        int i = 0, j = 0, cnt = 0, ans = 0;
+        int N = s.size();
+        for (; j < N; ++j) {
+            cnt += s[j] != c;
+            if (cnt > k) {
+                cnt -= s[i++] != c;
             }
-            return j - i;
-        };
-        for (char c = 'A'; c <= 'Z'; ++c) ans = max(ans, count(c));
+            ans = max(ans, j - i + 1);
+        }
         return ans;
     }
 };
+
 ```
 
 ## Discuss
