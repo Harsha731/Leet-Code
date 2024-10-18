@@ -53,17 +53,13 @@ Here we store the `index` of the monotonoically decreasing sequence. When a new 
 We need to pop the index which falls out of the window from the deque as well.
 
 ```cpp
-// OJ: https://leetcode.com/problems/sliding-window-maximum
-// Author: github.com/lzl124631x
-// Time: O(N)
-// Space: O(N)
 class Solution {
 public:
     vector<int> maxSlidingWindow(vector<int>& A, int k) {
         vector<int> ans;
         deque<int> q;
         for (int i = 0; i < A.size(); ++i) {
-            while (q.size() && A[q.back()] <= A[i]) q.pop_back();
+            while (q.size() && A[q.back()] <= A[i]) q.pop_back();	// important
             q.push_back(i);
             if (q.front() == i - k) q.pop_front();
             if (i >= k - 1) ans.push_back(A[q.front()]);
@@ -77,20 +73,21 @@ public:
 
 Similar to Solution 1, but here we store the values instead of the indexes in the deque.
 
+Here, we are keeping values and not indices, so we pop back only if the value is less and we ignore the duplicate values
+While above, we try to keep as small as possible (< is also correct above)
+The problem comes during the pop_front. But in the above we keep indices in the queue which will be unique anyways
+While below we keep values which have duplicate's
+
 ```cpp
-// OJ: https://leetcode.com/problems/sliding-window-maximum/
-// Author: github.com/lzl124631x
-// Time: O(N)
-// Space: O(N)
 class Solution {
 public:
     vector<int> maxSlidingWindow(vector<int>& A, int k) {
         deque<int> q;
         vector<int> ans;
         for (int i = 0; i < A.size(); ++i) {
-            if (i >= k && q.size() && q.front() == A[i - k]) q.pop_front();
-            while (q.size() && q.back() < A[i]) q.pop_back();
+            while (q.size() && q.back() < A[i]) q.pop_back();	// important
             q.push_back(A[i]);
+            if (i >= k && q.size() && q.front() == A[i - k]) q.pop_front();
             if (i >= k - 1) ans.push_back(q.front());
         }
         return ans;
