@@ -51,6 +51,12 @@
 **Similar Questions**:
 * [Number of 1 Bits (Easy)](https://leetcode.com/problems/number-of-1-bits/)
 
+# important
+1) 8 to 15 are same as 0 to 7 with addition of 1 extra
+2) i&-i gives the last set bit. i&-i gives the number with the last set bit as 0. So, we simply add 1 extra to it.
+3) i/2 is same as right shift by 1 and if it is odd earler, we add 1. else add 0.
+
+
 ## Solution 1. DP
 
 All the numbers of power of 2 only have a single bit.
