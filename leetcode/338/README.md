@@ -123,7 +123,8 @@ public:
 };
 ```
 
-## Solution 4. DP
+## Solution 4. DP. Don't use this
+
 
 DP based on highest bit
 
