@@ -57,3 +57,27 @@ public:
     }
 };
 ```
+
+## Solution 3. Binary search
+
+Binary search, if array is already sorted, else it is waste (O(logN) TC and O(1) SC)
+
+```cpp
+int missingNumber(vector<int>& nums) {
+    sort(nums.begin(), nums.end()); 
+    int left = 0, right = nums.size();
+    
+    while (left < right) {
+        int mid = (left + right) / 2; 
+        if (nums[mid] > mid) {
+            right = mid; 
+        } else {
+            left = mid + 1; 
+        }
+    }
+    return left; 
+}
+```
+
+
+
