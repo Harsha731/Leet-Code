@@ -46,17 +46,6 @@ We have the maximum performance of the team by selecting engineer 2 (with speed=
 
 ### Intuition
 
-For a given efficiency, we pick all works with the same or better efficiency. If the number of workers is greater than `k`, we pick `k` fastest workers.
-
-### Algorithm
-
-We greedily try each engineer from the most efficient one to the least one.
-
-For each engineer:
-* first try adding him to the team and add his `speed[i]` to the `sum`.
-* If after the addition there are more than `k` engineers in the team, pop the one with the least `speed`, and deduct his `speed` from `sum`.
-* try to update the answer using `sum * speed[i]`.
-
 The idea behind 
 
 ```cpp
