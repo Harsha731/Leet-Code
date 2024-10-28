@@ -31,133 +31,83 @@
 
 ## Solution 1. Sequential Placing (Greedy)
 
-We place the letters from left to right. We always pick the letter that has the maximum count and is not the previously placed letter.
+Fill the characters at even postions first, then do at odd. By using (i>=s.size) i=1
+The problem may arise if the mostFreq > n+1 / 2
 
 ```cpp
-// OJ: https://leetcode.com/problems/reorganize-string/
-// Author: github.com/lzl124631x
-// Time: O(NA) where A is the size of the alphabet
-// Space: O(A)
+
 class Solution {
 public:
     string reorganizeString(string s) {
-        int cnt[26] = {}, mxCnt = 0;
-        for (char c : s) mxCnt = max(mxCnt, ++cnt[c - 'a']);
-        if (mxCnt > (s.size() + 1) / 2) return "";
-        string ans;
-        for (int i = 0; i < s.size(); ++i) {
-            int mxIndex = -1;
-            for (int c = 0; c < 26; ++c) {
-                if (cnt[c] == 0 || (ans.size() && ans.back() == 'a' + c) || (mxIndex != -1 && cnt[c] <= cnt[mxIndex])) continue;
-                mxIndex = c;
-            }
-            cnt[mxIndex]--;
-            ans.push_back('a' + mxIndex);
+        vector<int> cnt(26, 0);  
+        int mostFreq = 0, i = 0; 
+
+        // Count frequency of each character and track the most frequent one
+        for (char c : s) {
+            if (++cnt[c - 'a'] > cnt[mostFreq]) 
+                mostFreq = c - 'a';
         }
-        return ans;
+
+        // If the most frequent character's count is more than half the size, return empty
+        if (2 * cnt[mostFreq] - 1 > s.size()) 
+            return "";
+
+        while (cnt[mostFreq] > 0) {
+            s[i] = 'a' + mostFreq;
+            cnt[mostFreq]--;
+            i += 2;
+        }
+
+        for (int j = 0; j < 26; ++j) {
+            while (cnt[j] > 0) {
+                if (i >= s.size())  i = 1;  // Switch to odd positions if even positions are filled
+                s[i] = 'a' + j;
+                cnt[j]--;
+                i += 2;
+            }
+        }
+
+        return s;
     }
 };
+
 ```
 
-## Solution 2. Sequential Placing (Greedy + Heap)
+## Solution 2. PQ
 
-Similar to solution 1, but instead of traversing all the letters, we use a priority queue to pick the one with the maximum count. 
-
-Since we can't place the letter we just placed again, we store the letter we just placed in a temp variable `prev`, and push it back into the priority queue one round later.
+use hashmap and store the frequencies and push into PQ
+Do while(pq.size > 1) pop the 1st and 2nd and add to string end
+Push if still frequency is present
+Atlast, if pq.size=1 and freq!=1, then invalid
+Else, add that to string
 
 ```cpp
-// OJ: https://leetcode.com/problems/reorganize-string/
-// Author: github.com/lzl124631x
-// Time: O(A + NlogA) where A is the size of the alphabet
-// Space: O(A)
+// TC : O(NlogM) and M=26
+// SC : O(N)
+
 class Solution {
 public:
     string reorganizeString(string S) {
-        int cnt[26] = {}, prev = -1;
-        for (char c : S) cnt[c - 'a']++;
-        auto cmp = [&](int a, int b) { return cnt[a] < cnt[b]; };
-        priority_queue<int, vector<int>, decltype(cmp)> q(cmp);
-        for (int i = 0; i < 26; ++i) if (cnt[i]) q.push(i);
-        string ans;
-        while (q.size()) {
-            int c = q.top();
-            q.pop();
-            ans.push_back('a' + c);
-            if (prev != -1) q.push(prev);
-            if (--cnt[c]) prev = c;
-            else prev = -1;
+        unordered_map<char, int> ump;
+        priority_queue<pair<int, char>> pq;
+        string res = "";
+        
+        for (char s : S) ump[s]++;
+        for (auto it : ump) pq.push({it.second, it.first});
+        
+        while (pq.size() > 1) {
+            auto [freq1, char1] = pq.top(); pq.pop();
+            auto [freq2, char2] = pq.top(); pq.pop();
+            
+            res += char1; res += char2;
+            if (--freq1 > 0) pq.push({freq1, char1});
+            if (--freq2 > 0) pq.push({freq2, char2});
         }
-        if (prev != -1) return "";
-        return ans;
+        
+        if (!pq.empty() && pq.top().first > 1) return "";       // a character have no place to fill
+        if (!pq.empty()) res += pq.top().second;                // at last, only a character remains
+        
+        return res;
     }
 };
 ```
-
-## Solution 3. Interleaving Placement
-
-We fill the even indices first, then the odd indices.
-
-```cpp
-// OJ: https://leetcode.com/problems/reorganize-string/
-// Author: github.com/lzl124631x
-// Time: O(AlogA + N) where A is the size of the alphabet 
-// Space: O(A)
-// Ref: https://leetcode.com/problems/reorganize-string/solution/
-class Solution {
-public:
-    string reorganizeString(string s) {
-        int N = s.size(), cnt[26] = {}, j = 0;
-        for (char c : s) cnt[c - 'a'] += 100;
-        for (int i = 0; i < 26; ++i) cnt[i] += i;
-        sort(begin(cnt), end(cnt), greater<>());
-        string ans(N, 0);
-        for (int n : cnt) {
-            int ct = n / 100, ch = n % 100;
-            if (ct == 0) continue;
-            if (ct > (N + 1) / 2) return "";
-            while (ct--) {
-                ans[j] = ch + 'a';
-                j = (j + 2) % N;
-                if (j == 0) j = 1;
-            }
-        }
-        return ans;
-    }
-};
-```
-
-We don't even need to sort the `cnt` array. We just need to place the letter with the maximum count first, and then place the rest in any order.
-
-```cpp
-// OJ: https://leetcode.com/problems/reorganize-string
-// Author: github.com/lzl124631x
-// Time: O(N)
-// Space: O(A)
-class Solution {
-public:
-    string reorganizeString(string s) {
-        int cnt[26] = {}, mxIndex = -1, N = s.size(), j = 0;
-        for (char c : s) ++cnt[c - 'a'];
-        for (int i = 0; i < 26; ++i) {
-            if (mxIndex == -1 || cnt[i] > cnt[mxIndex]) mxIndex = i;
-        }
-        if (cnt[mxIndex] > (N + 1) / 2) return "";
-        string ans(N, 0);
-        // Place the most frequent letter
-        while (cnt[mxIndex]--) {
-            ans[j] = 'a' + mxIndex;
-            j += 2;
-        }
-        // Place rest of the letters in any order
-        for (int i = 0; i < 26; ++i) {
-            while (cnt[i]-- > 0) {
-                if (j >= N) j = 1;
-                ans[j] = 'a' + i;
-                j += 2;
-            }
-        }
-        return ans;
-    }
-};
-```
-
