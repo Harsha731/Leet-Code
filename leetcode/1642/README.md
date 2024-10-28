@@ -72,47 +72,16 @@ Now the problem becomes "find the maximum index `i` that `sum( A[0]...A[i] ) - s
 We can use a min heap to keep track of the top `L` items.
 
 ```cpp
-// OJ: https://leetcode.com/problems/furthest-building-you-can-reach/
-// Author: github.com/lzl124631x
 // Time: O(NlogL)
 // Space: O(L)
-class Solution {
-public:
-    int furthestBuilding(vector<int>& A, int B, int L) {
-        long N = A.size(), sum = 0, sumTop = 0;
-        for (int i = 0; i < N - 1; ++i) { // convert to diff array
-            A[i] = max(0, A[i + 1] - A[i]);
-        }
-        priority_queue<int, vector<int>, greater<>> pq; // min-heap storing the top L diffs
-        for (int i = 0; i < N; ++i) {
-            sum += A[i];
-            sumTop += A[i];
-            pq.push(A[i]);
-            if (pq.size() > L) {
-                sumTop -= pq.top();
-                pq.pop();
-            }
-            if (sum - sumTop > B) return i;
-        }
-        return N - 1;
-    }
-};
-```
 
-Or
-
-```cpp
-// OJ: https://leetcode.com/problems/furthest-building-you-can-reach/
-// Author: github.com/lzl124631x
-// Time: O(NlogL)
-// Space: O(L)
 class Solution {
 public:
     int furthestBuilding(vector<int>& H, int B, int L) {
-        int N = H.size(), sum = 0; // sum is the sum of the diffs that we want to use bricks to handle
-        priority_queue<int, vector<int>, greater<>> pq; // min-heap, keep track of the L largest diffs
+        int N = H.size(), sum = 0; 
+        priority_queue<int, vector<int>, greater<>> pq; // min-heap
         for (int i = 1; i < N; ++i) {
-            int diff = H[i] - H[i - 1]; // compute diff on the fly
+            int diff = H[i] - H[i - 1]; 
             if (diff <= 0) continue; // ignore negative diffs
             pq.push(diff);
             if (pq.size() <= L) continue; // doesn't need any brick, continue
