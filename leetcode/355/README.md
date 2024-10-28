@@ -56,38 +56,38 @@ twitter.getNewsFeed(1);
 //     * follow: O(1)
 //     * unfollow: O(1)
 // Space: O(F + R) where F is number of feeds, R is count of follower-followee relationships.
+
 class Twitter {
 private:
-    deque<pair<int, int>> feeds;
-    unordered_map<int, unordered_set<int>> followerToFollowee;
+    vector<pair<int, int>> posts; // Stores (userId, tweetId)
+    unordered_map<int, unordered_set<int>> follows; // Maps followerId to a set of followeeIds
+
 public:
     Twitter() {}
+
     void postTweet(int userId, int tweetId) {
-        feeds.push_front(make_pair(userId, tweetId));
+        posts.push_back(make_pair(userId, tweetId));
     }
+
     vector<int> getNewsFeed(int userId) {
-        vector<int> v;
-        auto it = feeds.begin();
-        auto &followees = followerToFollowee[userId];
-        int cnt = 0;
-        while (it != feeds.end() && cnt < 10) {
-            int posterId = it->first;
-            if (posterId == userId
-            || followees.find(posterId) != followees.end()) {
-                v.push_back(it->second);
-                ++cnt;
+        vector<int> feed;
+        int count = 0;
+        for (int i = posts.size() - 1; i >= 0 && count < 10; i--) {
+            if (posts[i].first == userId || follows[userId].count(posts[i].first)) {
+                feed.push_back(posts[i].second);
+                count++;
             }
-            ++it;
         }
-        return v;
+        return feed;
     }
+
     void follow(int followerId, int followeeId) {
-        if (followerId == followeeId) return;
-        followerToFollowee[followerId].insert(followeeId);
+        follows[followerId].insert(followeeId); // Add followeeId to the followerId's set
     }
+
     void unfollow(int followerId, int followeeId) {
-        if (followerId == followeeId) return;
-        followerToFollowee[followerId].erase(followeeId);
+        follows[followerId].erase(followeeId); // Remove followeeId from the followerId's set
     }
 };
+
 ```
