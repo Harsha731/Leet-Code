@@ -62,26 +62,26 @@ seatManager.unreserve(5); // Unreserve seat 5, so now the available seats are [5
 ## Solution 1.
 
 ```cpp
-// OJ: https://leetcode.com/problems/seat-reservation-manager
-// Author: github.com/lzl124631x
-// Time:
-//      SeatManager: O(NlogN)
-//      reserve: O(1)
-//      unreserve: O(logN)
-// Space: O(N)
 class SeatManager {
-    set<int> s;
 public:
+    priority_queue <int, vector<int>, greater<int> > pq;
     SeatManager(int n) {
-        for (int i = 1; i <= n; ++i) s.insert(i);
+        for(int i = 1;i<=n;i++){
+            pq.push(i);
+        }
     }
+    
     int reserve() {
-        int x = *s.begin();
-        s.erase(s.begin());
-        return x;
+        if(pq.empty()){
+            return -1;
+        }
+        int top = pq.top();
+        pq.pop();
+        return top;
     }
+    
     void unreserve(int seatNumber) {
-        s.insert(seatNumber);
+        pq.push(seatNumber);
     }
 };
 ```
@@ -89,28 +89,27 @@ public:
 ## Solution 2.
 
 ```cpp
-// OJ: https://leetcode.com/problems/seat-reservation-manager/
-// Author: github.com/lzl124631x
-// Time:
-//      SeatManager: O(1)
-//      reserve: O(1)
-//      unreserve: O(logN)
-// Space: O(U) where U is the number of unreserves.
 class SeatManager {
-    set<int> unr;
-    int cur = 0;
+    int m; // Marker for the next unreserved seat.
+    priority_queue<int, vector<int>, greater<int>> pq; // Min-heap for unreserved seats.
+
 public:
-    SeatManager(int n) {}
-    int reserve() {
-        if (unr.size()) {
-            int r = *unr.begin();
-            unr.erase(r);
-            return r;
-        }
-        return ++cur;
+    SeatManager(int n) {
+        m = 1; // Initialize marker to the first seat.
     }
-    void unreserve(int seatNumber) {
-        unr.insert(seatNumber);
+
+    int reserve() {
+        if (!pq.empty()) {
+            int s = pq.top();
+            pq.pop();
+            return s;
+        }
+        return m++;
+    }
+
+    void unreserve(int s) {
+        pq.push(s);
     }
 };
+
 ```
