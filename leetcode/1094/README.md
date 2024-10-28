@@ -88,3 +88,44 @@ public:
     }
 };
 ```
+
+
+
+```cpp
+// TC : O(NlogN)
+// SC : O(N)
+
+// Same as above
+// Sort based on start time, then end time
+// Add { endTime, people } to PQ
+// Vacate as many people as people before inserting a new one 
+// If limit crosses any time, return false
+
+class Solution {
+public:
+    static bool comp(vector<int> lhs, vector<int> rhs) {
+        return lhs[1] < rhs[1] || (lhs[1] == rhs[1] && lhs[2] < rhs[2]);
+    }
+        
+    bool carPooling(vector<vector<int>>& trips, int capacity) {
+        sort(trips.begin(), trips.end(), comp);
+        
+        int curr = 0;
+        priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
+
+        for (int i = 0; i < trips.size(); i++) {
+            while (!pq.empty() && pq.top().first <= trips[i][1]) {
+                curr -= pq.top().second;
+                pq.pop();
+            }
+            
+            pq.push({trips[i][2], trips[i][0]});
+            curr += trips[i][0];
+            
+            if (curr > capacity) return false;
+        }
+        
+        return true;
+    }
+};
+```
