@@ -49,87 +49,51 @@
 **Related Topics**:  
 [Heap](https://leetcode.com/tag/heap/)
 
-## TLE version. Greedy
 
-Try `person[i]` as the baseline. Use her `W[i] / Q[i]` as the factor to get others' wages. Drop those who can't meet their min wages.
-
-For the rest, sum the smallest `K` wages.
-
-```cpp
-// OJ: https://leetcode.com/problems/minimum-cost-to-hire-k-workers/
-// Author: github.com/lzl124631x
-// Time: O(N^2 * logN)
-// Space: O(N)
-// Ref: https://leetcode.com/problems/minimum-cost-to-hire-k-workers/solution/
-// NOTE: this solution will get TLE
-class Solution {
-public:
-    double mincostToHireWorkers(vector<int>& Q, vector<int>& W, int K) {
-        int N = Q.size();
-        double ans = DBL_MAX;
-        for (int i = 0; i < N; ++i) {
-            double factor = (double) W[i] / Q[i];
-            vector<double> costs;
-            for (int j = 0; j < N; ++j) {
-                double c = factor * Q[j];
-                if (c < W[j]) continue;
-                costs.push_back(c);
-            }
-            if (costs.size() < K) continue;
-            sort(costs.begin(), costs.end());
-            double sum = accumulate(costs.begin(), costs.begin() + K, 0.0);
-            ans = min(ans, sum);
-        }
-        return ans;
-    }
-};
-```
 
 ## Solution 1. Max Heap
 
-If we select `person[i]` as the benchmark, `W[i]/Q[i]` will be used as the `rate`. All other people get `Q[j] * rate`.
-
-If `Q[j] * rate[i]` is smaller than `W[j]`, i.e. `Q[j] * rate[i] < W[j]`, or `rate[i] < rate[j]`, `person[j]` can't work.
-
-So `rate[i]` can only make the people with equal or smaller rates to be able to work.
-
-* The greatest rate can make all people work, but results in greater total wage.
-* The smaller rate can make less people work, but results in smaller total wage.
-
-Hence we can iterate people in ascending order of rate.
-
-We use a max heap `pq` to keep the qualities of people, and `sum` to track the sum of qualities of people in the `pq`.
-
-For `person[i]`, we add her quality into the `pq`. And pop if the `pq` has more than `K` people. We update the `sum` accordingly.
-
-If there are `K` people in the `pq`, then `sum * rate[i]` is the total wage. We just need to find the minimal total wage.
-
 ```cpp
-// OJ: https://leetcode.com/problems/minimum-cost-to-hire-k-workers/
-// Author: github.com/lzl124631x
-// Time: O(NlogN)
-// Space: O(N)
+
+// Time Complexity
+// O(NlogN) for sort.
+// O(NlogK) for priority queue. Both are needed for this problem
+
+// wi : wj :: qi : qj    =>    wi / qi  =  wj / qj   => We select the minimum wi/qi ration
+// we need to provide the minimum wage to all the k workers
+
+// We are simply multiplying the current wi/qi value with the sum of the min k quality workers till now
+
+// What is we are supposed to remove the worker[1] and we are multiplying with worker[0]
+// No problem, it will be more than the earlier, as sum is same with more value of worker[0]
+// causes it to ingore while applying the min function
+
+
 class Solution {
 public:
-    double mincostToHireWorkers(vector<int>& Q, vector<int>& W, int K) {
-        int N = Q.size(), sum = 0;
-        double ans = DBL_MAX; 
-        vector<int> id(N);
-        vector<double> rate(N);
-        for (int i = 0; i < N; ++i) rate[i] = (double)W[i] / Q[i];
-        iota(begin(id), end(id), 0);
-        sort(begin(id), end(id), [&](int a, int b) { return rate[a] < rate[b]; });
-        priority_queue<int> pq;
-        for (int i = 0; i < N; ++i) {
-            sum += Q[id[i]];
-            pq.push(Q[id[i]]);
-            if (pq.size() > K) {
-                sum -= pq.top();
-                pq.pop();
-            }
-            if (pq.size() == K) ans = min(ans, rate[id[i]] * sum);
+    double mincostToHireWorkers(vector<int> q, vector<int> w, int K) {
+        vector<vector<double>> workers;
+
+        // Calculate the ratio of wage to quality for each worker
+        for (int i = 0; i < q.size(); ++i)
+            workers.push_back({(double)(w[i]) / q[i], (double)q[i]});
+
+        // Sort workers by their wage-to-quality ratio
+        sort(workers.begin(), workers.end());
+
+        double ans = DBL_MAX, qsum = 0;
+        priority_queue<int> pq;  // Max-heap to store the largest quality workers
+
+        // Iterate over the sorted workers
+        for (auto worker: workers) {
+            qsum += worker[1];  // Add the quality of the current worker
+            pq.push(worker[1]); // Add the quality to the max-heap
+            if (pq.size() > K) qsum -= pq.top(), pq.pop();  // Remove the highest quality if we exceed K workers
+            if (pq.size() == K) ans = min(ans, qsum * worker[0]);  // Calculate minimum cost for K workers
         }
+        
         return ans;
     }
 };
+
 ```
