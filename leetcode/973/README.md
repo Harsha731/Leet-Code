@@ -49,10 +49,10 @@ We only want the closest k = 1 points from the origin, so the answer is just [[-
 ## Solution 1. Sort
 
 ```cpp
-// OJ: https://leetcode.com/problems/k-closest-points-to-origin/
-// Author: github.com/lzl124631x
+
 // Time: O(NlogN)
 // Space: O(1)
+
 class Solution {
 private:
     int dist(vector<int> &p) {
@@ -66,127 +66,83 @@ public:
 };
 ```
 
-## Solution 2. Heap of size `N`
-
-Keep a min-heap of all elements and pop `K` times.
-
-Heap creation takes `O(N)`. Popping an element takes `O(logN)` which we repeat `K` times.
+## Solution 2. Heap of size `K`
 
 ```cpp
-// OJ: https://leetcode.com/problems/k-closest-points-to-origin/
-// Author: github.com/lzl124631x
-// Time: O(N + KlogN)
-// Space: O(N)
+// Priority Queue approach
+// Store the distances in maxHeap and keep popping such that we can have the min k
+// At the end push all the points into the ans vector
+
+// TC : O(NlogK) and SC : O(K)
+
 class Solution {
-    int dist(vector<int> &p) {
-        return p[0] * p[0] + p[1] * p[1];
-    }
 public:
-    vector<vector<int>> kClosest(vector<vector<int>>& A, int K) {
-        auto cmp = [&](auto &a, auto &b) { return dist(a) > dist(b); };
-        priority_queue<vector<int>, vector<vector<int>>, decltype(cmp)> pq(begin(A), end(A), cmp);
-        vector<vector<int>> ans;
-        while (ans.size() < K) {
-            ans.push_back(pq.top());
+    int dist(vector<int>& point) {
+        return point[0] * point[0] + point[1] * point[1];
+    }
+
+    vector<vector<int>> kClosest(vector<vector<int>>& points, int k) {
+        // Max-heap to store pairs of (distance, index)
+        priority_queue<pair<int, int>> pq;          
+        
+        for (int i = 0; i < points.size(); i++) {
+            int distance = dist(points[i]);
+            pq.emplace(distance, i);  // Push (distance, index) into the heap
+            
+            // If heap size exceeds k, remove the farthest point
+            if (pq.size() > k) {
+                pq.pop();
+            }
+        }
+        
+        // Retrieve the k closest points from the heap
+        vector<vector<int>> ans(k);
+        for (int i = 0; i < k; i++) {
+            ans[i] = points[pq.top().second];
             pq.pop();
         }
+        
         return ans;
     }
 };
+
 ```
 
-Or use `make_heap` and `pop_heap` in place.
+## Solution 3. Quick Select
 
 ```cpp
-// OJ: https://leetcode.com/problems/k-closest-points-to-origin/
-// Author: github.com/lzl124631x
-// Time: O(N + KlogN)
-// Space: O(1)
-class Solution {
-    int dist(vector<int> &p) {
-        return p[0] * p[0] + p[1] * p[1];
-    }
-public:
-    vector<vector<int>> kClosest(vector<vector<int>>& A, int k) {
-        auto cmp = [&](auto &a, auto &b) { return dist(a) > dist(b); };
-        make_heap(begin(A), end(A), cmp);
-        vector<vector<int>> ans;
-        while (k--) {
-            pop_heap(begin(A), end(A), cmp);
-            ans.push_back(A.back());
-            A.pop_back();
-        }
-        return ans;
-    }
-};
-```
-
-## Solution 3. Heap of size `K`
-
-If the space is limited, we can keep a max-heap of size `K`.
-
-We loop through each point:
-* If the heap has less than `K` elements, push the point into heap.
-* Otherwise, if the distance of the element is smaller than that of the heap top, we pop the heap top and push this point into heap.
-
-In the end, all the elements left in the heap forms the answer.
-
-```cpp
-// OJ: https://leetcode.com/problems/k-closest-points-to-origin/
-// Author: github.com/lzl124631x
-// Time: O(NlogK)
-// Space: O(K)
-class Solution {
-    int dist(vector<int> &p) {
-        return p[0] * p[0] + p[1] * p[1];
-    }
-public:
-    vector<vector<int>> kClosest(vector<vector<int>>& A, int K) {
-        auto cmp = [&](auto &a, auto &b) { return dist(a) < dist(b); };
-        priority_queue<vector<int>, vector<vector<int>>, decltype(cmp)> pq(cmp);
-        for (auto &p : A) {
-            pq.push(p);
-            if (pq.size() > K) pq.pop();
-        }
-        vector<vector<int>> ans;
-        while (pq.size()) {
-            ans.push_back(pq.top());
-            pq.pop();
-        }
-        return ans;
-    }
-};
-```
-
-## Solution 4. Quick Select
-
-```cpp
-// OJ: https://leetcode.com/problems/k-closest-points-to-origin/
-// Author: github.com/lzl124631x
 // Time: O(N) on average, O(N^2) in the worst case
 // Space: O(1)
+
 class Solution {
-    int dist(vector<int> &p) {
+    int dist(const vector<int>& p) {
         return p[0] * p[0] + p[1] * p[1];
     }
+
+    int partition(vector<vector<int>>& A, int L, int R) {
+        int i = L, pivotIndex = L + rand() % (R - L + 1), pivot = dist(A[pivotIndex]);
+        swap(A[pivotIndex], A[R]); // swap the pivot to the end of this subarray
+
+        for (int j = L; j < R; ++j) { // traverse from L to R - 1. Note that we don't visit A[R] which is the pivot
+            if (dist(A[j]) < pivot) {
+                swap(A[i++], A[j]);
+            }
+        }
+        swap(A[i], A[R]); // Place pivot in its correct position
+        return i; // Return the index of the pivot
+    }
+
 public:
     vector<vector<int>> kClosest(vector<vector<int>>& A, int k) {
         int L = 0, R = A.size() - 1;
-        auto partition = [&](int L, int R) {
-            int i = L, pivotIndex = L + rand() % (R - L + 1), pivot = dist(A[pivotIndex]);
-            swap(A[pivotIndex], A[R]); // swap the pivot to the end of this subarray
-            for (int j = L; j < R; ++j) { // traverse from L to R - 1. Note that we don't visit A[R] which is the pivot
-                if (dist(A[j]) < pivot) swap(A[i++], A[j]);
-            }
-            swap(A[i], A[R]);
-            return i;
-        };
+
         while (true) {
-            int M = partition(L, R);
+            int M = partition(A, L, R);
             if (M + 1 == k) break;
             if (M + 1 < k) L = M + 1;
             else R = M - 1;
         }
+
         return vector<vector<int>>(begin(A), begin(A) + k);
     }
 };
