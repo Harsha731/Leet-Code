@@ -68,35 +68,56 @@ Let `time` be the current time. When `time >= A[i][0]`, keep pushing `A[i]` into
 Then we pop a task from the min-heap and handle it. Increase the `time` by the processing time of this task and add its index to the answer.
 
 ```cpp
-// OJ: https://leetcode.com/problems/single-threaded-cpu/
-// Author: github.com/lzl124631x
-// Time: O(NlogN)
-// Space: O(N)
+    // We add the index to the pair <int, int>
+    // We make the current time = 0th task enqueue time
+    // In general, it have 2 cases if pq is empty
+    // i) currentTime is more than the next task enqueue time, we let it be as more can be pushed into queue instead of only one
+    // ii) If it is is less than the next task enqueue time, we shift it to the next task
+    // We push all the available tasks according to the current time
+    // We consider the one with minimum processing time by popping it out
+
 class Solution {
-    typedef pair<int, int> T; // processing time, index
 public:
-    vector<int> getOrder(vector<vector<int>>& A) {
-        priority_queue<T, vector<T>, greater<>> pq; // min heap of tasks, sorted first by processing time then by index.
-        long N = A.size(), time = 0, i = 0; // `time` is the current time, `i` is the read pointer
-        for (int i = 0; i < N; ++i) A[i].push_back(i); // append the index to each task
-        sort(begin(A), end(A)); // sort the input array so that we can take the tasks of small enqueueTime first
-        vector<int> ans;
-        while (i < N || pq.size()) { // stop the loop when we exhausted the input array and the tasks in the heap.
+    vector<int> getOrder(vector<vector<int>>& tasks) {
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> pq; // Min-heap for tasks
+        long n = tasks.size();
+        long currentTime = 0; 
+
+        // We need index at the end, so we are appending it
+        // Same like creating a pair if we have a value, but here we already have 2 values
+        for (int j = 0; j < n; ++j) {
+            tasks[j].push_back(j);
+        }
+        sort(begin(tasks), end(tasks)); // Sort by enqueue time
+        
+        vector<int> ans; 
+
+        int i = 0; 
+        while (i < n || !pq.empty()) {
+            // If no tasks in the heap, then we have two cases
+            // currentTime is more than the next task enqueue time, we let it be as more can be pushed into queue instead of only one
+            // If it is is less than the next task enqueue time, we shift it to the next task
             if (pq.empty()) {
-                time = max(time, (long)A[i][0]); // nothing in the heap? try updating the current time using the processing time of the next task in array
+                currentTime = max(currentTime, (long)tasks[i][0]);
             }
-            while (i < N && time >= A[i][0]) { // push all the tasks in the array whose enqueueTime <= currentTime into the heap
-                pq.emplace(A[i][1], A[i][2]);
+
+            // Push all tasks whose enqueue time is <= current time into the heap
+            while (i < n && currentTime >= tasks[i][0]) {
+                pq.emplace(tasks[i][1], tasks[i][2]); // (processing time, index)
                 ++i;
             }
-            auto [pro, index] = pq.top();
+
+            // Process the task with the smallest processing time
+            auto [processingTime, index] = pq.top();
             pq.pop();
-            time += pro; // handle this task and increase the current time by the processingTime
-            ans.push_back(index);
+            currentTime += processingTime; 
+            ans.push_back(index); 
         }
+
         return ans;
     }
 };
+
 ```
 
 ## Note
