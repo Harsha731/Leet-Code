@@ -30,28 +30,60 @@
 **Related Topics**:  
 [Array](https://leetcode.com/tag/array/), [Sort](https://leetcode.com/tag/sort/)
 
-## Solution 1.
+## Solution 1. PQ approach
 
 ```cpp
-// OJ: https://leetcode.com/problems/least-number-of-unique-integers-after-k-removals/
-// Author: github.com/lzl124631x
-// Time: O(N + UlogU) where U is the number of unique counts
-// Space: O(N)
 class Solution {
 public:
-    int findLeastNumOfUniqueInts(vector<int>& A, int k) {
-        unordered_map<int, int> cnt;
-        for (int n : A) cnt[n]++;
-        map<int, int> m;
-        for (auto &p : cnt) m[p.second]++;
-        int ans = cnt.size();
-        for (auto &p : m) {
-            int n = min(p.second, k / p.first);
-            if (n == 0) break;
-            ans -= n;
-            k -= p.first * n;
+    int findLeastNumOfUniqueInts(vector<int>& arr, int k) {
+        unordered_map<int, int> count;
+        for (int num : arr) count[num]++;
+
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> minHeap;
+        for (auto& [num, freq] : count) minHeap.push({freq, num});
+
+        // Remove elements starting with the smallest frequency
+        while (k > 0 && !minHeap.empty()) {
+            auto [freq, num] = minHeap.top();
+            minHeap.pop();
+            if (k >= freq) k -= freq; // Remove all occurrences
+            else break;
         }
-        return ans;
+        
+        return minHeap.size() + (k > 0);
     }
 };
+
+```
+
+
+## Solution 2. Counting sort approach
+
+```cpp
+class Solution {
+public:
+    int findLeastNumOfUniqueInts(vector<int>& arr, int k) {
+        unordered_map<int, int> freq;
+        for (int i : arr) freq[i]++;
+
+        int n = arr.size(), uniqueCount = freq.size();
+        vector<int> freqCounts(n + 1, 0);
+
+        // Count occurrences of each frequency
+        for (auto& [_, f] : freq) freqCounts[f]++;
+
+        // Remove elements based on smallest frequencies
+        for (int i = 1; i <= n; i++) {
+            int removeCount = min(k / i, freqCounts[i]);
+            k -= i * removeCount;
+            uniqueCount -= removeCount;
+
+            if (k < i) return uniqueCount;  // Stop if k is exhausted
+        }
+
+        return 0;  // All elements removed
+    }
+};
+
+
 ```
