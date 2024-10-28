@@ -51,25 +51,58 @@ The 2<sup>nd</sup> largest integer in nums is "0".
 ## Solution 1. Sorting
 
 ```cpp
-// OJ: https://leetcode.com/problems/find-the-kth-largest-integer-in-the-array/
-// Author: github.com/lzl124631x
-// Time: O(NlogN * W)
-// Space: O(1)
+// Note: Duplicate numbers should be counted distinctly. For example, if nums is ["1","2","2"], "2" is the first largest integer, 
+// "2" is the second-largest integer, and "1" is the third-largest integer.
+
+// Sorting
+// TC : O(NlogN) ans SC : O(1)
+
 class Solution {
-    bool isLessThan(string &a, string &b) {
-        int N = a.size();
-        for (int i = 0; i < N; ++i) {
-            if (a[i] == b[i]) continue;
-            return a[i] < b[i];
-        }
-        return false;
-    }
 public:
-    string kthLargestNumber(vector<string>& A, int k) {
-        sort(begin(A), end(A), [&](auto &a, auto &b) {
-            return a.size() != b.size() ? a.size() < b.size() : isLessThan(a, b);
-        });
-        return A[A.size() - k];
+    static bool cmp(string &a,string &b) {
+        if (a.size() == b.size()) return a < b;
+        return a.size() < b.size();
+    }
+    
+    string kthLargestNumber(vector<string>& nums, int k) {
+        sort(nums.begin(), nums.end(), cmp);
+        int n = nums.size();
+        return nums[n-k];
     }
 };
+```
+
+
+## Solution 2. PQ approach
+
+```cpp
+// TC : O(NlogK) and SC : O(K)
+
+// If it is a number, no cmp is required. Automatically the smaller numbers will be on top
+// But here, as it is strings we need to define what is high and small
+
+class Solution {
+public:
+    // Custom cmp to order strings by length and lexicographically
+    struct cmp {
+        bool operator() (string &s1, string &s2) {
+            return s1.length() > s2.length() || (s1.length() == s2.length() && s1 > s2);
+        }
+    };
+
+    string kthLargestNumber(vector<string>& nums, int k) {
+        // Declare a min-heap of strings using the custom cmp
+        priority_queue<string, vector<string>, cmp> q;
+
+        for (const auto& num : nums) {
+            q.push(num);
+            if (q.size() > k) {
+                q.pop();
+            }
+        }
+
+        return q.top(); // Return the k-th largest number
+    }
+};
+
 ```
