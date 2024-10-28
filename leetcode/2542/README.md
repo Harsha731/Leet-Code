@@ -74,29 +74,39 @@ Zip `A` and `B` into an array `C` such that `C[i] = (A[i], B[i])`. Sort `C` in d
 Traverse `C` from left to right. The last seen `B` value is the minimum value. To track the top `K` elements, we use a min heap. Whenever we visit a new `C[i]`, we push its `A` value into the heap, and add this value to `sum`. When heap has more than `K` elements, we pop the top, and remove this top value from `sum`. In this way, we keep track of the `sum` of the top `K` elements.
 
 ```cpp
-// OJ: https://leetcode.com/problems/maximum-subsequence-score
-// Author: github.com/lzl124631x
-// Time: O(NlogN)
-// Space: O(N)
 class Solution {
 public:
     long long maxScore(vector<int>& A, vector<int>& B, int k) {
-        vector<pair<int, int>> C;
-        long long N = A.size(), sum = 0, ans = 0;
-        for (int i = 0; i < N; ++i) C.emplace_back(A[i], B[i]);
-        sort(begin(C), end(C), [](auto &a, auto &b) { return a.second > b.second; });
-        priority_queue<int, vector<int>, greater<>> pq;
+        int N = A.size();
+        long long sum = 0, ans = 0;
+        
+        // Pair elements from A and B and sort by B in descending order
+        vector<pair<int, int>> pairs(N);
+        for (int i = 0; i < N; ++i)
+            pairs[i] = {B[i], A[i]};
+        
+        // We want the min(nums2) in descending order
+        sort(pairs.rbegin(), pairs.rend());     
+        
+        // Min-heap to store the smallest elements of the current subsequence
+        priority_queue<int, vector<int>, greater<int>> minHeap;
+        
         for (int i = 0; i < N; ++i) {
-            auto &[a, b] = C[i];
-            pq.push(a);
-            sum += a;
-            if (pq.size() > k) {
-                sum -= pq.top();
-                pq.pop();
+            auto &[a, b] = pairs[i];
+            sum += b;
+            minHeap.push(b);
+            
+            // Keep only the k largest elements in sum
+            if (minHeap.size() > k) {
+                sum -= minHeap.top();
+                minHeap.pop();
             }
-            if (i >= k - 1) ans = max(ans, b * sum);
+            
+            // Calculate the maximum score for subsequences of size k
+            if (minHeap.size() == k)  ans = max(ans, sum * a);
         }
         return ans;
     }
 };
+
 ```
