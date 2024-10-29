@@ -43,24 +43,16 @@
 
 ## Solution 1. Prefix State Map
 
-Use a map `m` to store the mapping from the count of odd numbers `cnt` to the first index in the array that has `cnt` numbers in front of it and including itself.
-
-When `cnt >= k`, we add `m[cnt - k + 1] - m[cnt - k]` to the answer.
-
 ```cpp
-// OJ: https://leetcode.com/problems/count-number-of-nice-subarrays/
-// Author: github.com/lzl124631x
-// Time: O(N)
-// Space: O(N)
 class Solution {
 public:
     int numberOfSubarrays(vector<int>& A, int k) {
-        int N = A.size(), cnt = 0, ans = 0;
-        unordered_map<int, int> m{{0,-1}};
-        for (int i = 0; i < N; ++i) {
+        unordered_map<int, int> m{{0, 1}}; // cnt -> number of occurrences of this cnt
+        int cnt = 0, ans = 0;
+        for (int i = 0; i < A.size(); ++i) {
             cnt += A[i] % 2;
-            if (m.count(cnt) == 0) m[cnt] = i;
-            if (cnt >= k) ans += m[cnt - k + 1] - m[cnt - k]; 
+            ans += m.count(cnt - k) ? m[cnt - k] : 0;
+            m[cnt]++;
         }
         return ans;
     }
