@@ -92,36 +92,44 @@ Check out "[C++ Maximum Sliding Window Cheatsheet Template!](https://leetcode.co
 Function `atMost(s, goal)` returns the number of substrings that has at most `goal` number of unique vowels. The answer is `atMost(s, 5) - atMost(s, 4)`.
 
 ```cpp
-// OJ: https://leetcode.com/problems/count-vowel-substrings-of-a-string/
-// Author: github.com/lzl124631x
-// Time: O(N)
-// Space: O(1)
 class Solution {
+public:
     bool isVowel(char c) {
         return c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u';
-    };
+    }
+
     int atMost(string &s, int goal) {
-        int ans = 0, i = 0, j = 0, N = s.size();
-        unordered_map<char, int> cnt;
-        for (; j < N; ++j) {
+        int ans = 0, i = 0, uniqueCount = 0;
+        vector<int> count(26, 0); // Count of vowels
+
+        for (int j = 0; j < s.size(); ++j) {
             if (!isVowel(s[j])) {
-                i = j + 1;
-                cnt.clear();
+                i = j + 1; // Reset the start index
+                fill(count.begin(), count.end(), 0); // Reset counts
+                uniqueCount = 0; // Reset unique count
                 continue;
             }
-            cnt[s[j]]++;
-            for (; cnt.size() > goal; ++i) {
-                if (--cnt[s[i]] == 0) cnt.erase(s[i]);
+
+            count[s[j] - 'a']++;
+            if (count[s[j] - 'a'] == 1) uniqueCount++; // New unique vowel
+
+            while (uniqueCount > goal) {
+                count[s[i] - 'a']--;
+                if (count[s[i] - 'a'] == 0) uniqueCount--; // Lost a unique vowel
+                i++;
             }
-            ans += j - i + 1; // this window [i, j] is the maximum window ending at `s[j]` that has at most `goal` number of unique vowels.
+
+            ans += j - i + 1; // Count valid substrings ending at j
         }
+
         return ans;
     }
-public:
+
     int countVowelSubstrings(string s) {
-        return atMost(s, 5) - atMost(s, 4);
+        return atMost(s, 5) - atMost(s, 4); // Exactly 5 unique vowels
     }
 };
+
 ```
 
 ## Discuss
