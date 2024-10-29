@@ -71,55 +71,30 @@ The resulting array is [1,2,3,4], which is continuous.
 
 ## Solution 1. Sliding Window
 
-Check out "[C++ Maximum Sliding Window Cheatsheet Template!](https://leetcode.com/problems/frequency-of-the-most-frequent-element/discuss/1175088/C%2B%2B-Maximum-Sliding-Window-Cheatsheet-Template!)".
-
-**Intuition**: Sort and only keep unique elements. The problem is the same as "get the length of the longest subarray whose difference between min and max elements is `N - 1`".
-
-**Algorithm**:
-
-The brute force way is to pick each `A[i]` as the start of the subarray and count the number of elements that are `<= A[i] + N - 1`, which takes `O(N^2)` time.
-
-Since the array is already sorted, we can use sliding window so that we only traverse the entire array once.
-
-```cpp
-// OJ: https://leetcode.com/problems/minimum-number-of-operations-to-make-array-continuous/
-// Author: github.com/lzl124631x
-// Time: O(NlogN)
-// Space: O(1)
-class Solution {
-public:
-    int minOperations(vector<int>& A) {
-        int N = A.size(), ans = N, j = 0;
-        sort(begin(A), end(A));
-        A.erase(unique(begin(A), end(A)), end(A)); // only keep unique elements
-        int M = A.size();
-        for (int i = 0; i < M; ++i) {
-            while (j < M && A[j] < A[i] + N) ++j; // let `j` point to the first element that is out of range -- `>= A[i] + N`.
-            ans = min(ans, N - j + i); // The length of this subarray is `j - i`. We need to replace `N - j + i` elements to make it continuous.
-        }
-        return ans;
-    }
-};
 ```
-
-Use Shrinkable Sliding Window Template: 
-
-```cpp
-// OJ: https://leetcode.com/problems/minimum-number-of-operations-to-make-array-continuous/
-// Author: github.com/lzl124631x
 // Time: O(NlogN)
 // Space: O(1)
+
+// We sort and remove the duplicat elements at start
+// We move the j from start 0 to n-1
+// We keep i=0 at start and if any (i, j) is not able to satisfy in [1, n] we shift the i
+// Here, we can get the possible window size for that particular j
+// Then, N-ans is the operations to be done to get continous array
+
 class Solution {
 public:
     int minOperations(vector<int>& A) {
-        int N = A.size(), i = 0, j = 0, ans = 0;
-        sort(begin(A), end(A));
-        A.erase(unique(begin(A), end(A)), end(A)); // only keep unique elements
-        for (int M = A.size(); j < M; ++j) {
-            while (A[i] + N <= A[j]) ++i; // let `i` point to the first element that is in range -- `A[i] + N > A[j]`
+        
+        int N = A.size(), i = 0, j, ans = 0;
+        sort(A.begin(), A.end());
+        A.erase(unique(A.begin(), A.end()), A.end()); // Remove duplicates
+
+        for (j=0; j < A.size(); ++j) {
+            while (A[i] + N <= A[j]) ++i; // Keep A[i] in range [A[j] - N + 1, A[j]]
             ans = max(ans, j - i + 1);
         }
-        return N - ans;
+
+        return N - ans; // Minimum operations needed
     }
 };
 ```
@@ -127,20 +102,20 @@ public:
 Use Non-shrinkable Sliding Window Template:
 
 ```cpp
-// OJ: https://leetcode.com/problems/minimum-number-of-operations-to-make-array-continuous/
-// Author: github.com/lzl124631x
-// Time: O(NlogN)
-// Space: O(1)
+// We can simply change the while to if to get non shrinkable approach
+// But we generally don't use ans in the 2nd approach
+
 class Solution {
 public:
     int minOperations(vector<int>& A) {
-        int N = A.size(), i = 0, j = 0;
+        int N = A.size(), i = 0, j;
         sort(begin(A), end(A));
         A.erase(unique(begin(A), end(A)), end(A)); // only keep unique elements
-        for (int M = A.size(); j < M; ++j) {
+
+        for (j=0; j < A.size(); ++j) {
             if (A[i] + N <= A[j]) ++i;
         }
-        return N - j + i;
+        return N - (j - i);   // as j is already at n. i,e j is j+1
     }
 };
 ```
