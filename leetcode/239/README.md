@@ -46,11 +46,10 @@ Window position                Max
 
 ## Solution 1. Mono-Deque
 
-Assume the array is `[3, 1, 2, ...]` and `k = 3`, popping `3` out of the window will result in max value update, but popping `1` won't. This means that we can just keep track of `[3, 2]`, i.e. a monotonically decreasing sequence of values.
-
-Here we store the `index` of the monotonoically decreasing sequence. When a new value `A[i]` is added to the window, we pop the trailing index in the deque which are pointing to values that are smaller or equal to `A[i]`. Then we can push `i` into the deque.
-
-We need to pop the index which falls out of the window from the deque as well.
+Use a deque and pop out all the elements less than current from back 
+push the current element
+If the front needs to be removed (q.front() = i-k), do pop_front
+At last, push the q.front() value to the answer vector
 
 ```cpp
 class Solution {
@@ -71,12 +70,15 @@ public:
 
 ## Solution 2. Mono-Deque
 
-Similar to Solution 1, but here we store the values instead of the indexes in the deque.
+We can push the indices as well as values to the deque, indices are unique, while the values are not unique
+The only difference come during    
+while (q.size() && A[q.back()] <= A[i]) q.pop_back();	// important
+if (q.front() == i - k) q.pop_front();
 
-Here, we are keeping values and not indices, so we pop back only if the value is less and we ignore the duplicate values
-While above, we try to keep as small as possible (< is also correct above)
-The problem comes during the pop_front. But in the above we keep indices in the queue which will be unique anyways
-While below we keep values which have duplicate's
+while (q.size() && A[q.back()] < A[i]) q.pop_back();	// important
+if (i >= k && q.size() && q.front() == A[i - k]) q.pop_front();
+
+Because in 2nd step of 2nd appraoch, we need to keep duplicates as if we pop_front, the element corresponding to that index needs to be popped, it should not affect the other. For index, it won't be problem, but during values, it will affect	
 
 ```cpp
 class Solution {
