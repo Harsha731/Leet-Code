@@ -40,6 +40,9 @@
 
 ## Solution 1. Fixed-length Sliding Window
 
+We can use 2 hashmaps to count the frequencies of s1 and s2. and we update hashmap of s2 while we are traversing
+and we check both hashmaps are equal or not with O(26) everytime until we found
+
 ```cpp
 class Solution {
 public:
@@ -62,6 +65,11 @@ public:
 ```
 
 ## Solution 2. Variable-length Sliding Window
+
+We can optimize this by using a variable matchCount. When we are traversing, the new value can increase the matchCount or decrease the matchCount or reamin as it is
+So, we write statements accordingly 
+if (h[right] == w[right])
+else if (h[right] == w[right] + 1) 
 
 ```cpp
 class Solution {
