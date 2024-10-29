@@ -58,9 +58,10 @@ public:
 
 ## Solution 2. Find Minimum Sliding Window
 
+ans += i, For that particular j, we have i possible sub arrays 
+
 ```cpp
-// OJ: https://leetcode.com/problems/count-subarrays-where-max-element-appears-at-least-k-times
-// Author: github.com/lzl124631x
+
 // Time: O(N)
 // Space: O(N)
 class Solution {
