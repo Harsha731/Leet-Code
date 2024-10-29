@@ -34,9 +34,11 @@
 
 ## Solution 1. Map of first occurrence
 
+Instead of using 2 pointers, we can store the occurence using hashmap in place of i (see 2nd approach)
+1 2 3 4 5 6 7 8    k=5, cnt=8, cnt-k+1 = 4.   So, at mp[4]+1 are possible sub arrays with ending at i
+
 ```cpp
-// OJ: https://leetcode.com/problems/count-subarrays-where-max-element-appears-at-least-k-times
-// Author: github.com/lzl124631x
+
 // Time: O(N)
 // Space: O(N)
 class Solution {
