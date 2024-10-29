@@ -61,14 +61,6 @@ public:
 
 ## Solution 2. Two Pointers
 
-Assume the current pointer is `j` and the corresponding odd number count is `cj`, we need two pointers to get the answer.
-
-The first pointer `i` is the index whose corresponding odd number count is `cj - k + 1`.
-
-The second pointer `prev` is the index whose corresponding odd number count is `cj - k`.
-
-So when `cj >= k`, we add `i - prev` to the answer.
-
 ```cpp
 // OJ: https://leetcode.com/problems/count-number-of-nice-subarrays/
 // Author: github.com/lzl124631x
@@ -91,32 +83,6 @@ public:
 };
 ```
 
-Or use a single count.
-
-```cpp
-// OJ: https://leetcode.com/problems/count-number-of-nice-subarrays/
-// Author: github.com/lzl124631x
-// Time: O(N)
-// Space: O(1)
-class Solution {
-public:
-    int numberOfSubarrays(vector<int>& A, int k) {
-        int N = A.size(), i = 0, j = 0, prev = -1, ans = 0, cnt = 0;
-        while (j < N) {
-            int c = A[j++] % 2;
-            cnt += c;
-            if (c && cnt >= k) {
-                prev = i;
-                while (A[i] % 2 == 0) ++i;
-                ++i;
-            }
-            if (cnt >= k) ans += i - prev;
-        }
-        return ans;
-    }
-};
-```
-
 ## Solution 3. AtMost to Equal + Find Maximum Sliding Window
 
 Check out "[C++ Maximum Sliding Window Cheatsheet Template!](https://leetcode.com/problems/frequency-of-the-most-frequent-element/discuss/1175088/C%2B%2B-Maximum-Sliding-Window-Cheatsheet-Template!)"
@@ -124,26 +90,36 @@ Check out "[C++ Maximum Sliding Window Cheatsheet Template!](https://leetcode.co
 Exactly `k` times = At Most `k` times - At Most `k - 1` times.
 
 ```cpp
-// OJ: https://leetcode.com/problems/count-number-of-nice-subarrays/
-// Author: github.com/lzl124631x
-// Time: O(N)
-// Space: O(1)
-// Ref: https://leetcode.com/problems/count-number-of-nice-subarrays/discuss/419378/JavaC%2B%2BPython-Sliding-Window-O(1)-Space
 class Solution {
-    int atMost(vector<int> &A, int k) {
-        int N = A.size(), i = 0, ans = 0;
-        for (int j = 0; j < N; ++j) {
-            k -= A[j] % 2;
-            while (k < 0) k += A[i++] % 2;
-            ans += j - i;
-        }
-        return ans;
-    }
 public:
-    int numberOfSubarrays(vector<int>& A, int k) {
-        return atMost(A, k) - atMost(A, k - 1);
+    int numberOfSubarrays(vector<int>& A, int goal) {
+        int n = A.size();
+        int i = 0, j = 0, cnt1 = 0, cnt2 = 0, count = 0;
+
+        for (int end = 0; end < n; ++end) {
+            cnt1 += A[end] % 2;
+            cnt2 += A[end] % 2;
+
+            // Adjust window `i` to have exactly `goal` odd numbers
+            while (i <= end && cnt1 > goal) {
+                cnt1 -= A[i++] % 2;
+            }
+
+            // Adjust window `j` to have at most `goal - 1` odd numbers
+            while (j <= end && cnt2 > goal - 1) {
+                cnt2 -= A[j++] % 2;
+            }
+
+            // If the cnt1 window has exactly `goal` odd numbers, all subarrays starting from indices in range [j, i] to `end` have `goal` odd numbers
+            if (cnt1 == goal) {
+                count += j - i;
+            }
+        }
+
+        return count;
     }
 };
+
 ```
 
 ## Discuss
