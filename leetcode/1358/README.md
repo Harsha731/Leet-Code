@@ -38,29 +38,52 @@
 
 ## Solution 1. Sliding Window
 
+For every time, we come across a valid sub string, we add n-j (n-1 - j + 1 => n-j)
+It is because for a fixed L, we have n-j substrings. It is L dependent
+As we decrease L by one each time
+
 ```cpp
-// OJ: https://leetcode.com/problems/number-of-substrings-containing-all-three-characters/
-// Author: github.com/lzl124631x
-// Time: O(N)
-// Space: O(1)
 class Solution {
-    int cnt[3] = {0};
-    bool valid() {
-        for (int n : cnt) 
-            if (!n) return false;
-        return true;
-    }
 public:
+    unordered_map <int, int> ump;
+    bool valid() {
+        if(ump[0] && ump[1] && ump[2]) return true;
+        return false;
+    }
+
     int numberOfSubstrings(string s) {
-        int L = 0, R = 0, N = s.size(), ans = 0;
-        while (R < N) { 
-            if (!valid()) cnt[s[R++] - 'a']++;
-            while (valid()) {
-                ans += N - R + 1;
-                cnt[s[L++] - 'a']--;
+        int i = 0, j = 0, n = s.length(), ans = 0;
+        for(j=0; j<n; j++) {
+            ump[s[j]-'a']++;
+            while(valid()) { 
+                ans = ans + (n-j);
+                ump[s[i]-'a']--;  
+                i++;
             }
         }
         return ans;
+    }
+};
+```
+
+## Solution 2. DP
+
+We store the last index where we have the all three characters available
+
+```cpp
+class Solution {
+public:
+    int numberOfSubstrings(string s) {
+        int n = s.length();
+        int count = 0;
+        int last[3] = {-1, -1, -1};
+        for(int i=0;i<n;i++){
+            last[s[i]-'a'] = i;
+            if(last[0]!=-1 && last[1]!=-1 && last[2]!=-1) {
+                count += 1 + min(last[0], min(last[1], last[2]));
+            }
+        }
+        return count;
     }
 };
 ```
