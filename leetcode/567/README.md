@@ -37,43 +37,8 @@
 * [Minimum Window Substring (Hard)](https://leetcode.com/problems/minimum-window-substring/)
 * [Find All Anagrams in a String (Medium)](https://leetcode.com/problems/find-all-anagrams-in-a-string/)
 
+
 ## Solution 1. Fixed-length Sliding Window
-
-Store the counts of letters of `a` in `cnts` array.
-
-* When we consume a letter `b[i]`, we decrement its count.
-* When we pop a letter `b[i - N]`, we increment its count. We start popping when `i - N >= 0` to make sure the sliding window is at most as long as `a`.
-
-Once all the counts in `cnts` array are zeros, we return `true`. If we reached end of array and still haven't clear out the `cnts`, return `false`.
-
-The time complexity is `O(26 * S2) = O(S2)`.
-
-```cpp
-// OJ: https://leetcode.com/problems/permutation-in-string/
-// Author: github.com/lzl124631x
-// Time: O(B)
-// Space: O(1)
-class Solution {
-public:
-    bool checkInclusion(string a, string b) {
-        if (a.size() > b.size()) return false;
-        int N = a.size(), cnts[26] = {};
-        for (char c : a) cnts[c - 'a']++;
-        for (int i = 0; i < b.size(); ++i) {
-            cnts[b[i] - 'a']--;
-            if (i - N >= 0) cnts[b[i - N] - 'a']++;
-            bool match = true;
-            for (int j = 0; j < 26 && match; ++j) {
-                if (cnts[j]) match = false;
-            }
-            if (match) return true;
-        }
-        return false;
-    }
-};
-```
-
-## Solution 2. Fixed-length Sliding Window
 
 ```cpp
 class Solution {
@@ -96,7 +61,7 @@ public:
 };
 ```
 
-## Solution 3. Variable-length Sliding Window
+## Solution 2. Variable-length Sliding Window
 
 ```cpp
 class Solution {
