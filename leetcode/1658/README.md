@@ -42,31 +42,7 @@
 * [Minimum Size Subarray Sum (Medium)](https://leetcode.com/problems/minimum-size-subarray-sum/)
 * [Subarray Sum Equals K (Medium)](https://leetcode.com/problems/subarray-sum-equals-k/)
 
-## Solution 1. Two pointers
-
-```cpp
-// OJ: https://leetcode.com/problems/minimum-operations-to-reduce-x-to-zero
-// Author: github.com/lzl124631x
-// Time: O(N)
-// Space: O(1)
-class Solution {
-public:
-    int minOperations(vector<int>& A, int x) {
-        int ans = INT_MAX, sum = 0, N = A.size(), i = 0, j = N - 1;
-        for (; i < N && sum < x; ++i) sum += A[i];
-        if (sum < x) return -1;
-        if (sum == x) ans = i;
-        while (i > 0) {
-            sum -= A[--i];
-            while (i <= j && sum < x) sum += A[j--];
-            if (sum == x) ans = min(ans, i + N - j - 1);
-        }
-        return ans == INT_MAX ? -1 : ans;
-    }
-};
-```
-
-## Solution 2. Find Maximum Sliding Window
+## Solution 1. Find Maximum Sliding Window
 
 This problem is equivalent to "finding the longest subarray that sums to `sum(A) - target`."
 
@@ -86,6 +62,29 @@ public:
             if (sum == target) maxLen = max(maxLen, j - i + 1);
         }
         return maxLen == -1 ? -1 : (N - maxLen);
+    }
+};
+```
+## Solution 2. Two pointers
+
+```cpp
+// OJ: https://leetcode.com/problems/minimum-operations-to-reduce-x-to-zero
+// Author: github.com/lzl124631x
+// Time: O(N)
+// Space: O(1)
+class Solution {
+public:
+    int minOperations(vector<int>& A, int x) {
+        int ans = INT_MAX, sum = 0, N = A.size(), i = 0, j = N - 1;
+        for (; i < N && sum < x; ++i) sum += A[i];
+        if (sum < x) return -1;
+        if (sum == x) ans = i;
+        while (i > 0) {
+            sum -= A[--i];
+            while (i <= j && sum < x) sum += A[j--];
+            if (sum == x) ans = min(ans, i + N - j - 1);
+        }
+        return ans == INT_MAX ? -1 : ans;
     }
 };
 ```
