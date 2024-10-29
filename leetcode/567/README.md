@@ -75,23 +75,21 @@ public:
 
 ## Solution 2. Fixed-length Sliding Window
 
-Similar to Solution 1, we keep a sliding window of size `a.size()`. Instead of checking the count for 26 characters, we just use a `matched` variable to store the number of matched characters within the sliding window.
-
 ```cpp
-// OJ: https://leetcode.com/problems/permutation-in-string/
-// Author: github.com/lzl124631x
-// Time: O(B)
-// Space: O(1)
 class Solution {
 public:
-    bool checkInclusion(string a, string b) {
-        if (a.size() > b.size()) return false;
-        int cnt[26] = {}, matched = a.size(), N = a.size();
-        for (char c : a) cnt[c - 'a']++;
-        for (int i = 0; i < b.size(); ++i) {
-            if (i >= N) matched += cnt[b[i - N] - 'a']++ >= 0;
-            matched -= cnt[b[i] - 'a']-- > 0;
-            if (!matched) return true;
+    bool checkInclusion(string s1, string s2) {
+        if(s2.size()<s1.size()) return false;
+        vector<int> w(26,0), h(26,0);
+        for(int i = 0; i<s1.size(); i++){
+            w[s1[i]-'a']+=1;
+            h[s2[i]-'a']+=1;
+        }
+        if(w==h) return true;
+        for(int i = s1.size(); i<s2.size(); i++){
+            h[s2[i-s1.size()]-'a']--;
+            h[s2[i]-'a']++;
+            if(w==h) return true;
         }
         return false;
     }
@@ -100,54 +98,47 @@ public:
 
 ## Solution 3. Variable-length Sliding Window
 
-We keep the counts of letters of `s1` in `goal` array. And we use two pointers `i` and `j` to consume `s2`, and store the counts of letters within range `[i, j)` in `cnt` array.
-
-1. We keep incrementing `j` and the corresponding count `cnt[s2[j]]` until it reaches the end or `cnt[s2[j]] + 1 <= goal[s2[j]]`. Let `X` be `s2[j]` then `X` is the letter we don't want to consume.
-2. If the gap between `i` and `j` is the length of `s1`, then we've found match and just return `true`.
-4. Since `s2[j]` is unwanted, we keep popping `s2[i]` by incrementing `i` until `s2[i] == s2[j]`, meanwhile, we decrement `cnt[s2[i]]`.
-5. Now `s[i]` and `s[j]` are all pointing to the unwanted letter `X`, increment `i` and `j` both so that the `cnt[X]` will be unchanged. Go to Step 1 until `j` reaches end.
-
 ```cpp
-// OJ: https://leetcode.com/problems/permutation-in-string/
-// Author: github.com/lzl124631x
-// Time: O(S2)
-// Space: O(1)
 class Solution {
 public:
     bool checkInclusion(string s1, string s2) {
-        int M = s1.size(), N = s2.size(), i = 0, j = 0, goal[26] = {0}, cnt[26] = {0};
-        for (char c : s1) goal[c - 'a']++;
-        for (; j < N; ++i, ++j) {
-            while (j < N && cnt[s2[j] - 'a'] + 1 <= goal[s2[j] - 'a']) cnt[s2[j++] - 'a']++;
-            if (j - i == M) return true;
-            while (j < N && i < j && s2[i] != s2[j]) cnt[s2[i++] - 'a']--;
+        if (s2.size() < s1.size()) return false;
+
+        vector<int> w(26, 0), h(26, 0);
+        int matchCount = 0;
+
+        // Initialize frequency arrays and initial match count
+        for (int i = 0; i < s1.size(); i++) {
+            w[s1[i] - 'a']++;
+            h[s2[i] - 'a']++;
         }
-        return false;
+
+        // Calculate the initial match count
+        for (int i = 0; i < 26; i++) {
+            if (w[i] == h[i]) matchCount++;
+        }
+
+        // Sliding window over the rest of s2
+        for (int i = s1.size(); i < s2.size(); i++) {
+            if (matchCount == 26) return true;
+
+            int right = s2[i] - 'a';
+            int left = s2[i - s1.size()] - 'a';
+
+            // Add the new character in the window (right side)
+            h[right]++;
+            if (h[right] == w[right]) matchCount++;
+            else if (h[right] == w[right] + 1) matchCount--;
+
+            // Remove the old character from the window (left side)
+            h[left]--;
+            if (h[left] == w[left]) matchCount++;
+            else if (h[left] == w[left] - 1) matchCount--;
+        }
+
+        // Final check after the loop
+        return matchCount == 26;
     }
 };
-```
 
-Or
-
-```cpp
-// OJ: https://leetcode.com/problems/permutation-in-string/
-// Author: github.com/lzl124631x
-// Time: O(B)
-// Space: O(1)
-class Solution {
-public:
-    bool checkInclusion(string a, string b) {
-        if (a.size() > b.size()) return false;
-        int cnt[26] = {};
-        for (char c : a) cnt[c - 'a']++;
-        for (int i = 0, j = 0; j < b.size(); ++j) {
-            if (--cnt[b[j] - 'a'] < 0) { // We can't have this `b[j]` in the window
-                while (b[i] != b[j]) cnt[b[i++] - 'a']++; // keep skipping until `b[i] == b[j]`
-                cnt[b[i++] - 'a']++; // remove `b[i]` from the window
-            }
-            if (j - i + 1 == a.size()) return true; // If the window has the same length as `a`, return true
-        }
-        return false;
-    }
-};
 ```
