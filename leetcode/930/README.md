@@ -40,31 +40,7 @@
 ## Solution 1. Prefix State Map
 
 ```cpp
-// OJ: https://leetcode.com/problems/binary-subarrays-with-sum/
-// Author: github.com/lzl124631x
-// Time: O(N)
-// Space: O(N)
-class Solution {
-public:
-    int numSubarraysWithSum(vector<int>& A, int goal) {
-        unordered_map<int, int> m{{0,-1}}; // count of 1s -> index
-        int ans = 0;
-        for (int i = 0, N = A.size(), sum = 0; i < N; ++i) {
-            sum += A[i];
-            if (m.count(sum) == 0) m[sum] = i;
-            if (goal == 0) ans += i - m[sum];
-            else if (sum - goal >= 0) ans += m[sum - goal + 1] - m[sum - goal];
-        }
-        return ans;
-    }
-};
-```
 
-Or
-
-```cpp
-// OJ: https://leetcode.com/problems/binary-subarrays-with-sum/
-// Author: github.com/lzl124631x
 // Time: O(N)
 // Space: O(N)
 class Solution {
