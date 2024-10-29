@@ -69,6 +69,8 @@ public:
 ## Solution 2. DP
 
 We store the last index where we have the all three characters available
+We do 	1 + min(last[0], min(last[1], last[2]));   to get the strings from L to 0 (L+1 will be there) having a fixed R each time
+We add these to count
 
 ```cpp
 class Solution {
