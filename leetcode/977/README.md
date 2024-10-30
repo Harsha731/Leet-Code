@@ -39,26 +39,24 @@ After sorting, it becomes [0,1,9,16,100].
 ## Solution 1.
 
 ```cpp
-// OJ: https://leetcode.com/problems/squares-of-a-sorted-array/
-// Author: github.com/lzl124631x
-// Time: O(N)
-// Space: O(1)
 class Solution {
 public:
     vector<int> sortedSquares(vector<int>& A) {
         int N = A.size();
-        for (int &n : A) n *= n;
+        for (int &n : A) n *= n; // Square the elements in A
         vector<int> ans(N);
-        for (int i = 0, j = N - 1, k = N - 1; i <= j; ) {
-            if (A[i] > A[j] ) {
-                ans[k--] = A[i];
-                ++i;
+        int i = 0, j = N - 1, k = N - 1;
+
+        // Use a while loop to fill the ans vector
+        while (i <= j) {
+            if (A[i] > A[j]) {
+                ans[k--] = A[i++];
             } else {
-                ans[k--] = A[j];
-                --j;
+                ans[k--] = A[j--];
             }
         }
         return ans;
     }
 };
+
 ```
