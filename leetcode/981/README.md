@@ -65,24 +65,18 @@ kv.get("foo", 5); //output "bar2" &nbsp;
 ## Solution 1.
 
 ```cpp
-// OJ: https://leetcode.com/problems/time-based-key-value-store/
-// Author: github.com/lzl124631x
-// Time:
-//      TimeMap: O(1)
-//      set: O(logT)
-//      get: O(logT)
-// Space: O(N)
 class TimeMap {
-    unordered_map<string, map<int, string, greater<>>> m;
 public:
     TimeMap() {}
+    unordered_map<string, map<int, string>> m;
+
     void set(string key, string value, int timestamp) {
-        m[key][timestamp] = value;
+        m[key].insert({ timestamp, value });
     }
+
     string get(string key, int timestamp) {
-        if (m.count(key) == 0) return "";
-        auto it = m[key].lower_bound(timestamp);
-        return it == m[key].end() ? "" : it->second;
+        auto it = m[key].upper_bound(timestamp);
+        return it == m[key].begin() ? "" : prev(it)->second;
     }
 };
 ```
