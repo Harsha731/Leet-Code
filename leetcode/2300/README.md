@@ -45,22 +45,30 @@ Thus, [2,0,2] is returned.
 
 ## Solution 1.
 
+Find the place where product gives >= thresold using binary search
+
 ```cpp
-// OJ: https://leetcode.com/problems/successful-pairs-of-spells-and-potions
-// Author: github.com/lzl124631x
-// Time: O(AlogB)
-// Space: O(1)
 class Solution {
 public:
-    vector<int> successfulPairs(vector<int>& A, vector<int>& B, long 
-long target) {
-        sort(begin(B), end(B));
-        vector<int> ans;
-        for (int n : A) {
-            ans.push_back((int)B.size() - (upper_bound(begin(B), end
-(B), target, [&](long long target, int &val) {
-                return (long long)n * val >= target;
-            }) - begin(B)));
+    vector<int> successfulPairs(vector<int>& spells, vector<int>& potions, long long success) {
+        int n = spells.size();
+        int m = potions.size();
+        vector<int> ans(n, 0);
+        sort(potions.begin(), potions.end());
+        for (int i = 0; i < n; i++) {
+            int spell = spells[i];
+            int left = 0;
+            int right = m - 1;
+            while (left <= right) {
+                int mid = left + (right - left) / 2;
+                long long product = (long long)spell * (long long)potions[mid];
+                if (product >= success) {
+                    right = mid - 1;
+                } else {
+                    left = mid + 1;
+                }
+            }
+            ans[i] = m - left;
         }
         return ans;
     }
