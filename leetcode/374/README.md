@@ -53,10 +53,6 @@
 ## Solution 1. Binary Search (L <= R)
 
 ```cpp
-// OJ: https://leetcode.com/problems/guess-number-higher-or-lower/
-// Author: github.com/lzl124631x
-// Time: O(logN)
-// Space: O(1)
 class Solution {
 public:
     int guessNumber(int n) {
@@ -64,8 +60,8 @@ public:
         while (L <= R) {
             int M = L + (R - L) / 2, g = guess(M);
             if (g == 0) return M;
-            if (g == 1) L = M + 1;
-            else R = M - 1;
+            else if (g == 1) L = M + 1;
+            else R = M-1;
         }
         return -1;
     }
@@ -74,42 +70,23 @@ public:
 
 ## Solution 2. Binary Search (L < R)
 
+The only difference is return L instead of return -1
+
 ```cpp
-// OJ: https://leetcode.com/problems/guess-number-higher-or-lower/
-// Author: github.com/lzl124631x
-// Time: O(logN)
-// Space: O(1)
 class Solution {
 public:
     int guessNumber(int n) {
         int L = 1, R = n;
         while (L < R) {
-            int M = L + (R - L) / 2, g = guess(M);
-            if (g == 1) L = M + 1;
-            else R = M;
+            int M = L + (R - L) / 2;
+            int g = guess(M);
+            if (g == 0) return M;
+            else if (g == 1) L = M + 1;
+            else R = M - 1;
         }
-        return L;
+        // After the loop, L should equal R, check if it's the correct guess
+        return L; // L should be the guess
     }
 };
-```
 
-Or
-
-```cpp
-// OJ: https://leetcode.com/problems/guess-number-higher-or-lower/
-// Author: github.com/lzl124631x
-// Time: O(logN)
-// Space: O(1)
-class Solution {
-public:
-    int guessNumber(int n) {
-        int L = 1, R = n;
-        while (L < R) {
-            int M = R - (R - L) / 2, g = guess(M);
-            if (g == -1) R = M - 1;
-            else L = M;
-        }
-        return L;
-    }
-};
 ```
