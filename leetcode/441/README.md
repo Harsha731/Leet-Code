@@ -74,23 +74,25 @@ public:
 
 Or use `L < R`
 
+After the loop, simply check and return
+
 ```cpp
-// OJ: https://leetcode.com/problems/arranging-coins/
-// Author: github.com/lzl124631x
-// Time: O(logN)
-// Space: O(1)
 class Solution {
 public:
     int arrangeCoins(int n) {
         int L = 1, R = n;
         while (L < R) {
-            long M = R - (R - L) / 2, sum = M * (1 + M) / 2;
-            if (sum <= n) L = M;
+            long M = L + (R - L) / 2, sum = M * (1 + M) / 2;
+            if (sum == n) return M;
+            if (sum < n) L = M + 1;
             else R = M - 1;
         }
-        return L;
+        // After the loop, we check if L is the correct answer
+        if (L * (L + 1) / 2 <= n) return L;
+        return L - 1;
     }
 };
+
 ```
 
 ## Solution 3. Math
