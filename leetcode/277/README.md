@@ -93,6 +93,9 @@ public:
 
 ## Solution 2. Stack approach
 
+The definition of a celebrity is that all the other n - 1 people know the celebrity, but the celebrity does not know any of them.
+Each know(i, j) can help us eliminate a node. If i knows j, i must not be celebrity, and we should try j instead. If i doesn't know j, j must not be celebrity.
+
 ```cpp
 class Solution {
 public:
