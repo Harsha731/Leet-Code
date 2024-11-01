@@ -90,3 +90,45 @@ public:
     }
 };
 ```
+
+## Solution 2.
+
+```
+class Solution {
+public:
+    // Returns -1 if celebrity is not present. If present, returns id (value from 0 to n-1).
+    int findCelebrity(int n) {
+        stack<int> s;
+        
+        // Push everybody to stack
+        for (int i = 0; i < n; i++)
+            s.push(i);
+
+        // Find a potential celebrity
+        while (s.size() > 1) {
+            int A = s.top();
+            s.pop();
+            int B = s.top();
+            s.pop();
+            
+            if (knows(A, B)) {
+                s.push(B);
+            } else {
+                s.push(A);
+            }
+        }
+
+        // Potential candidate
+        int C = s.top();
+        s.pop();
+
+        // Verify if C is actually a celebrity
+        for (int i = 0; i < n; i++) {
+            if ((i != C) && (knows(C, i) || !knows(i, C)))
+                return -1;
+        }
+
+        return C;
+    }
+};
+```
