@@ -91,7 +91,7 @@ public:
 };
 ```
 
-## Solution 2.
+## Solution 2. Stack approach
 
 ```
 class Solution {
