@@ -93,7 +93,7 @@ public:
 
 ## Solution 2. Stack approach
 
-```
+```cpp
 class Solution {
 public:
     // Returns -1 if celebrity is not present. If present, returns id (value from 0 to n-1).
