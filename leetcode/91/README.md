@@ -79,6 +79,9 @@ public:
 };
 ```
 
+
+## Solution 2. DP
+
 ```cpp
 class Solution {
 public:
