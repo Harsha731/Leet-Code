@@ -68,24 +68,33 @@ In total you spent $17 and covered all the days of your travel.
 // Time: O(N)
 // Space: O(N)
 class Solution {
-    vector<int> m;
-    int dp(vector<int> &days, vector<int>& costs, int i) {
-        int N = days.size();
-        if (i == N) return 0;
-        if (m[i] != INT_MAX) return m[i];
-        int ans = dp(days, costs, i + 1) + costs[0], j = i;
-        while (j < N && days[j] < days[i] + 7) ++j;
-        ans = min(ans, dp(days, costs, j) + costs[1]);
-        while (j < N && days[j] < days[i] + 30) ++j;
-        ans = min(ans, dp(days, costs, j) + costs[2]);
-        return m[i] = ans;
-    }
 public:
+    int solve(int i, const vector<int>& days, const vector<int>& costs, vector<int>& memo) {
+        int N = days.size();
+        if (i >= N) return 0;
+        if (memo[i] != -1) return memo[i];
+        
+        // 1-day pass: Take the current day and move to the next one
+        int cost1 = solve(i + 1, days, costs, memo) + costs[0];
+        
+        // 7-day pass: Move to the first day that is outside the 7-day window
+        int next7 = lower_bound(begin(days) + i, end(days), days[i] + 7) - begin(days);
+        int cost7 = solve(next7, days, costs, memo) + costs[1];
+        
+        // 30-day pass: Move to the first day that is outside the 30-day window
+        int next30 = lower_bound(begin(days) + i, end(days), days[i] + 30) - begin(days);
+        int cost30 = solve(next30, days, costs, memo) + costs[2];
+        
+        return memo[i] = min({cost1, cost7, cost30});
+    }
+
     int mincostTickets(vector<int>& days, vector<int>& costs) {
-        m.assign(days.size(), INT_MAX);
-        return dp(days, costs, 0);
+        int N = days.size();
+        vector<int> memo(N, -1); 
+        return solve(0, days, costs, memo);
     }
 };
+
 ```
 
 ## Solution 2. DP Bottom-up
@@ -99,35 +108,24 @@ class Solution {
 public:
     int mincostTickets(vector<int>& days, vector<int>& costs) {
         int N = days.size();
-        vector<int> dp(N + 1);
+        vector<int> dp(N + 1, 0); // Initialize dp array with 0
+        
         for (int i = N - 1; i >= 0; --i) {
-            dp[i] = min({ dp[i + 1] + costs[0],
-                          dp[lower_bound(begin(days) + i, end(days), days[i] + 7) - begin(days)] + costs[1],
-                          dp[lower_bound(begin(days) + i, end(days), days[i] + 30) - begin(days)] + costs[2] });
+            int cost1 = dp[i + 1] + costs[0]; // 1-day pass
+            
+            // 7-day pass
+            int next7 = lower_bound(begin(days) + i, end(days), days[i] + 7) - begin(days);
+            int cost7 = dp[next7] + costs[1];
+            
+            // 30-day pass
+            int next30 = lower_bound(begin(days) + i, end(days), days[i] + 30) - begin(days);
+            int cost30 = dp[next30] + costs[2];
+            
+            dp[i] = min({cost1, cost7, cost30});
         }
-        return dp[0];
+        
+        return dp[0]; // Minimum cost to cover all days starting from day 0
     }
 };
-```
 
-Another version which is from left to right and push the data to the next state.
-
-```cpp
-class Solution {
-public:
-    int mincostTickets(vector<int>& days, vector<int>& costs) {
-        int N = days.size();
-        vector<int> dp(N + 1, INT_MAX);
-        dp[0] = 0;
-        for (int i = 0; i < N; ++i) {
-            dp[i + 1] = min(dp[i + 1], dp[i] + costs[0]);
-            for (int j = 1; j < 3; ++j) {
-                int d = j == 1 ? 7 : 30;
-                int k = lower_bound(begin(days), end(days), days[i] + d) - begin(days);
-                dp[k] = min(dp[k], dp[i] + costs[j]);
-            }
-        }
-        return dp[N];
-    }
-};
 ```
