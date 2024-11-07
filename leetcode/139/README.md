@@ -106,25 +106,26 @@ public:
 // Time: O(S^3)
 // Space: O(S + W)
 class Solution {
-    unordered_set<string> st;
-    vector<int> m;
-    bool dp(string &s, int i) {
-        if (i == s.size()) return true;
-        if (m[i] != -1) return m[i];
-        m[i] = 0;
-        for (int j = i + 1; j <= s.size() && m[i] != 1; ++j) {
-            if (!dp(s, j) || st.count(s.substr(i, j - i)) == 0) continue;
-            m[i] = 1;
+private:
+    bool wordBreak(string s, unordered_set<string> &st, int start){
+        if(start == s.size()){
+            return true;
         }
-        return m[i];
+        for(int i=start; i<s.size(); i++){
+            if(st.count(s.substr(start, i+1-start)) && wordBreak(s, st, i+1)){
+                return true;
+            }
+        }
+        return false;
     }
 public:
-    bool wordBreak(string s, vector<string>& dict) {
-        m.assign(s.size(), -1);
-        st = { begin(dict), end(dict) };
-        return dp(s, 0);
+    bool wordBreak(string s, vector<string>& wordDict) {
+        unordered_set<string> st(wordDict.begin(), wordDict.end());
+        return wordBreak(s, st, 0);
     }
 };
+
+
 ```
 
 Minor optimization which won't check substrings whose lengths haven't shown up in the dictionary.
