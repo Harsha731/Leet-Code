@@ -56,6 +56,29 @@ We cannot draw 3 uncrossed lines, because the line from A[1]=4 to B[2]=4 will in
 * [Edit Distance (Hard)](https://leetcode.com/problems/edit-distance/)
 
 ## Solution 1. DP
+```cpp
+class Solution {
+public:
+    int solve(int i, int j, vector<int>& A, vector<int>& B, vector<vector<int>>& memo) {
+        if (i == 0 || j == 0) return 0;
+        if (memo[i][j] != -1) return memo[i][j];
+        if (A[i - 1] == B[j - 1]) {
+            memo[i][j] = 1 + solve(i - 1, j - 1, A, B, memo);
+        } else {
+            memo[i][j] = max(solve(i - 1, j, A, B, memo), solve(i, j - 1, A, B, memo));
+        }
+        return memo[i][j];
+    }
+
+    int maxUncrossedLines(vector<int>& A, vector<int>& B) {
+        int M = A.size(), N = B.size();
+        vector<vector<int>> memo(M + 1, vector<int>(N + 1, -1));
+        return solve(M, N, A, B, memo);
+    }
+};
+```
+
+## Solution 2. DP
 This problem is equivalent to longest common subsequence.
 
 Let `dp[i + 1][j + 1]` be the maximum number of connecting lines between `A[0..i]` and `B[0..j]`.
