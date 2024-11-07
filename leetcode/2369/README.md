@@ -42,20 +42,60 @@ This partition is valid, so we return true.
 // Space: O(N)
 class Solution {
 public:
-    bool validPartition(vector<int>& A) {
-        int N = A.size();
-        vector<int> memo(N, -1);
-        function<bool(int)> dfs = [&](int start) -> bool {
-            if (start == N) return true;
-            if (memo[start] != -1) return memo[start];
-            bool ans = false;
-            if (start + 1 < N && A[start + 1] == A[start]) ans = dfs(start + 2);
-            if (start + 2 < N &&
-                ((A[start + 1] == A[start] && A[start + 2] == A[start])
-                || (A[start + 1] == A[start] + 1 && A[start + 2] == A[start] + 2))) ans |= dfs(start + 3);
-            return memo[start] = ans;
-        };
-        return dfs(0);
+    bool dfs(int index, const vector<int>& nums, vector<int>& memo, int size) {
+        if (index == size) return true;
+        if (memo[index] != -1) return memo[index] == 1;
+
+        bool isValidPartition = false;
+
+        if (index + 1 <= size - 1 && nums[index] == nums[index + 1])
+            isValidPartition = isValidPartition || dfs(index + 2, nums, memo, size);
+      
+        if (index + 2 <= size - 1 && nums[index] == nums[index + 1] && nums[index + 1] == nums[index + 2])
+            isValidPartition = isValidPartition || dfs(index + 3, nums, memo, size);
+      
+        if (index + 2 <= size - 1 && nums[index + 1] - nums[index] == 1 && nums[index + 2] - nums[index + 1] == 1)
+            isValidPartition = isValidPartition || dfs(index + 3, nums, memo, size);
+      
+        memo[index] = isValidPartition ? 1 : 0;
+      
+        return isValidPartition;
+    }
+
+    bool validPartition(vector<int>& nums) {
+        int size = nums.size();
+        vector<int> memo(size, -1);
+        return dfs(0, nums, memo, size);
+    }
+};
+```
+
+## Solution 2. Bottom-up DP
+
+```cpp
+class Solution {
+public:
+    bool validPartition(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 1) return false; // If there's only one element, no valid partition exists.
+
+        vector<bool> dp(n + 1, false); // DP array where dp[i] means whether nums[0..i-1] can be partitioned.
+        dp[0] = true; // Base case: an empty array is always valid.
+
+        for (int i = 2; i <= n; ++i) {
+            // Check for a valid partition ending at index i-1
+            if (nums[i - 1] == nums[i - 2]) {
+                dp[i] = dp[i] || dp[i - 2]; // Case: two consecutive equal numbers.
+            }
+            if (i > 2 && nums[i - 1] == nums[i - 2] && nums[i - 2] == nums[i - 3]) {
+                dp[i] = dp[i] || dp[i - 3]; // Case: three consecutive equal numbers.
+            }
+            if (i > 2 && nums[i - 1] - nums[i - 2] == 1 && nums[i - 2] - nums[i - 3] == 1) {
+                dp[i] = dp[i] || dp[i - 3]; // Case: three consecutive numbers forming a strict increasing sequence.
+            }
+        }
+
+        return dp[n]; // The result for the entire array is stored in dp[n].
     }
 };
 ```
