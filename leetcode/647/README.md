@@ -50,16 +50,37 @@
 class Solution {
 public:
     int countSubstrings(string s) {
-        int N = s.size(), ans = N; // initially all the single characters are counted
-        for (int i = 0; i < N; ++i) { // odd length
-            for (int j = 1; i - j >= 0 && i + j < N && s[i - j] == s[i + j]; ++j) ++ans;
+        int N = s.size();
+        int ans = N; // Initialize ans with N as all single characters are palindromes
+        
+        // Check for odd-length palindromes centered at each character
+        for (int center = 0; center < N; ++center) {
+            for (int radius = 1;
+                 center - radius >= 0 &&
+                 center + radius < N &&
+                 s[center - radius] == s[center + radius];
+                 ++radius) 
+            {
+                ++ans;
+            }
         }
-        for (int i = 1; i < N; ++i) { // even length
-            for (int j = 0; i - j - 1 >= 0 && i + j < N && s[i - j - 1] == s[i + j]; ++j) ++ans;
+        
+        // Check for even-length palindromes centered between each pair of adjacent characters
+        for (int center = 1; center < N; ++center) {
+            for (int radius = 0;
+                 center - radius - 1 >= 0 &&
+                 center + radius < N &&
+                 s[center - radius - 1] == s[center + radius];
+                 ++radius) 
+            {
+                ++ans;
+            }
         }
+        
         return ans;
     }
 };
+
 ```
 
 ## Solution 2. Manacher
