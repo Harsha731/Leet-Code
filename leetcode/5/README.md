@@ -90,6 +90,40 @@ Since `dp[i][j]` only depends on `dp[i + 1][j - 1]`, we can reduce the space com
 // OJ: https://leetcode.com/problems/longest-palindromic-substring/
 // Author: github.com/lzl124631x
 // Time: O(N^2)
+
+// OJ: https://leetcode.com/problems/longest-palindromic-substring/
+// Author: github.com/lzl124631x
+// Time: O(N^2)
+// Space: O(N)
+class Solution {
+public:
+    string longestPalindrome(string s) {
+        int N = s.size(), start = 0, len = 0;
+        bool dp[1001] = {};
+        for (int i = N - 1; i >= 0; --i) {
+            for (int j = N - 1; j >= i; --j) {
+                if (i == j) dp[j] = true;
+                else dp[j] = s[i] == s[j] && (i + 1 > j - 1 || dp[j - 1]);
+                if (dp[j] && j - i + 1 > len) {
+                    start = i;
+                    len = j - i + 1;
+                }
+            }
+        }
+        return s.substr(start, len);
+    }
+};
+
+```
+
+
+## Solution 2. Expanding from Middle
+
+```cpp
+// OJ: https://leetcode.com/problems/longest-palindromic-substring/
+// Author: github.com/lzl124631x
+// Time: O(N^2)
+// Space: O(1)
 class Solution {
 public:
     string longestPalindrome(string s) {
@@ -121,35 +155,6 @@ private:
             right++;
         }
         return s.substr(left + 1, right - left - 1);
-    }
-};
-```
-
-
-## Solution 2. Expanding from Middle
-
-```cpp
-// OJ: https://leetcode.com/problems/longest-palindromic-substring/
-// Author: github.com/lzl124631x
-// Time: O(N^2)
-// Space: O(1)
-class Solution {
-    int expand(string &s, int L, int R) {
-        while (L >= 0 && R < s.size() && s[L] == s[R]) --L, ++R;
-        return R - L - 1;
-    }
-public:
-    string longestPalindrome(string s) {
-        int start = 0, maxLen = 0;
-        for (int i = 0; i < s.size(); ++i) {
-            int len1 = expand(s, i, i), len2 = expand(s, i, i + 1);
-            int len = max(len1, len2);
-            if (len > maxLen) {
-                maxLen = len;
-                start = i - (len - 1) / 2;
-            }
-        }
-        return s.substr(start, maxLen);
     }
 };
 ```
