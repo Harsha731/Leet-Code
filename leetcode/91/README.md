@@ -51,7 +51,9 @@ dp[i] += dp[i - 2]  if i != 0 && S[i - 1] != '0' && (S[i - 1] - '0') * 10 + S[i]
 
 Since `dp[i]` only depends on `dp[i - 1]` and `dp[i - 2]`. We can reduce the space to just two variables storing `dp[i - 1]` and `dp[i - 2]`.
 
-```cpp
+
+## Solution 2. DP
+```
 // OJ: https://leetcode.com/problems/decode-ways
 // Author: github.com/lzl124631x
 // Time: O(N)
