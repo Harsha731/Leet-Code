@@ -88,15 +88,19 @@ Or
 // Space: O(N)
 class Solution {
 public:
+    long long solve(int i, vector<vector<int>>& A, vector<long long>& dp) {
+        if (i >= A.size()) return 0;
+        if (dp[i] != -1) return dp[i];
+        int next = min(i + A[i][1] + 1, (int)A.size());
+        dp[i] = max(solve(i + 1, A, dp), A[i][0] + solve(next, A, dp));
+        return dp[i];
+    }
+
     long long mostPoints(vector<vector<int>>& A) {
-        int N = A.size();
-        vector<long> dp(N + 1);
-        for (int i = N - 1; i >= 0; --i) {
-            dp[i] = max(dp[i], dp[i + 1]);
-            int next = min(i + A[i][1] + 1, N);
-            dp[i] = max(dp[i], dp[next] + A[i][0]);
-        }
-        return dp[0];
+        int n = A.size();
+        vector<long long> dp(n, -1);
+        return solve(0, A, dp);
     }
 };
+
 ```
