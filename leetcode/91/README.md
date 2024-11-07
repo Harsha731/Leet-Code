@@ -33,24 +33,6 @@
 **Similar Questions**:
 * [Decode Ways II (Hard)](https://leetcode.com/problems/decode-ways-ii/)
 
-## Solution 1. DP
-
-Denote `dp[i]` as the result for substring `S[0..i]` (`i` &isin; `[0, N - 1]`).
-
-For each letter `S[i]`, we have two options:
-1. Use `S[i]` to decode. `S[i]` shouldn't be `'0'`.
-2. Use `S[i - 1]` and `S[i]` to decode. `S[i - 1]` shouldn't be `'0'` and the number `S[i - 1]` and `S[i]` formed shouldn't be greater than 26.
-
-When `dp[i] == 0`, we should stop right away and return 0.
-
-```
-dp[i] = 0
-dp[i] += dp[i - 1]  if S[i] != '0'
-dp[i] += dp[i - 2]  if i != 0 && S[i - 1] != '0' && (S[i - 1] - '0') * 10 + S[i] - '0' <= 26
-```
-
-Since `dp[i]` only depends on `dp[i - 1]` and `dp[i - 2]`. We can reduce the space to just two variables storing `dp[i - 1]` and `dp[i - 2]`.
-
 
 ## Solution 1. DP
 ```cpp
