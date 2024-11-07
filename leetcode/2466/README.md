@@ -83,3 +83,28 @@ public:
     }
 };
 ```
+
+## Solution 2.
+```cpp
+class Solution {
+public:
+    int countGoodStrings(int low, int high, int zero, int one) {
+        const int MOD = 1e9 + 7;
+        long long ans = 0;
+        long long dpCurr = 0;
+        long long dpPrevZero = 1; // dp[i - zero]
+        long long dpPrevOne = 1; // dp[i - one]
+
+        for (int i = 1; i <= high; ++i) {
+            dpCurr = 0;
+            if (i >= zero) dpCurr = (dpCurr + dpPrevZero) % MOD;
+            if (i >= one) dpCurr = (dpCurr + dpPrevOne) % MOD;
+            if (i >= low) ans = (ans + dpCurr) % MOD;
+            dpPrevZero = dpCurr; // Update for next zero addition
+            dpPrevOne = dpCurr; // Update for next one addition
+        }
+
+        return ans;
+    }
+};
+```
