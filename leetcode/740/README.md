@@ -71,20 +71,40 @@ dp[i] = num == prevNum ? max(dp[i-1], dp[i-2] + num * count) : (dp[i-1] + num * 
 // Time: O(NlogN)
 // Space: O(N)
 class Solution {
+    vector<int> points;
+    vector<int> memo;
+    int minVal;
+
+    // Top-down helper function
+    int dp(int i) {
+        if (i < minVal) return 0; // Base case: indices less than minVal return 0
+        if (memo[i] != -1) return memo[i]; // Return memoized result if available
+
+        // Recurrence relation: choose the max between skipping i or taking i
+        return memo[i] = max(dp(i - 1), dp(i - 2) + points[i]);
+    }
+
 public:
-    int deleteAndEarn(vector<int>& A) {
-        map<int, int> m;
-        for (int n : A) m[n]++;
-        int prev = 0, prev2 = 0, num = INT_MIN;
-        for (auto &[n, cnt] : m) {
-            int cur = n == num + 1 ? max(prev, prev2 + n * cnt) : (prev + n * cnt);
-            prev2 = prev;
-            prev = cur;
-            num = n;
+    int deleteAndEarn(vector<int>& nums) {
+        if (nums.empty()) return 0;
+
+        // Find the minimum and maximum values in nums
+        minVal = *min_element(nums.begin(), nums.end());
+        int maxVal = *max_element(nums.begin(), nums.end());
+
+        // Create and fill the points array
+        points.resize(maxVal + 1, 0);
+        for (int num : nums) {
+            points[num] += num;
         }
-        return prev;
+
+        // Initialize the memoization array
+        memo.assign(maxVal + 1, -1);
+
+        return dp(maxVal); // Start recursion from maxVal
     }
 };
+
 ```
 
 ## Solution 2. DP
@@ -99,8 +119,6 @@ use[i] = skip[i-1] + cnt[i] * i
 skip[i] = max(use[i-1], skip[i-1])
 ```
 
-The answer is `max(use[10000], skip[10000])`.
-
 ```cpp
 // OJ: https://leetcode.com/problems/delete-and-earn/
 // Author: github.com/lzl124631x
@@ -108,36 +126,29 @@ The answer is `max(use[10000], skip[10000])`.
 // Space: O(R)
 class Solution {
 public:
-    int deleteAndEarn(vector<int>& A) {
-        int cnt[10001] = {}, use[10001] = {}, skip[10001] = {};
-        for (int n : A) cnt[n]++;
-        for (int i = 1; i <= 10000; ++i) {
-            use[i] = skip[i - 1] + cnt[i] * i;
-            skip[i] = max(skip[i - 1], use[i - 1]);
+    int deleteAndEarn(vector<int>& nums) {
+        if (nums.empty()) return 0;
+
+        // Find the minimum and maximum values in nums
+        int minVal = *min_element(nums.begin(), nums.end());
+        int maxVal = *max_element(nums.begin(), nums.end());
+
+        // Create and fill the points array
+        vector<int> points(maxVal + 1, 0);
+        for (int num : nums) {
+            points[num] += num;
         }
-        return max(use[10000], skip[10000]);
+
+        // Use dynamic programming to solve the problem
+        vector<int> dp(maxVal + 1, 0);
+        dp[minVal] = points[minVal]; // Initialize dp at minVal
+
+        for (int i = minVal + 1; i <= maxVal; ++i) {
+            dp[i] = max(dp[i - 1], dp[i - 2] + points[i]);
+        }
+
+        return dp[maxVal];
     }
 };
-```
 
-Or
-
-```cpp
-// OJ: https://leetcode.com/problems/delete-and-earn/
-// Author: github.com/lzl124631x
-// Time: O(N + R)
-// Space: O(R)
-class Solution {
-public:
-    int deleteAndEarn(vector<int>& A) {
-        int cnt[10001] = {}, use = 0, skip = 0, mn = INT_MAX, mx = INT_MIN;
-        for (int n : A) cnt[n]++, mx = max(mx, n), mn = min(mn, n);
-        for (int i = mn; i <= mx; ++i) {
-            int u = skip + cnt[i] * i, s = max(skip, use);
-            use = u;
-            skip = s;
-        }
-        return max(use, skip);
-    }
-};
 ```
