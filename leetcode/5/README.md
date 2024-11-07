@@ -90,23 +90,37 @@ Since `dp[i][j]` only depends on `dp[i + 1][j - 1]`, we can reduce the space com
 // OJ: https://leetcode.com/problems/longest-palindromic-substring/
 // Author: github.com/lzl124631x
 // Time: O(N^2)
-// Space: O(N)
 class Solution {
 public:
     string longestPalindrome(string s) {
-        int N = s.size(), start = 0, len = 0;
-        bool dp[1001] = {};
-        for (int i = N - 1; i >= 0; --i) {
-            for (int j = N - 1; j >= i; --j) {
-                if (i == j) dp[j] = true;
-                else dp[j] = s[i] == s[j] && (i + 1 > j - 1 || dp[j - 1]);
-                if (dp[j] && j - i + 1 > len) {
-                    start = i;
-                    len = j - i + 1;
-                }
+        if (s.length() <= 1) {
+            return s;
+        }
+
+        string max_str = s.substr(0, 1); // Initial longest palindrome is the first character
+
+        for (int i = 0; i < s.length(); i++) {
+            string odd = expand_from_center(s, i, i);       // Odd length palindrome
+            string even = expand_from_center(s, i, i + 1);  // Even length palindrome
+
+            if (odd.length() > max_str.length()) {
+                max_str = odd;
+            }
+            if (even.length() > max_str.length()) {
+                max_str = even;
             }
         }
-        return s.substr(start, len);
+
+        return max_str;
+    }
+
+private:
+    string expand_from_center(const string& s, int left, int right) {
+        while (left >= 0 && right < s.length() && s[left] == s[right]) {
+            left--;
+            right++;
+        }
+        return s.substr(left + 1, right - left - 1);
     }
 };
 ```
