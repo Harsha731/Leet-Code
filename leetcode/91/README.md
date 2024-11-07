@@ -58,17 +58,60 @@ Since `dp[i]` only depends on `dp[i - 1]` and `dp[i - 2]`. We can reduce the spa
 // Space: O(1)
 class Solution {
 public:
-  int numDecodings(string s) {
-    int pre2 = 0, pre1 = 1;
-    for (int i = 0; i < s.size() && pre1; ++i) {
-      int cur = 0;
-      if (s[i] != '0') cur += pre1;
-      if (i != 0 && s[i - 1] != '0' && (s[i - 1] - '0') * 10 + s[i] - '0' <= 26)
-        cur += pre2;
-      pre2 = pre1;
-      pre1 = cur;
+
+    int memo(int i, int n, vector<int> &dp, string s) {
+        if(i >= n) return 1;
+        if(s[i]-'0' == 0) return 0;
+        if(dp[i] != -1) return dp[i];
+        int n1 = memo(i+1, n, dp, s);
+        int n2 = 0;
+        if(i+1 <= n-1 && (s[i]-'0') != 0 && (s[i]-'0')*10 + (s[i+1]-'0') <= 26) n2 = memo(i+2, n, dp, s);
+        return dp[i] = n1 + n2; 
     }
-    return pre1;
-  }
+
+    int numDecodings(string s) {
+        int n = s.length();
+        vector<int> dp (n+1, -1);
+        return memo(0, n, dp, s);
+    }
 };
+```
+
+cpp
+```
+class Solution {
+public:
+    int numDecodings(const string& s) {
+        int n = s.size();
+        if (n == 0) return 0;
+        vector<int> dp(n + 1, 0);
+
+        // Base cases
+        dp[0] = 1; // There's one way to decode an empty string
+        if (s[0] != '0') {
+            dp[1] = 1; // There's one way to decode a single non-'0' character
+        }
+
+        for (int pos = 2; pos <= n; ++pos) {
+            int way1 = 0;
+            int way2 = 0;
+
+            // Check single character decoding
+            if (s[pos - 1] != '0') {
+                way1 = dp[pos - 1];
+            }
+
+            // Check two-character decoding
+            string twoDigit = s.substr(pos - 2, 2);
+            if (stoi(twoDigit) >= 10 && stoi(twoDigit) <= 26) {
+                way2 = dp[pos - 2];
+            }
+
+            dp[pos] = way1 + way2;
+        }
+
+        return dp[n];
+    }
+};
+
 ```
