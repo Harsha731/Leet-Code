@@ -72,7 +72,33 @@ Installing any would create some section that does not have exactly two seats.
 If the total number of seats is not a positive even number, return 0
 
 Scan `corridor` section by section, count the number of plants between sections, and multiply the answer by `plant + 1`.
+``` cpp
 
+TC : O(N)
+SC : O(N)
+class Solution {
+public:
+    int numberOfWays(string corridor) {
+        int M = 1e9 + 7;
+        vector<int> seat_number;
+        // Find Seat Indices
+        for(int i = 0; i < corridor.size(); i++) {
+            if(corridor[i] == 'S')
+                seat_number.push_back(i);
+        }
+        // check Seats are Odd or Zero
+        if(seat_number.size() % 2 != 0 || seat_number.size() == 0)
+            return 0;
+        // Computing the result
+        long long int result = 1;
+        for(int i = 2; i < seat_number.size(); i += 2) {
+            result =( result * (seat_number[i] - seat_number[i-1]) % M);
+        }
+        return result;
+    }
+};
+```
+## Solution 2.
 ```cpp
 // OJ: https://leetcode.com/problems/number-of-ways-to-divide-a-long-corridor/
 // Author: github.com/lzl124631x
@@ -81,19 +107,31 @@ Scan `corridor` section by section, count the number of plants between sections,
 class Solution {
 public:
     int numberOfWays(string s) {
-        long ans = 1, mod = 1e9 + 7, N = s.size(), total = 0, section = 0;
-        for (int i = 0; i < N; ) {
-            int seat = 0, plant = 0;
-            for (; i < N && seat < 2; ++i) {
-                seat += s[i] == 'S';
-                if (seat == 0) plant += s[i] == 'P'; // Only count the plants in the front of the first seat of this section
+        const long mod = 1e9 + 7;
+        long ways = 1, totalSeats = 0, sections = 0;
+        int n = s.size();
+
+        for (int i = 0; i < n; ) {
+            int seatCount = 0, plantCount = 0;
+
+            // Count seats and plants in the current section. This stops when seatCount=3 and index will be at 'S' and it start from here for the next interation
+            while (i < n && seatCount < 2) {
+                seatCount += (s[i] == 'S');
+                if (seatCount == 0) plantCount += (s[i] == 'P');
+                ++i;
             }
-            if (seat && section++ > 0) ans = ans * (plant + 1) % mod;
-            total += seat;
+
+            // If this is not the first section, multiply ways by (plants between sections + 1)
+            if (seatCount > 0 && sections++ > 0) {
+                ways = ways * (plantCount + 1) % mod;
+            }
+            totalSeats += seatCount;
         }
-        return total % 2 == 0 && total ? ans : 0; // if the total number of seats is not a positive even number, return 0
+        // If the total number of seats is not a positive even number, return 0
+        return (totalSeats > 0 && totalSeats % 2 == 0) ? ways : 0;
     }
 };
+
 ```
 
 Or
