@@ -59,46 +59,63 @@
 // Time: O(N)
 // Space: O(1)
 class Solution {
-    vector<vector<int>> next {{4, 6}, {6, 8}, {7, 9}, {4, 8}, {0, 3, 9}, {}, {0, 1, 7}, {2, 6}, {1, 3}, {2, 4}};
 public:
-    int knightDialer(int N) {
-        vector<vector<int>> dp(2, vector<int>(10, 1));
-        int mod = 1e9 + 7, ans = 0;
-        for (int i = 2; i <= N; ++i) {
-            for (int j = 0; j <= 9; ++j) {
-                dp[i % 2][j] = 0;
-                for (int n : next[j]) {
-                    dp[i % 2][j] = (dp[i % 2][j] + dp[(i - 1) % 2][n]) % mod;
+    int knightDialer(int n) {
+        vector<vector<int>> jumps = {
+            {4, 6}, {6, 8}, {7, 9}, {4, 8}, {3, 9, 0}, {}, {1, 7, 0}, {2, 6}, {1, 3}, {2, 4}
+        };
+        int MOD = 1e9 + 7;
+        vector<vector<int>> dp(n, vector<int>(10, 0));
+
+        for (int i = 0; i < 10; i++) dp[0][i] = 1;
+        
+        for (int i = 1; i < n; i++) {
+            for (int j = 0; j < 10; j++) {
+                for (int next : jumps[j]) {
+                    dp[i][j] = (dp[i][j] + dp[i - 1][next]) % MOD;
                 }
             }
         }
-        for (int i = 0; i <= 9; ++i) ans = (ans + dp[N % 2][i]) % mod;
+
+        int ans = 0;
+        for (int i = 0; i < 10; i++) {
+            ans = (ans + dp[n - 1][i]) % MOD;
+        }
+
         return ans;
     }
 };
+
 ```
 
-Or
-
 ```cpp
-// OJ: https://leetcode.com/problems/knight-dialer
-// Author: github.com/lzl124631x
-// Time: O()
-// Space: O()
 class Solution {
 public:
-    int knightDialer(int n) {
-        vector<int> m[10]{{4,6},{6,8},{7,9},{4,8},{0,3,9},{},{0,1,7},{2,6},{1,3},{4,2}};
-        long dp[10] = {[0 ... 9] = 1}, mod = 1e9 + 7, ans = 0;
-        for (int i = 1; i < n; ++i) {
-            long next[10] = {};
-            for (int j = 0; j <= 9; ++j) {
-                for (int n : m[j]) next[n] = (next[n] + dp[j]) % mod;
-            }
-            swap(dp, next);
+    static const int MOD = 1e9 + 7;
+    vector<vector<int>> jumps = {
+        {4, 6}, {6, 8}, {7, 9}, {4, 8}, {3, 9, 0}, {}, {1, 7, 0}, {2, 6}, {1, 3}, {2, 4}
+    };
+    vector<vector<int>> memo;
+
+    int dp(int remainingMoves, int digit) {
+        if (remainingMoves == 0) return 1;
+        if (memo[remainingMoves][digit] != -1) return memo[remainingMoves][digit];
+        
+        int ways = 0;
+        for (int nextDigit : jumps[digit]) {
+            ways = (ways + dp(remainingMoves - 1, nextDigit)) % MOD;
         }
-        for (int i = 0; i <= 9; ++i) ans = (ans + dp[i]) % mod;
-        return ans;
+        return memo[remainingMoves][digit] = ways;
+    }
+    
+    int knightDialer(int n) {
+        memo = vector<vector<int>>(n + 1, vector<int>(10, -1));
+        int totalWays = 0;
+   for (int startDigit = 0; startDigit < 10; ++startDigit) {
+            totalWays = (totalWays + dp(n - 1, startDigit)) % MOD;
+        }
+        return totalWays;
     }
 };
+
 ```
