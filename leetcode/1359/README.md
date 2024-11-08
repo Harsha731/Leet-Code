@@ -64,3 +64,23 @@ public:
     }
 };
 ```
+## Solution 2.
+
+```cpp
+
+class Solution {
+public:
+    int mod = 1e9 + 7;
+
+    long long helper(int n) {
+        if (n == 1) return 1; // Base case: 1 valid sequence for n = 1
+        long long prev = helper(n - 1); 
+        long long cnt = 2 * n - 1;  // Number of possible positions for pickup and delivery
+        return prev * cnt * (cnt + 1) / 2 % mod;
+    }
+
+    int countOrders(int n) {
+        return helper(n);
+    }
+};
+```
