@@ -51,8 +51,7 @@
 **Related Topics**:  
 [Dynamic Programming](https://leetcode.com/tag/dynamic-programming)
 
-## Solution 1. DP
-
+## Solution 1. Bottom-Up
 ```cpp
 // OJ: https://leetcode.com/problems/knight-dialer/
 // Author: github.com/lzl124631x
@@ -87,6 +86,7 @@ public:
 };
 
 ```
+## Solution 2. Top- Down
 
 ```cpp
 class Solution {
