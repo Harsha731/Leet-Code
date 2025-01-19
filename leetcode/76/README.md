@@ -62,8 +62,7 @@ Since the largest window of s only has one 'a', return empty string.
 class Solution {
 public:
     string minWindow(string s, string t) {
-        int M = s.size(), N = t.size(), cnt[128] = {}, matched = 0, minLen = 
-INT_MAX, start = -1;
+        int M = s.size(), N = t.size(), cnt[128] = {}, matched = 0, minLen = INT_MAX, start = -1;
         for (char c : t) cnt[c]++;
         for (int i = 0, j = 0; j < M; ++j) {
             matched += cnt[s[j]]-- > 0;
