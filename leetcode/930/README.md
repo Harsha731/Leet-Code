@@ -87,7 +87,7 @@ public:
 
 ## Solution 3. Prefix State Map
 
-```
+```cpp
 class Solution {
 public:
     int numSubarraysWithSum(vector<int>& A, int goal) {
