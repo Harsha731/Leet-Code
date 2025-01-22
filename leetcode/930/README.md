@@ -92,41 +92,6 @@ public:
 };
 ```
 
-
-## Solution 3. Prefix State Map
-
-```cpp
-class Solution {
-public:
-    int numSubarraysWithSum(vector<int>& A, int goal) {
-        int n = A.size();
-        int i = 0, j = 0, sum1 = 0, sum2 = 0, count = 0;
-
-        for (int k = 0; k < n; ++k) {
-            sum1 += A[k];
-            sum2 += A[k];
-
-            // Adjust window `i` to have exactly `goal` sum
-            while (i <= k && sum1 > goal) {
-                sum1 -= A[i++];
-            }
-
-            // Adjust window `j` to have at most `goal - 1` sum
-            while (j <= k && sum2 > goal - 1) {
-                sum2 -= A[j++];
-            }
-
-            // If the sum1 window is exactly `goal`, then all subarrays starting from indices in range [j, i] to `k` have sum `goal`
-            if (sum1 == goal) {
-                count += j - i;
-            }
-        }
-
-        return count;
-    }
-};
-```
-
 Similar problem:
 * [992. Subarrays with K Different Integers (Hard)](https://leetcode.com/problems/subarrays-with-k-different-integers/)
 * [1248. Count Number of Nice Subarrays (Medium)](https://leetcode.com/problems/count-number-of-nice-subarrays/)
