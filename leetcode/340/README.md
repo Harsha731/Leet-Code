@@ -43,18 +43,25 @@ Shrinkable Sliding Window:
 // Author: github.com/lzl124631x
 // Time: O(N)
 // Space: O(1)
-class Solution {
-public:
-    int lengthOfLongestSubstringKDistinct(string s, int k) {
-        int cnt[128] = {}, distinct = 0, i = 0, j = 0, ans = 0, N = s.size();
-        while (j < N) {
-            distinct += cnt[s[j++]]++ == 0;
-            while (distinct > k) distinct -= --cnt[s[i++]] == 0;
-            ans = max(ans, j - i);
+
+int kDistinctChars(int k, string &s) {
+    int i = 0, j = 0, n = s.size(), cnt = 0, ans = 0;
+    unordered_map<int, int> ump;
+
+    for (j = 0; j < n; j++) {
+        ump[s[j]]++;
+        if (ump[s[j]] == 1) cnt++;
+
+        while (cnt > k) {
+            ump[s[i]]--;
+            if (ump[s[i]] == 0) cnt--;
+            i++;
         }
-        return ans;
+        ans = max(ans, j - i + 1);
     }
-};
+    return ans;
+}
+
 ```
 
 Non-shrinkable Sliding Window:
@@ -64,17 +71,24 @@ Non-shrinkable Sliding Window:
 // Author: github.com/lzl124631x
 // Time: O(N)
 // Space: O(1)
-class Solution {
-public:
-    int lengthOfLongestSubstringKDistinct(string s, int k) {
-        int cnt[128] = {}, distinct = 0, i = 0, j = 0, N = s.size();
-        while (j < N) {
-            distinct += cnt[s[j++]]++ == 0;
-            if (distinct > k) distinct -= --cnt[s[i++]] == 0;
+
+int kDistinctChars(int k, string &s) {
+    int i = 0, j = 0, n = s.size(), cnt = 0, ans = 0;
+    unordered_map<int, int> ump;
+
+    for (j = 0; j < n; j++) {
+        ump[s[j]]++;
+        if (ump[s[j]] == 1) cnt++;
+
+        if (cnt > k) {
+            ump[s[i]]--;
+            if (ump[s[i]] == 0) cnt--;
+            i++;
         }
-        return j - i;
+        ans = max(ans, j - i + 1);
     }
-};
+    return j-i;		// At the end, j becomes n instead of n-1, so we don't write j-i+1
+}
 ```
 
 ## Discuss
