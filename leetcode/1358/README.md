@@ -40,7 +40,7 @@
 
 For every time, we come across a valid sub string, we add n-j (n-1 - j + 1 => n-j)
 It is because for a fixed L, we have n-j substrings. It is L dependent
-As we decrease L by one each time
+As we increase L by one each time
 
 ```cpp
 class Solution {
