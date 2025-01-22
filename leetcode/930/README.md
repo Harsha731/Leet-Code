@@ -68,18 +68,26 @@ Check out "[C++ Maximum Sliding Window Cheatsheet Template!](https://leetcode.co
 // Time: O(N)
 // Space: O(1)
 class Solution {
-    int atMost(vector<int> A, int goal) {
-        int N = A.size(), i = 0, j = 0, cnt = 0, ans = 0;
-        while (j < N) {
-            cnt += A[j++];
-            while (i < j && cnt > goal) cnt -= A[i++];
-            ans += j - i;
-        }
-        return ans;
-    }
 public:
-    int numSubarraysWithSum(vector<int>& A, int goal) {
-        return atMost(A, goal) - atMost(A, goal - 1);
+    int solve(vector<int>& nums, int goal){
+        int n = nums.size(); // size of the array.
+        
+        int left = 0, right = 0;
+        int sum = 0, count = 0;
+        while (right < nums.size()) {
+            sum += nums[right];
+            while (sum > goal && left<=right) {
+                sum -= nums[left];
+                left++;
+            }
+            count += right - left + 1;
+            right++;
+        }
+        return count;
+    }
+
+    int numSubarraysWithSum(vector<int>& nums, int goal) {
+       return solve(nums, goal) - solve(nums, goal-1);
     }
 };
 ```
