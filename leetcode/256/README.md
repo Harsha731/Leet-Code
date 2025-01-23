@@ -46,3 +46,41 @@ public:
     }
 };
 ```
+
+
+## Solution 2. Memoization
+
+```cpp
+class Solution {
+public:
+    int solve(int i, int j, vector<vector<int>>& costs, vector<vector<int>>& dp) {
+        int n = costs.size();
+        if (i >= n) return 0; // Base case: no more houses to paint
+        if (dp[i][j] != -1) return dp[i][j]; // Return memoized result if available
+
+        // Calculate the minimum cost for the next house with a different color
+        int nextCost1 = solve(i + 1, (j + 1) % 3, costs, dp); // Choose next color 1
+        int nextCost2 = solve(i + 1, (j + 2) % 3, costs, dp); // Choose next color 2
+
+        // Store the result in the memoization table
+        dp[i][j] = costs[i][j] + min(nextCost1, nextCost2);
+        return dp[i][j];
+    }
+
+    int minCost(vector<vector<int>>& costs) {
+        int n = costs.size();
+        if (n == 0) return 0;
+
+        // Initialize memoization table with -1
+        vector<vector<int>> dp(n, vector<int>(3, -1));
+
+        // Calculate the minimum cost for the first house with each color
+        int cost1 = solve(0, 0, costs, dp); // Start with color 0
+        int cost2 = solve(0, 1, costs, dp); // Start with color 1
+        int cost3 = solve(0, 2, costs, dp); // Start with color 2
+
+        // Return the minimum cost among the three choices
+        return min({cost1, cost2, cost3});
+    }
+};
+```
