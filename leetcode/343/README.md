@@ -43,6 +43,7 @@ public:
         for (int i = 2; i <= n; ++i) 
             for (int j = 1, b = ceil(sqrt(i)); j <= b; ++j)
                 memo[i] = max(memo[i], max(j, memo[j]) * max(i - j, memo[i - j]));
+                // i-j can be answer or it can be coming after breaking the number i-j
         return memo[n];
     }
 };
