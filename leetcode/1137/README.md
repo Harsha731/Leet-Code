@@ -63,3 +63,57 @@ public:
     }
 };
 ```
+
+## Solution 2. Tabulation
+
+```cpp
+class Solution {
+public:
+    int tribonacci(int n) {
+        if (n == 0) return 0;
+        if (n <= 2) return 1;
+
+        // Create a table to store the Tribonacci numbers
+        int dp[n + 1];
+
+        // Base cases
+        dp[0] = 0;
+        dp[1] = 1;
+        dp[2] = 1;
+
+        // Fill the table iteratively
+        for (int i = 3; i <= n; ++i) {
+            dp[i] = dp[i - 1] + dp[i - 2] + dp[i - 3];
+        }
+
+        // Return the nth Tribonacci number
+        return dp[n];
+    }
+};
+```
+
+## Solution 3. Space Optimization
+
+```cpp
+class Solution {
+public:
+    int tribonacci(int n) {
+        if (n == 0) return 0;
+        if (n <= 2) return 1;
+
+        // Initialize the first three Tribonacci numbers
+        int a = 0, b = 1, c = 1;
+
+        // Iterate to compute the nth Tribonacci number
+        for (int i = 3; i <= n; ++i) {
+            int next = a + b + c; // Compute the next Tribonacci number
+            a = b; // Update a to b
+            b = c; // Update b to c
+            c = next; // Update c to the newly computed value
+        }
+
+        // Return the nth Tribonacci number
+        return c;
+    }
+};
+```
