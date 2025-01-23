@@ -43,47 +43,102 @@
 ## Solution 1. Brute Force
 
 ```cpp
-// OJ: https://leetcode.com/problems/palindromic-substrings/
-// Author: github.com/lzl124631x
-// Time: O(N^2)
-// Space: O(1)
+
+// TC : O(N^3) and SC : O(1)
+// Because we have two for loops to iterate all possible substring and one loop to check if it is palindrome or not.
+
+class Solution {
+
+    public boolean isPalindrome(String s, int left, int right) {
+        while(left < right) {
+            if(s.charAt(left++) != s.charAt(right--)) return false;
+        } 
+        return true;
+    }
+    
+    public int countSubstrings(String s) {
+        int ans = 0;
+        int n = s.length();
+        for(int i=0;i<n;i++) {
+            for(int j=i;j<n;j++) {
+                if(isPalindrome(s, i, j)) ans++;
+            }
+        }
+        return ans;
+    }
+}
+```
+
+
+## Solution 2. Better
+
+```cpp
+
+// TC : O(N^2) and SC : O(1)
 class Solution {
 public:
     int countSubstrings(string s) {
-        int N = s.size();
-        int ans = N; // Initialize ans with N as all single characters are palindromes
-        
-        // Check for odd-length palindromes centered at each character
-        for (int center = 0; center < N; ++center) {
-            for (int radius = 1;
-                 center - radius >= 0 &&
-                 center + radius < N &&
-                 s[center - radius] == s[center + radius];
-                 ++radius) 
-            {
-                ++ans;
+        int n = s.length(), ans = 0;
+        for (int i = 0; i < n; ++i) {
+            int even = palindromeCount(s, i, i + 1);
+            int odd = palindromeCount(s, i, i);
+            ans += even + odd;
+        }
+        return ans;
+    }
+
+    int palindromeCount(const string& s, int left, int right) {
+        int count = 0;
+        while (left >= 0 && right < s.length() && s[left] == s[right]) {
+            --left;
+            ++right;
+            ++count;
+        }
+        return count;
+    }
+};
+```
+
+
+## Solution 3. DP
+
+```cpp
+
+// TC : O(N^2) and SC : O(N^2)
+class Solution {
+public:
+    int countSubstrings(string s) {
+        int n = s.length();
+        vector<vector<bool>> palindrome(n, vector<bool>(n, false));
+        int ans = 0;
+
+        for (int i = 0; i < n; ++i) {
+            palindrome[i][i] = true;
+            ans++;
+        }
+
+        for (int i = 0; i < n - 1; ++i) {
+            if (s[i] == s[i + 1]) {
+                palindrome[i][i + 1] = true;
+                ans++;
             }
         }
-        
-        // Check for even-length palindromes centered between each pair of adjacent characters
-        for (int center = 1; center < N; ++center) {
-            for (int radius = 0;
-                 center - radius - 1 >= 0 &&
-                 center + radius < N &&
-                 s[center - radius - 1] == s[center + radius];
-                 ++radius) 
-            {
-                ++ans;
+
+        for (int len = 3; len <= n; ++len) {
+            for (int i = 0; i < n - len + 1; ++i) {
+                if (s[i] == s[i + len - 1] && palindrome[i + 1][i + len - 2]) {
+                    palindrome[i][i + len - 1] = true;
+                    ans++;
+                }
             }
         }
-        
+
         return ans;
     }
 };
-
 ```
 
-## Solution 2. Manacher
+## Solution 4. Manacher
 
 ```cpp
 // OJ: https://leetcode.com/problems/palindromic-substrings/
