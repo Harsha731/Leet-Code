@@ -47,90 +47,22 @@ You earn a total of 9 points.</pre>
 **Similar Questions**:
 * [House Robber (Medium)](https://leetcode.com/problems/house-robber/)
 
-## Solution 1. DP
-
-Firstly, to avoid duplicate, store the data in a map from the number to its count.
-
-Let `dp[i]` be the max point you can get at point `i`.
-
-If `num != prevNum + 1`, we can freely pick `num`, then `dp[i] = dp[i-1] + num * count`.
-
-Otherwise:
-* If we skip `num`, `dp[i] = dp[i-1]`.
-* If we pick `num`, `dp[i] = dp[i-2] + num * count`.
-
-So in sum:
-
-```
-dp[i] = num == prevNum ? max(dp[i-1], dp[i-2] + num * count) : (dp[i-1] + num * count)
-```
+## Solution 1. Tabulation
 
 ```cpp
-// OJ: https://leetcode.com/problems/delete-and-earn/
-// Author: github.com/lzl124631x
-// Time: O(NlogN)
-// Space: O(N)
-class Solution {
-    vector<int> points;
-    vector<int> memo;
-    int minVal;
 
-    // Top-down helper function
-    int dp(int i) {
-        if (i < minVal) return 0; // Base case: indices less than minVal return 0
-        if (memo[i] != -1) return memo[i]; // Return memoized result if available
+/* Same as House robber problem
+Using max_element takes O(N)
+iteration takes O(M), M is maxVal
+TC : O(N+M) and SC : O(M)
+*/
 
-        // Recurrence relation: choose the max between skipping i or taking i
-        return memo[i] = max(dp(i - 1), dp(i - 2) + points[i]);
-    }
-
-public:
-    int deleteAndEarn(vector<int>& nums) {
-        if (nums.empty()) return 0;
-
-        // Find the minimum and maximum values in nums
-        minVal = *min_element(nums.begin(), nums.end());
-        int maxVal = *max_element(nums.begin(), nums.end());
-
-        // Create and fill the points array
-        points.resize(maxVal + 1, 0);
-        for (int num : nums) {
-            points[num] += num;
-        }
-
-        // Initialize the memoization array
-        memo.assign(maxVal + 1, -1);
-
-        return dp(maxVal); // Start recursion from maxVal
-    }
-};
-
-```
-
-## Solution 2. DP
-
-Let `use[i]` be the maximum points we can get if we use numbers in range `[1,i]` and we must use the number `i`.
-
-Let `skip[i]` be the maximum points we can get if we use numbers in range `[1,i]` and we must skip the number `i`.
-
-```
-use[0] = skip[0] = 0
-use[i] = skip[i-1] + cnt[i] * i
-skip[i] = max(use[i-1], skip[i-1])
-```
-
-```cpp
-// OJ: https://leetcode.com/problems/delete-and-earn/
-// Author: github.com/lzl124631x
-// Time: O(N + R) where `R` is the range of numbers in `A`
-// Space: O(R)
 class Solution {
 public:
     int deleteAndEarn(vector<int>& nums) {
         if (nums.empty()) return 0;
 
-        // Find the minimum and maximum values in nums
-        int minVal = *min_element(nums.begin(), nums.end());
+        // Find the maximum value in nums to determine the size of dp array
         int maxVal = *max_element(nums.begin(), nums.end());
 
         // Create and fill the points array
@@ -141,14 +73,45 @@ public:
 
         // Use dynamic programming to solve the problem
         vector<int> dp(maxVal + 1, 0);
-        dp[minVal] = points[minVal]; // Initialize dp at minVal
+        dp[0] = 0; // No points for number 0
+        dp[1] = points[1]; // Points we get for number 1
 
-        for (int i = minVal + 1; i <= maxVal; ++i) {
+        for (int i = 2; i <= maxVal; ++i) {
             dp[i] = max(dp[i - 1], dp[i - 2] + points[i]);
         }
 
         return dp[maxVal];
     }
 };
+```
 
+## Solution 2. Memoization
+```cpp
+class Solution {
+private:
+    int solve(int num, std::vector<int>& points, std::unordered_map<int, int>& memo) {
+        if (num <= 0) return 0;
+        if (memo.find(num) != memo.end()) return memo[num];
+
+        int take = points[num] + solve(num - 2, points, memo);
+        int skip = solve(num - 1, points, memo);
+
+        memo[num] = std::max(take, skip);
+        return memo[num];
+    }
+
+public:
+    int deleteAndEarn(std::vector<int>& nums) {
+        if (nums.empty()) return 0;
+
+        int maxVal = *std::max_element(nums.begin(), nums.end());
+        std::vector<int> points(maxVal + 1, 0);
+        for (int num : nums) {
+            points[num] += num;
+        }
+
+        std::unordered_map<int, int> memo;
+        return solve(maxVal, points, memo);
+    }
+};
 ```
