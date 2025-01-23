@@ -50,7 +50,54 @@
 * [Longest Palindromic Subsequence (Medium)](https://leetcode.com/problems/longest-palindromic-subsequence/)
 * [Palindromic Substrings (Medium)](https://leetcode.com/problems/palindromic-substrings/)
 
-## Solution 1. DP
+## Solution 1. Brute Force
+
+```cpp
+
+/* TC : O(n^3). Assume that n is the length of the input string, there are a total of C(n, 2) = n(n-1)/2 substrings (excluding the trivial solution where a character itself is a palindrome). Since verifying each substring takes O(n) time, the run time complexity is O(n^3).
+Space complexity : O(1).
+*/
+class Solution {
+public:
+    std::string longestPalindrome(std::string s) {
+        if (s.length() <= 1) {
+            return s;
+        }
+        
+        int max_len = 1;
+        std::string max_str = s.substr(0, 1);
+        
+        for (int i = 0; i < s.length(); ++i) {
+            for (int j = i + max_len; j <= s.length(); ++j) {
+                if (j - i > max_len && isPalindrome(s.substr(i, j - i))) {
+                    max_len = j - i;
+                    max_str = s.substr(i, j - i);
+                }
+            }
+        }
+
+        return max_str;
+    }
+
+private:
+    bool isPalindrome(const std::string& str) {
+        int left = 0;
+        int right = str.length() - 1;
+        
+        while (left < right) {
+            if (str[left] != str[right]) {
+                return false;
+            }
+            ++left;
+            --right;
+        }
+        
+        return true;
+    }
+};
+```
+
+## Solution 2. DP
 
 Let `dp[i][j]` be `true` if `s[i..j]` is a palindrome. The answer is the substring of the longest length that has `dp[i][j] = true`.
 
@@ -117,7 +164,7 @@ public:
 ```
 
 
-## Solution 2. Expanding from Middle
+## Solution 3. Expanding from Middle
 
 ```cpp
 // OJ: https://leetcode.com/problems/longest-palindromic-substring/
