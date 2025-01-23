@@ -57,7 +57,7 @@ Total points earned: 2 + 5 = 7. There is no other way to earn 7 or more points.
 * [House Robber (Medium)](https://leetcode.com/problems/house-robber/)
 * [Frog Jump (Hard)](https://leetcode.com/problems/frog-jump/)
 
-## Solution 1. DP
+## Solution 1. DP Tabulation
 
 ```cpp
 // OJ: https://leetcode.com/problems/solving-questions-with-brainpower/
@@ -67,20 +67,33 @@ Total points earned: 2 + 5 = 7. There is no other way to earn 7 or more points.
 class Solution {
 public:
     long long mostPoints(vector<vector<int>>& A) {
-        int N = A.size();
-        vector<long> dp(N + 2);
-        for (int i = 0; i < N; ++i) {
-            dp[i + 1] = max(dp[i + 1], dp[i]);
-            int next = min(i + A[i][1] + 2, N + 1);
-            dp[next] = max(dp[next], dp[i + 1] + A[i][0]);
+        int n = A.size();
+        vector<long long> dp(n + 1, 0); // DP array: dp[i] = max points starting from question i
+
+        // Traverse from the last question to the first
+        for (int i = n - 1; i >= 0; --i) {
+            int points = A[i][0]; // Points for current question
+            int brainpower = A[i][1]; // Brainpower for current question
+
+            // Calculate the next question after skipping brainpower questions
+            int nextQuestion = i + brainpower + 1;
+
+            // If next question is out of bounds, set it to n
+            if (nextQuestion >= n) nextQuestion = n;
+
+            // Choose max between solving or skipping the current question
+            dp[i] = max(points + dp[nextQuestion], dp[i + 1]);
         }
-        return dp[N + 1];
+
+        // Result is the max points starting from the first question
+        return dp[0];
     }
 };
 ```
 
 Or
 
+## Memoization
 ```cpp
 // OJ: https://leetcode.com/problems/solving-questions-with-brainpower/
 // Author: github.com/lzl124631x
