@@ -72,7 +72,7 @@ public:
 };
 ```
 
-## Solution 3.
+## Solution 3.  No need
 
 ```cpp
 // OJ: https://leetcode.com/problems/perfect-squares/
