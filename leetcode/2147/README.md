@@ -74,26 +74,34 @@ If the total number of seats is not a positive even number, return 0
 Scan `corridor` section by section, count the number of plants between sections, and multiply the answer by `plant + 1`.
 ``` cpp
 
-TC : O(N)
-SC : O(N)
+//T.C : O(n)
+//S.C : O(n)
 class Solution {
 public:
+    int mod = 1e9 + 7;
+    
     int numberOfWays(string corridor) {
-        int M = 1e9 + 7;
-        vector<int> seat_number;
-        // Find Seat Indices
-        for(int i = 0; i < corridor.size(); i++) {
-            if(corridor[i] == 'S')
-                seat_number.push_back(i);
+        vector<int> pos_seats;
+        
+        for (int i = 0; i < corridor.size(); i++) {
+            if (corridor[i] == 'S') {
+                pos_seats.push_back(i);
+            }
         }
-        // check Seats are Odd or Zero
-        if(seat_number.size() % 2 != 0 || seat_number.size() == 0)
+        
+        if (pos_seats.size() % 2 || pos_seats.size() == 0)
             return 0;
-        // Computing the result
-        long long int result = 1;
-        for(int i = 2; i < seat_number.size(); i += 2) {
-            result =( result * (seat_number[i] - seat_number[i-1]) % M);
+        
+        long long result = 1;
+        int prev = pos_seats[1]; //End index of the starting subarray having 2 seats
+        
+        for (int i = 2; i < pos_seats.size(); i += 2) {
+            int length = pos_seats[i] - prev;
+            result = (result * length) % mod;
+            
+            prev = pos_seats[i + 1];
         }
+        
         return result;
     }
 };
