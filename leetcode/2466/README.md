@@ -72,36 +72,15 @@ dp[len] = dp[len-zero] + dp[len-one]
 class Solution {
 public:
     int countGoodStrings(int low, int high, int zero, int one) {
-        long dp[100001] = {}, ans = 0, mod = 1e9 + 7;
-        dp[0] = 1;
-        for (int i = 1; i <= high; ++i) {
-            if (i - zero >= 0) dp[i] = dp[i - zero];
-            if (i - one >= 0) dp[i] = (dp[i] + dp[i - one]) % mod;
-            if (i >= low) ans = (ans + dp[i]) % mod;
-        }
-        return ans;
-    }
-};
-```
-
-## Solution 2.
-```cpp
-class Solution {
-public:
-    int countGoodStrings(int low, int high, int zero, int one) {
         const int MOD = 1e9 + 7;
+        vector<long long> dp(high + 1, 0);
+        dp[0] = 1;
         long long ans = 0;
-        long long dpCurr = 0;
-        long long dpPrevZero = 1; // dp[i - zero]
-        long long dpPrevOne = 1; // dp[i - one]
 
         for (int i = 1; i <= high; ++i) {
-            dpCurr = 0;
-            if (i >= zero) dpCurr = (dpCurr + dpPrevZero) % MOD;
-            if (i >= one) dpCurr = (dpCurr + dpPrevOne) % MOD;
-            if (i >= low) ans = (ans + dpCurr) % MOD;
-            dpPrevZero = dpCurr; // Update for next zero addition
-            dpPrevOne = dpCurr; // Update for next one addition
+            if (i >= zero) dp[i] = (dp[i] + dp[i - zero]) % MOD;
+            if (i >= one) dp[i] = (dp[i] + dp[i - one]) % MOD;
+            if (i >= low) ans = (ans + dp[i]) % MOD;
         }
 
         return ans;
