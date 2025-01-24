@@ -81,7 +81,7 @@ public:
 };
 ```
 
-## Solution 1.
+## Solution 2. Tabulation
 
 Let `dp[len]` be the number of ways to form good strings. The anwer is `SUM( dp[len] | low <= len <= high )`
 
@@ -112,4 +112,6 @@ public:
         return ans;
     }
 };
+
+// No Space Optimization code
 ```
