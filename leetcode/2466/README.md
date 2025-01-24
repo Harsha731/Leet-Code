@@ -55,6 +55,32 @@ All binary strings from &quot;000&quot; to &quot;111&quot; are good strings in t
 * Calculate the number of good strings with length less or equal to some constant x.
 * Apply dynamic programming using the group size of consecutive zeros and ones.
 
+## Solution 1. Memoization
+```cpp
+class Solution {
+    const int MOD = 1e9 + 7;
+
+    int dp(int len, int zero, int one, vector<int>& memo) {
+        if (len == 0) return 1;
+        if (memo[len] != -1) return memo[len];
+        int res = 0;
+        if (len >= zero) res = (res + dp(len - zero, zero, one, memo)) % MOD;
+        if (len >= one) res = (res + dp(len - one, zero, one, memo)) % MOD;
+        return memo[len] = res;
+    }
+
+public:
+    int countGoodStrings(int low, int high, int zero, int one) {
+        vector<int> memo(high + 1, -1);
+        long long ans = 0;
+        for (int i = low; i <= high; ++i) {
+            ans = (ans + dp(i, zero, one, memo)) % MOD;
+        }
+        return ans;
+    }
+};
+```
+
 ## Solution 1.
 
 Let `dp[len]` be the number of ways to form good strings. The anwer is `SUM( dp[len] | low <= len <= high )`
