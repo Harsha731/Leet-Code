@@ -80,4 +80,43 @@ public:
         return ans;
     }
 };
+
+```
+## Solution 2. Memoization
+
+```cpp
+class Solution {
+    const int MOD = 1e9 + 7;
+    vector<pair<int, int>> A;
+    vector<int> memo;
+
+    int solve(int i) {
+        if (memo[i] != -1) return memo[i];
+        int maxScore = A[i].second;
+        for (int j = 0; j < i; ++j) {
+            if (A[j].second <= A[i].second) {
+                maxScore = max(maxScore, solve(j) + A[i].second);
+            }
+        }
+        return memo[i] = maxScore;
+    }
+
+public:
+    int bestTeamScore(vector<int>& scores, vector<int>& ages) {
+        int N = scores.size();
+        A.resize(N);
+        for (int i = 0; i < N; ++i) {
+            A[i] = {ages[i], scores[i]};
+        }
+        sort(A.begin(), A.end());
+
+        memo.assign(N, -1);
+
+        int ans = 0;
+        for (int i = 0; i < N; ++i) {
+            ans = max(ans, solve(i));
+        }
+        return ans;
+    }
+};
 ```
