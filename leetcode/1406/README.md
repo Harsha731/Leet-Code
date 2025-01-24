@@ -85,15 +85,36 @@ So we can compute `dp[i]` from the end of the array. `dp[i] = 0` if `i >= N`.
 // Space: O(N)
 class Solution {
 public:
-    string stoneGameIII(vector<int>& A) {
-        int N = A.size();
-        vector<int> dp(N + 1, INT_MIN);
-        dp[N] = 0;
-        for (int i = N - 1; i >= 0; --i) {
-            int s = 0;
-            for (int j = 0; j < 3 && i + j < N; ++j) dp[i] = max(dp[i], -dp[i + j + 1] + (s += A[i + j]));
+    string stoneGameIII(vector<int>& stones) {
+        int n = stones.size();
+        vector<int> dp(n + 1, INT_MIN); // dp[i] stores the maximum score difference the player can achieve starting from index i
+        dp[n] = 0; // Base case: no stones left, score difference is 0
+
+        // Process the array from right to left
+        for (int i = n - 1; i >= 0; --i) {
+            int currentSum = 0;
+
+            // The player can pick 1 stone
+            currentSum += stones[i];
+            dp[i] = max(dp[i], currentSum - dp[i + 1]);
+
+            // The player can pick 2 stones
+            if (i + 1 < n) {
+                currentSum += stones[i + 1];
+                dp[i] = max(dp[i], currentSum - dp[i + 2]);
+            }
+
+            // The player can pick 3 stones
+            if (i + 2 < n) {
+                currentSum += stones[i + 2];
+                dp[i] = max(dp[i], currentSum - dp[i + 3]);
+            }
         }
-        return dp[0] > 0 ? "Alice" : (dp[0] < 0 ? "Bob" : "Tie");
+
+        // Determine the result based on dp[0]
+        if (dp[0] > 0) return "Alice";
+        else if (dp[0] < 0) return "Bob";
+        else return "Tie";
     }
 };
 ```
@@ -109,14 +130,84 @@ Since `dp[i]` is only dependent to the next 3 `dp` values. We can reduce the `dp
 // Space: O(1)
 class Solution {
 public:
-    string stoneGameIII(vector<int>& A) {
-        int N = A.size(), dp[4] = {};
-        for (int i = N - 1; i >= 0; --i) {
-            int s = 0;
-            dp[i % 4] = INT_MIN;
-            for (int j = 0; j < 3 && i + j < N; ++j) dp[i % 4] = max(dp[i % 4], -dp[(i + j + 1) % 4] + (s += A[i + j]));
+    string stoneGameIII(vector<int>& stones) {
+        int n = stones.size();
+        int dp1 = 0, dp2 = 0, dp3 = 0; // Variables to store dp[i + 1], dp[i + 2], dp[i + 3]
+        int currentDP = 0; // Variable to store dp[i]
+
+        // Process the array from right to left
+        for (int i = n - 1; i >= 0; --i) {
+            int currentSum = 0;
+            currentSum += stones[i]; // Pick 1 stone
+            currentDP = currentSum - dp1; // Update dp[i]
+
+            if (i + 1 < n) { // Pick 2 stones
+                currentSum += stones[i + 1];
+                currentDP = max(currentDP, currentSum - dp2);
+            }
+
+            if (i + 2 < n) { // Pick 3 stones
+                currentSum += stones[i + 2];
+                currentDP = max(currentDP, currentSum - dp3);
+            }
+
+            // Shift the variables for the next iteration
+            dp3 = dp2;
+            dp2 = dp1;
+            dp1 = currentDP;
         }
-        return dp[0] > 0 ? "Alice" : (dp[0] < 0 ? "Bob" : "Tie");
+
+        // Determine the result based on dp[0] (stored in dp1)
+        if (dp1 > 0) return "Alice";
+        else if (dp1 < 0) return "Bob";
+        else return "Tie";
+    }
+};
+```
+
+## Solution 3. Memoization
+```cpp
+class Solution {
+    vector<int> memo;
+
+    int solve(int i, vector<int>& stones) {
+        int n = stones.size();
+        if (i >= n) return 0; // Base case: no stones left
+        if (memo[i] != INT_MIN) return memo[i]; // Return cached result
+
+        int currentSum = 0;
+        int maxDiff = INT_MIN;
+
+        // Pick 1 stone
+        currentSum += stones[i];
+        maxDiff = max(maxDiff, currentSum - solve(i + 1, stones));
+
+        // Pick 2 stones (if possible)
+        if (i + 1 < n) {
+            currentSum += stones[i + 1];
+            maxDiff = max(maxDiff, currentSum - solve(i + 2, stones));
+        }
+
+        // Pick 3 stones (if possible)
+        if (i + 2 < n) {
+            currentSum += stones[i + 2];
+            maxDiff = max(maxDiff, currentSum - solve(i + 3, stones));
+        }
+
+        return memo[i] = maxDiff; // Cache and return the result
+    }
+
+public:
+    string stoneGameIII(vector<int>& stones) {
+        int n = stones.size();
+        memo.assign(n, INT_MIN); // Initialize memoization table with INT_MIN
+
+        int result = solve(0, stones); // Start solving from the first stone
+
+        // Determine the result based on the computed score difference
+        if (result > 0) return "Alice";
+        else if (result < 0) return "Bob";
+        else return "Tie";
     }
 };
 ```
