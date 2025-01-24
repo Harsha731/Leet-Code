@@ -108,3 +108,35 @@ public:
     }
 };
 ```
+
+## Solution 3. Memoization
+```cpp
+class Solution {
+public:
+    int findMaxForm(vector<string>& strs, int m, int n) {
+        int S = strs.size();
+        vector<vector<vector<int>>> memo(S + 1, vector<vector<int>>(m + 1, vector<int>(n + 1, -1)));
+        return solve(strs, S, m, n, memo);
+    }
+
+private:
+    int solve(vector<string>& strs, int i, int j, int k, vector<vector<vector<int>>>& memo) {
+        if (i == 0 || (j == 0 && k == 0)) return 0;
+        if (memo[i][j][k] != -1) return memo[i][j][k];
+
+        int zero = count(strs[i - 1].begin(), strs[i - 1].end(), '0');
+        int one = strs[i - 1].size() - zero;
+
+        if (j < zero || k < one) {
+            memo[i][j][k] = solve(strs, i - 1, j, k, memo);
+        } else {
+            memo[i][j][k] = max(
+                solve(strs, i - 1, j, k, memo),
+                1 + solve(strs, i - 1, j - zero, k - one, memo)
+            );
+        }
+
+        return memo[i][j][k];
+    }
+};
+```
