@@ -45,34 +45,49 @@
 ## Solution 1. Brute Force
 
 ```cpp
-// OJ: https://leetcode.com/problems/maximal-square/
-// Author: github.com/lzl124631x
-// Time: O((MN)^2)
-// Space: O(1)
+/*
+Solution - I (Optimized Brute-Force)
+
+Instead of checking each possible side length for a square starting at a given cell, we can optimze the process by starting from row of 
+that cell and expanding the side length for that row till it is possible. We will continue this for below rows as well, till consecutive 
+ones found along rows (denoted by allOnesRowLen) > current row number.
+
+The process is similar to the one shown in below diagram which I had used in my post for 85. Maximal Rectangle with only change that
+we stop further iteration as soon as allOnesRowLen exceeds current row number (because we need to form square in this case & max 
+possible side length is already know by now).
+*/
+
+// The (row, col) will be the first cell of the maximal square we are checking
+
 class Solution {
 public:
-    int maximalSquare(vector<vector<char>>& A) {
-        if (A.empty() || A[0].empty()) return 0;
-        int M = A.size(), N = A[0].size(), ans = 0;
-        for (int i = 0; i < M; ++i) {
-            for (int j = 0; j < N; ++j) {
-                int k = 0;
-                bool stop = false;
-                for (; i + k < M && j + k < N; ++k) {
-                    for (int t = 0; t < k + 1 && !stop; ++t) {
-                        if (A[i + t][j + k] == '0') stop = true;
-                    }
-                    for (int t = 0; t < k + 1 && !stop; ++t) {
-                        if (A[i + k][j + t] == '0') stop = true;
-                    }
-                    if (stop) break;
-                }
-                ans = max(ans, k);
+    int getMaxSquareLen(vector<vector<char>>& matrix, int row, int col) {
+        int maxLen = min(matrix.size() - row, matrix[0].size() - col);
+        int squareLen = 0;
+        for (int i = 0; i < maxLen; i++) {
+            int j;
+            for (j = 0; j < maxLen && matrix[row + i][col + j] != '0'; j++);
+            maxLen = j;
+            squareLen = min(maxLen, i + 1);
+        }
+        return squareLen;
+    }
+
+    int maximalSquare(vector<vector<char>>& matrix) {
+        int rows = matrix.size();
+        int cols = matrix[0].size();
+        int maxSquare = 0;
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < cols; col++) {
+                maxSquare = max(maxSquare, getMaxSquareLen(matrix, row, col));
             }
         }
-        return ans * ans;
+        return maxSquare * maxSquare;
     }
 };
+
+// TC : O(MN*min(M,N)^2)
+// SC : O(1)
 ```
 
 ## Solution 2. Use the 1D subproblem
@@ -135,109 +150,71 @@ dp[i + 1][j + 1] = min(dp[i][j], dp[i][j + 1], dp[i + 1][j]) + 1
 ```
 
 ```cpp
-// OJ: https://leetcode.com/problems/maximal-square/
-// Author: github.com/lzl124631x
-// Time: O(MN)
-// Space: O(MN)
+
 class Solution {
 public:
-    int maximalSquare(vector<vector<char>>& A) {
-        int M = A.size(), N = A[0].size(), ans = 0;
-        vector<vector<int>> dp(M + 1, vector<int>(N + 1));
-        for (int i = 0; i < M; ++i) {
-            for (int j = 0; j < N; ++j) {
-                if (A[i][j] == '0') continue;
-                dp[i + 1][j + 1] = 1 + min({ dp[i][j], dp[i + 1][j], dp[i][j + 1] });
-                ans = max(ans, dp[i + 1][j + 1]);
+    int maximalSquare(vector<vector<char>>& matrix) {
+        int rows = matrix.size();
+        int cols = matrix[0].size();
+        int maxSquare = 0;
+        vector<vector<int>> dp(rows + 1, vector<int>(cols + 1));
+
+        for (int i = rows - 1; i >= 0; i--) {
+            for (int j = cols - 1; j >= 0; j--) {
+                if (matrix[i][j] == '1') {
+                    dp[i][j] = 1 + min({dp[i + 1][j], dp[i][j + 1], dp[i + 1][j + 1]});
+                    maxSquare = max(maxSquare, dp[i][j]);
+                } else {
+                    dp[i][j] = 0;
+                }
             }
         }
-        return ans * ans;
+
+        return maxSquare * maxSquare;
     }
 };
+
+// TC : O(MN)
+// SC : O(MN)
 ```
 
 ## Solution 4. Bottom-up DP with Space Optimization
 
-```
-   dp[i][j]    dp[i][j + 1]
-
-            \   |
-
-dp[i+1][j] --  dp[i + 1][j + 1]
-```
-
 Given the dependency above, we can use a `2 * N` array to store the DP values.
 
 ```cpp
-// OJ: https://leetcode.com/problems/maximal-square/
-// Author: github.com/lzl124631x
-// Time: O(MN)
-// Space: O(N)
+
 class Solution {
 public:
-    int maximalSquare(vector<vector<char>>& A) {
-        int M = A.size(), N = A[0].size(), ans = 0;
-        vector<vector<int>> dp(2, vector<int>(N + 1));
-        for (int i = 0; i < M; ++i) {
-            for (int j = 0; j < N; ++j) {
-                dp[(i + 1) % 2][j + 1] = A[i][j] == '0' ? 0 : min({ dp[i % 2][j], dp[i % 2][j + 1], dp[(i + 1) % 2][j] }) + 1;
-                ans = max(ans, dp[(i + 1) % 2][j + 1]);
+    int maximalSquare(vector<vector<char>>& matrix) {
+        int rows = matrix.size();
+        int cols = matrix[0].size();
+        int maxSquare = 0;
+
+        // Use two 1D arrays: prevDp for the previous row and currDp for the current row
+        vector<int> prevDp(cols + 1);
+        vector<int> currDp(cols + 1);
+
+        for (int i = rows - 1; i >= 0; i--) {
+            for (int j = cols - 1; j >= 0; j--) {
+                if (matrix[i][j] == '1') {
+                    // Compute the value for the current cell
+                    currDp[j] = 1 + min({currDp[j + 1], prevDp[j], prevDp[j + 1]});
+                    // Update the maximum square length found so far
+                    maxSquare = max(maxSquare, currDp[j]);
+                } else {
+                    // Reset the value for the current cell if it's '0'
+                    currDp[j] = 0;
+                }
             }
+            // Swap prevDp and currDp for the next iteration
+            swap(prevDp, currDp);
         }
-        return ans * ans;
+
+        return maxSquare * maxSquare;
     }
 };
-```
 
-Or via swapping arrays.
-
-```cpp
-// OJ: https://leetcode.com/problems/maximal-square/
-// Author: github.com/lzl124631x
-// Time: O(MN)
-// Space: O(N)
-class Solution {
-public:
-    int maximalSquare(vector<vector<char>>& A) {
-        int M = A.size(), N = A[0].size(), ans = 0;
-        vector<int> dp(N + 1), next;
-        for (int i = 0; i < M; ++i) {
-            next.assign(N + 1, 0);
-            for (int j = 0; j < N; ++j) {
-                if (A[i][j] == '0') continue;
-                next[j + 1] = 1 + min({ dp[j], dp[j + 1], next[j] });
-                ans = max(ans, next[j + 1]);
-            }
-            swap(next, dp);
-        }
-        return ans * ans;
-    }
-};
-```
-
-Or: Use a `prev` variable to store the `dp[i][j]`, then we can further reduce the `dp` array to 1D array.
-
-```cpp
-// OJ: https://leetcode.com/problems/maximal-square/
-// Author: github.com/lzl124631x
-// Time: O(MN)
-// Space: O(N)
-class Solution {
-public:
-    int maximalSquare(vector<vector<char>>& A) {
-        int M = A.size(), N = A[0].size(), ans = 0;
-        vector<int> dp(N + 1, 0);
-        for (int i = 0; i < M; ++i) {
-            int prev = 0;
-            for (int j = 0; j < N; ++j) {
-                int cur = dp[j + 1];
-                if (A[i][j] == '1') dp[j + 1] = 1 + min({ prev, dp[j], dp[j + 1] });
-                else dp[j + 1] = 0;
-                prev = cur;
-                ans = max(ans, dp[j + 1]);
-            }
-        }
-        return ans * ans;
-    }
-};
+// Time Complexity : O(MN)
+// Space Complexity : O(1)
 ```
