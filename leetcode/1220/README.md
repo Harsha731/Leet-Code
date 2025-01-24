@@ -47,76 +47,93 @@
 **Related Topics**:  
 [Dynamic Programming](https://leetcode.com/tag/dynamic-programming/)
 
-## Solution 1. DP
-
-Given the rule, the valid combinations are as follows:
-
-```
-a: ae
-e: ea ei
-i: ia ie io iu
-o: oi ou
-u: ua
-```
-
-Let `dp[i][j]` be the count of valid strings of length `i` ending with letter `j` where `0 < i <= n`, `j = 'a', 'e', 'i', 'o', 'u'`.
-
-So we have
-
-```
-dp[i]['a'] = dp[i - 1]['e'] + dp[i - 1]['i'] + dp[i - 1]['u']
-dp[i]['e'] = dp[i - 1]['a'] + dp[i - 1]['i']
-dp[i]['i'] = dp[i - 1]['e'] + dp[i - 1]['o']
-dp[i]['o'] = dp[i - 1]['i']
-dp[i]['u'] = dp[i - 1]['i'] + dp[i - 1]['o']
-
-dp[1][j] = 1
-```
-
-The answer is `Sum{ dp[n][j] | j = 'a', 'e', 'i', 'o', 'u' }`.
+## Solution 1. Memoization
 
 ```cpp
-// OJ: https://leetcode.com/problems/count-vowels-permutation/
-// Author: github.com/lzl124631x
-// Time: O(N)
-// Space: O(1)
+class Solution {
+    const int MOD = 1e9 + 7;
+    const unordered_map<char, vector<char>> mappings{ {'s', {'a', 'e', 'i', 'o', 'u'} }, // start
+                                                      {'a', {'e'}                     }, 
+                                                      {'e', {'a', 'i'}                }, 
+                                                      {'i', {'a', 'e', 'o', 'u'}      }, 
+                                                      {'o', {'i', 'u'}                },
+                                                      {'u', {'a'}                     }  };
+    unordered_map<char, vector<int>> dp;
+
+public:
+    int countVowelPermutation(int n) {
+        dp['s'] = dp['a'] = dp['e'] = dp['i'] = dp['o'] = dp['u'] = vector<int>(n+1);
+        return solve(n, 's');                         // start with s
+    }
+    int solve(int rem, char prev) {
+        if(rem == 0) return 1;                        // no need to pick further. We have formed 1 string of length = n.
+        if(dp[prev][rem]) return dp[prev][rem];       // if result already calculated for current state, directly return it
+        for(auto c : mappings.at(prev))               // try each vowel allowed after prev character
+            dp[prev][rem] = (dp[prev][rem] + solve(rem - 1, c)) % MOD;  
+        return dp[prev][rem];
+    }
+};
+/*
+Time Complexity : O(N), we will be calculating the total possible strings for a given vowels when rem characters are requried, only once. 
+Thus, each vowel will make a max of N recursive calls. Hence the total time complexity becomes O(5*N) = O(N)
+Space Complexity : O(N), O(N) space is required by recursive stack. Further, a total of O(5*N) space is used by dp. 
+Thus the total space complexity becomes O(N) + O(5*N) = O(N)
+*/
+```
+
+
+## Solution 2. Tabulation 
+
+```cpp
+0 (a)       =>  1
+1 (e)       =>  0 / 2
+2 (i)       =>  0 / 1 / 3 / 4
+3 (o)       =>  2 / 4
+4 (u)       =>  0
+
 class Solution {
 public:
     int countVowelPermutation(int n) {
-        int mod = 1e9 + 7, a = 1, e = 1, i = 1, o = 1, u = 1;
-        while (--n) {
-            int aa = ((e + i) % mod + u) % mod;
-            int ee = (a + i) % mod;
-            int ii = (e + o) % mod;
-            int oo = i;
-            int uu = (i + o) % mod;
-            a = aa, e = ee, i = ii, o = oo, u = uu;
+        const int MOD = 1e9 + 7;
+        long dp[5][n+1], ans = 0;
+        dp[0][1] = dp[1][1] = dp[2][1] = dp[3][1] = dp[4][1] = 1;
+        for(int i = 2; i <= n; i++) {
+            dp[0][i] =  dp[1][i-1];
+            dp[1][i] = (dp[0][i-1] + dp[2][i-1]) % MOD;
+            dp[2][i] = (dp[0][i-1] + dp[1][i-1] + dp[3][i-1] + dp[4][i-1]) % MOD;
+            dp[3][i] = (dp[2][i-1] + dp[4][i-1]) % MOD;
+            dp[4][i] =  dp[0][i-1];
         }
-        return ((((a + e) % mod + i) % mod + o) % mod + u) % mod;
+        for(int i=0; i < 5; i++) 
+            ans = (ans + dp[i][n]) % MOD;
+        return ans;
     }
 };
+
+// Time Complexity : O(N)
+// Space Complexity : O(N)
 ```
 
-Or
+## Solution 3. Space Optimization 
 
 ```cpp
-// OJ: https://leetcode.com/problems/count-vowels-permutation/
-// Author: github.com/lzl124631x
-// Time: O(N)
-// Space: O(1)
 class Solution {
 public:
     int countVowelPermutation(int n) {
-        long mod = 1e9 + 7, a = 1, e = 1, i = 1, o = 1, u = 1;
-        while (--n) {
-            long aa = e;
-            long ee = (a + i) % mod;
-            long ii = ((a + e) % mod + (o + u) % mod) % mod;
-            long oo = (i + u) % mod;
-            long uu = a;
-            a = aa, e = ee, i = ii, o = oo, u = uu;
+        const int MOD = 1e9 + 7;
+        long a = 1, e = 1, i = 1, o = 1, u = 1, a_new, e_new, i_new, o_new, u_new;
+        for(int j = 2; j <= n; j++) {
+            a_new =  e;
+            e_new = (a + i) % MOD;
+            i_new = (a + e + o + u) % MOD;
+            o_new = (i + u) % MOD;
+            u_new =  a;
+            a = a_new, e = e_new, i = i_new, o = o_new, u = u_new;
         }
-        return (((((a + e) % mod + i) % mod) + o) % mod + u) % mod;
+        return (a + e + i + o + u) % MOD;
     }
 };
+
+// Time Complexity : O(N)
+// Space Complexity : O(1)
 ```
