@@ -90,58 +90,7 @@ public:
 // SC : O(1)
 ```
 
-## Solution 2. Use the 1D subproblem
-
-This problem is trivial on 1D array.
-
-Let `row[i][j]` be the length of consecutive 1s ending at `A[i][j]` in `i`th row.
-
-Let `col[i][j]` be the length of consecutive 1s ending at `A[i][j]` in `j`th column.
-
-With these two arrays, for each `matrix[i][j]`, the side length of the square whose bottom right corner is at `matrix[i][j]` is at most `min(row[i][j], col[i][j])`. Then we keep probing the `col[i][k]` where `k < j` to keep tighten the limit.
-
-```cpp
-// OJ: https://leetcode.com/problems/maximal-square/
-// Author: github.com/lzl124631x
-// Time: O(M * N^2)
-// Space: O(MN)
-class Solution {
-public:
-    int maximalSquare(vector<vector<char>>& A) {
-        if (A.empty() || A[0].empty()) return 0;
-        int M = A.size(), N = A[0].size(), ans = 0;
-        vector<vector<int>> row(M, vector<int>(N, 0)), col(M, vector<int>(N, 0));
-        for (int i = 0; i < M; ++i) {
-            int start = -1;
-            for (int j = 0; j < N; ++j) {
-                if (A[i][j] == '0') start = j;
-                row[i][j] = j - start;
-            }
-        }
-        for (int j = 0; j < N; ++j) {
-            int start = -1;
-            for (int i = 0; i < M; ++i) {
-                if (A[i][j] == '0') start = i;
-                col[i][j] = i - start;
-            }
-        }
-        for (int i = 0; i < M; ++i) {
-            for (int j = 0; j < N; ++j) {
-                int end = min(row[i][j], col[i][j]), k = 0;
-                while (k < end) {
-                    ++k;
-                    if (j - k < 0) break;
-                    end = min(end, col[i][j - k]);
-                }
-                ans = max(ans, k);
-            }
-        }
-        return ans * ans;
-    }
-};
-```
-
-## Solution 3. Bottom-up DP
+## Solution 2. Bottom-up DP
 
 Let `dp[i + 1][j + 1]` be the side length of the maximal square whose bottom right corner is at `matrix[i][j]`. Then we have:
 
@@ -178,7 +127,7 @@ public:
 // SC : O(MN)
 ```
 
-## Solution 4. Bottom-up DP with Space Optimization
+## Solution 3. Bottom-up DP with Space Optimization
 
 Given the dependency above, we can use a `2 * N` array to store the DP values.
 
