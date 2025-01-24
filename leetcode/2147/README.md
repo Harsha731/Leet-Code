@@ -114,59 +114,27 @@ public:
 // Space: O(1)
 class Solution {
 public:
-    int numberOfWays(string s) {
-        const long mod = 1e9 + 7;
-        long ways = 1, totalSeats = 0, sections = 0;
-        int n = s.size();
+    int numberOfWays(string corridor) {
+        const int mod = 1e9 + 7;
+        long res = 1;
+        int seatCount = 0, plantCount = 0;
 
-        for (int i = 0; i < n; ) {
-            int seatCount = 0, plantCount = 0;
-
-            // Count seats and plants in the current section. This stops when seatCount=3 and index will be at 'S' and it start from here for the next interation
-            while (i < n && seatCount < 2) {
-                seatCount += (s[i] == 'S');
-                if (seatCount == 0) plantCount += (s[i] == 'P');
-                ++i;
-            }
-
-            // If this is not the first section, multiply ways by (plants between sections + 1)
-            if (seatCount > 0 && sections++ > 0) {
-                ways = ways * (plantCount + 1) % mod;
-            }
-            totalSeats += seatCount;
-        }
-        // If the total number of seats is not a positive even number, return 0
-        return (totalSeats > 0 && totalSeats % 2 == 0) ? ways : 0;
-    }
-};
-
-```
-
-Or
-
-```cpp
-// OJ: https://leetcode.com/problems/number-of-ways-to-divide-a-long-corridor/
-// Author: github.com/lzl124631x
-// Time: O(N)
-// Space: O(1)
-class Solution {
-public:
-    int numberOfWays(string s) {
-        long N = s.size(), mod = 1e9 + 7, prev = 0, cnt = 0, plant = 0, ans = 1;
-        for (int i = 0; i < N; ++i) {
-            if (prev == cnt) plant += s[i] == 'P'; // count leading plants in each section.
-            cnt += s[i] == 'S';
-            if (cnt == prev + 2) {
-                if (prev) ans = ans * (plant + 1) % mod;
-                prev = cnt;
-                plant = 0;
+        for (char ch : corridor) {
+            if (ch == 'S') {
+                seatCount++;
+                // If we have 2 seats, calculate arrangements and reset plantCount
+                if (seatCount > 1 && seatCount % 2 == 0) {
+                    res = (res * (plantCount + 1)) % mod;
+                    plantCount = 0;
+                }
+            } else if (seatCount >= 2 && seatCount % 2 == 0) {
+                // Count plants only between valid seat pairs
+                plantCount++;
             }
         }
-        return prev == cnt && cnt ? ans : 0;
+
+        // If the total number of seats is odd or zero, return 0
+        return (seatCount < 2 || seatCount % 2 != 0) ? 0 : res;
     }
 };
 ```
-
-## Discuss
-
-https://leetcode.com/problems/number-of-ways-to-divide-a-long-corridor/discuss/1709665/C%2B%2B-Scan-section-by-section-O(N)-Time-O(1)-space
