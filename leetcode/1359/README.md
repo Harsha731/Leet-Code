@@ -48,19 +48,30 @@ So `f(2) = 3 + 2 + 1 = 6` or `f(2) = (1 + N) * N / 2 * f(1)` where `N = 3 = 2 * 
 
 By induction, we have `f(n) = f(n - 1) * (1 + N) * N / 2` where `N = 2n - 1`
 
+NOTE :-
+_ P1 _ P2 _ D1 _ D2 _
+We can keep P3 before P1. Then D1 have 5 options
+We can keep P3 between P1, P2. Then D1 have 4 options
+3, 2, 1, 0
+5 + 4 + 3 + 2 + 1 = (2i-1) * (2i) / 2 = (2i-1)*(i)
+
 ```cpp
 // OJ: https://leetcode.com/problems/count-all-valid-pickup-and-delivery-options/
 // Author: github.com/lzl124631x
 // Time: O(N)
 // Space: O(1)
+
+// This is not Tabulation, so no memoization too
+
 class Solution {
+const int MOD = 1e9 + 7;
 public:
     int countOrders(int n) {
-        long ans = 1, mod = 1e9 + 7;
-        for (int i = 2, cnt = 3; i <= n; ++i, cnt += 2) {
-            ans = ans * cnt * (cnt + 1) / 2 % mod;
+        long long count = 1;
+        for (int i = 2; i <= n; ++i) {
+            count = (count * (2 * i - 1) * i) % MOD;
         }
-        return ans;
+        return (int)count;
     }
 };
 ```
@@ -70,17 +81,19 @@ public:
 
 class Solution {
 public:
-    int mod = 1e9 + 7;
+    const int MOD = 1e9 + 7;
+    vector<long long> memo;
 
-    long long helper(int n) {
-        if (n == 1) return 1; // Base case: 1 valid sequence for n = 1
-        long long prev = helper(n - 1); 
-        long long cnt = 2 * n - 1;  // Number of possible positions for pickup and delivery
-        return prev * cnt * (cnt + 1) / 2 % mod;
+    long long solve(int n) {
+        if (n == 0) return 1;
+        if (memo[n] != -1) return memo[n];
+        long long res = solve(n - 1) * (2 * n - 1) * n % MOD;
+        return memo[n] = res;
     }
 
     int countOrders(int n) {
-        return helper(n);
+        memo.resize(n + 1, -1);
+        return solve(n);
     }
 };
 ```
