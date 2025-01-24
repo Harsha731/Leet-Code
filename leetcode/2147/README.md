@@ -63,6 +63,7 @@ Installing any would create some section that does not have exactly two seats.
 * If there are k plants between two adjacent segments, there are k + 1 positions (ways) you could install the divider you must install.
 * The problem now becomes: Find the product of all possible positions between every two adjacent segments.
 
+
 ## Solution 1.
 
 **Intuition**: If there are `p` plants between two sections, we multiply the answer by `p + 1`.
@@ -76,6 +77,9 @@ Scan `corridor` section by section, count the number of plants between sections,
 
 //T.C : O(n)
 //S.C : O(n)
+
+// Recursion is giving TLE
+
 class Solution {
 public:
     int mod = 1e9 + 7;
