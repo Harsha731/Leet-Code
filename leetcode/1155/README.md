@@ -75,7 +75,7 @@ dp[1][t] = 1 if 1 <= t <= f
 // Time: O(DFT)
 // Space: O(DT)
 class Solution {
-    vector<unordered_map<int, int>> m;
+    vector<unordered_map<int, int>> m;		// vector<vector<>> uses space more and not needed actually
     long mod = 1e9+7;
     int dfs(int d, int f, int target) {
         if (target < d || target > d * f) return 0;
@@ -124,31 +124,6 @@ class Solution {
 public:
     int numRollsToTarget(int d, int f, int target) {
         m.assign(d + 1, {});
-        this->f = f;
-        return dfs(d, target);
-    }
-};
-```
-
-Using array is always more time efficient.
-
-```cpp
-// OJ: https://leetcode.com/problems/number-of-dice-rolls-with-target-sum/
-// Author: github.com/lzl124631x
-// Time: O(DT)
-// Space: O(DT)
-class Solution {
-    int m[31][1001] = {};
-    long mod = 1e9+7, f;
-    int dfs(int d, int target) {
-        if (target < d || target > d * f) return 0;
-        if (d == 1) return 1; 
-        if (m[d][target] != -1) return m[d][target];
-        return m[d][target] = (((long)dfs(d, target - 1) + dfs(d - 1, target - 1)) % mod - dfs(d - 1, target - f - 1) + mod) % mod;
-    }
-public:
-    int numRollsToTarget(int d, int f, int target) {
-        memset(m, -1, sizeof(m));
         this->f = f;
         return dfs(d, target);
     }
