@@ -57,23 +57,48 @@ If we append 'P', then the next state will be `[i + 1][A][0]`, so `v[i + 1][A][0
 // Author: github.com/lzl124631x
 // Time: O(N)
 // Space: O(N)
+// OJ: https://leetcode.com/problems/student-attendance-record-ii/
+// Author: github.com/lzl124631x
+// Time: O(N)
+// Space: O(N)
 class Solution {
 public:
     int checkRecord(int n) {
-        auto v = vector<vector<vector<int>>>(n + 1, vector<vector<int>>(2, vector<int>(3)));
-        long long ans = 0, mod = 1e9 + 7;
+        const long long MOD = 1e9 + 7;
+        // v[i][A][L] represents the number of valid records of length i
+        // with A absences and L consecutive late days
+        vector<vector<vector<int>>> dp(n + 1, vector<vector<int>>(2, vector<int>(3, 0)));
+
+        long long ans = 0;
+
         for (int i = 0; i < n; ++i) {
             for (int A = 0; A <= 1; ++A) {
                 for (int L = 0; L <= 2; ++L) {
                     if (A + L > i + 1) continue;
-                    int val = i == 0 ? 1 : v[i][A][L];
-                    if (A != 1) v[i + 1][A + 1][0] = (v[i + 1][A + 1][0] + val) % mod;
-                    if (L != 2) v[i + 1][A][L + 1] = (v[i + 1][A][L + 1] + val) % mod;
-                    v[i + 1][A][0] = (v[i + 1][A][0] + val) % mod;
-                    if (i == n - 1) ans = (ans + val) % mod;
+
+                    int val = (i == 0) ? 1 : dp[i][A][L];
+
+                    // Append 'P' (Present) to records
+                    dp[i + 1][A][0] = (dp[i + 1][A][0] + val) % MOD;
+
+                    // Append 'A' (Absent) to records if we can add an additional absence
+                    if (A != 1) {
+                        dp[i + 1][A + 1][0] = (dp[i + 1][A + 1][0] + val) % MOD;
+                    }
+
+                    // Append 'L' (Late) to records if we can add another late day
+                    if (L != 2) {
+                        dp[i + 1][A][L + 1] = (dp[i + 1][A][L + 1] + val) % MOD;
+                    }
+
+                    // If it's the last day, add the valid records to the result
+                    if (i == n - 1) {
+                        ans = (ans + val) % MOD;
+                    }
                 }
             }
         }
+        
         return ans;
     }
 };
@@ -88,29 +113,101 @@ Since only two layers are related (`i` and `i + 1`), we can reduce the array fro
 // Author: github.com/lzl124631x
 // Time: O(N)
 // Space: O(1)
+// OJ: https://leetcode.com/problems/student-attendance-record-ii/
+// Author: github.com/lzl124631x
+// Time: O(N)
+// Space: O(1)
 class Solution {
 public:
     int checkRecord(int n) {
-        auto v = vector<vector<vector<int>>>(2, vector<vector<int>>(2, vector<int>(3)));
-        long long ans = 0, mod = 1e9 + 7;
+        const long long MOD = 1e9 + 7;
+        
+        // Initialize DP tables for the previous and current states
+        vector<vector<int>> prev(2, vector<int>(3, 0));
+        vector<vector<int>> curr(2, vector<int>(3, 0));
+        long long ans = 0;
+
         for (int i = 0; i < n; ++i) {
+            // Reset the current DP table
             for (int A = 0; A <= 1; ++A) {
                 for (int L = 0; L <= 2; ++L) {
-                    v[(i + 1) % 2][A][L] = 0;
+                    curr[A][L] = 0;
                 }
             }
+
             for (int A = 0; A <= 1; ++A) {
                 for (int L = 0; L <= 2; ++L) {
                     if (A + L > i + 1) continue;
-                    int val = i == 0 ? 1 : v[i % 2][A][L];
-                    if (A != 1) v[(i + 1) % 2][A + 1][0] = (v[(i + 1) % 2][A + 1][0] + val) % mod;
-                    if (L != 2) v[(i + 1) % 2][A][L + 1] = (v[(i + 1) % 2][A][L + 1] + val) % mod;
-                    v[(i + 1) % 2][A][0] = (v[(i + 1) % 2][A][0] + val) % mod;
-                    if (i == n - 1) ans = (ans + val) % mod;
+
+                    int val = (i == 0) ? 1 : prev[A][L];
+
+                    // Append 'P' (Present) to records
+                    curr[A][0] = (curr[A][0] + val) % MOD;
+
+                    // Append 'A' (Absent) to records if we can add an additional absence
+                    if (A != 1) {
+                        curr[A + 1][0] = (curr[A + 1][0] + val) % MOD;
+                    }
+
+                    // Append 'L' (Late) to records if we can add another late day
+                    if (L != 2) {
+                        curr[A][L + 1] = (curr[A][L + 1] + val) % MOD;
+                    }
+
+                    // Update the result if it's the last day
+                    if (i == n - 1) {
+                        ans = (ans + val) % MOD;
+                    }
                 }
             }
+
+            // Swap prev and curr
+            swap(prev, curr);
         }
+
         return ans;
+    }
+};
+```
+
+## Solution 3. Memoization
+```cpp
+class Solution {
+    const long long MOD = 1e9 + 7;
+
+    // Memoization table: dp[i][A][L]
+    // Represents the number of valid records of length i with A absences and L consecutive late days
+    vector<vector<vector<int>>> memo;
+
+    int solve(int i, int A, int L) {
+        if (i == 0) return 1; // Base case: empty record is valid
+        if (memo[i][A][L] != -1) return memo[i][A][L]; // Return cached result
+
+        long long result = 0;
+
+        // Append 'P' (Present)
+        result = (result + solve(i - 1, A, 0)) % MOD;
+
+        // Append 'A' (Absent) if we can add an additional absence
+        if (A < 1) {
+            result = (result + solve(i - 1, A + 1, 0)) % MOD;
+        }
+
+        // Append 'L' (Late) if we can add another late day
+        if (L < 2) {
+            result = (result + solve(i - 1, A, L + 1)) % MOD;
+        }
+
+        return memo[i][A][L] = result; // Cache and return the result
+    }
+
+public:
+    int checkRecord(int n) {
+        // Initialize memoization table with -1 (uncomputed)
+        memo.assign(n + 1, vector<vector<int>>(2, vector<int>(3, -1)));
+
+        // Start solving for records of length n with 0 absences and 0 consecutive late days
+        return solve(n, 0, 0);
     }
 };
 ```
