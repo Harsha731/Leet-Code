@@ -45,61 +45,117 @@ Stay, Stay
 **Related Topics**:  
 [Dynamic Programming](https://leetcode.com/tag/dynamic-programming/)
 
-## Solution 1. DP
-
-Let `dp[i][j]` be the number of ways to reach `0` from index `j` when there are `i` steps left.
-
-```
-dp[i][j] = dp[i-1][j-1] + dp[i-1][j] + dp[i-1][j+1]
-dp[0][0] = 1
-```
+## Solution 1. Memoization
 
 ```cpp
 // OJ: https://leetcode.com/problems/number-of-ways-to-stay-in-the-same-place-after-some-steps/
 // Author: github.com/lzl124631x
-// Time: O(SL)
-// Space: O(1)
+/*
+Time complexity: O(n⋅min(n,m))
+There can be steps values of remain and min(steps, arrLen) values of curr. The reason curr is limited by steps 
+is because if we were to only move right, we would eventually run out of moves. Thus, there are O(n⋅min(n,m)) 
+states of curr, remain. Due to memoization, we never calculate a state more than once. To calculate a given 
+state costs O(1) as we are simply adding up three options.
+Space complexity: O(n⋅min(n,m))
+The recursion call stack uses up to O(n) space, but this is dominated by memo which has a size of O(n⋅min(n,m))
+*/
+
 class Solution {
-    typedef long long LL;
 public:
+    vector<vector<int>> dp;
+    const int MOD = 1e9 + 7;
+    int n;
+
+    int solve(int i, int k) {
+        if (k == 0) return i == 0 ? 1 : 0;
+        if (dp[i][k] != -1) return dp[i][k];
+        int ans = solve(i, k - 1);
+        if (i > 0) ans = (ans + solve(i - 1, k - 1)) % MOD;
+        if (i < n - 1) ans = (ans + solve(i + 1, k - 1)) % MOD;
+        dp[i][k] = ans;
+        return ans;
+    }
+
     int numWays(int steps, int arrLen) {
-        LL dp[2][251] = {0}, diff[3] = {-1, 0, 1}, mod = 1e9+7;
-        dp[0][0] = 1;
-        arrLen = min(251, arrLen);
-        for (int i = 1; i <= steps; ++i) {
-            for (int j = 0; j < arrLen; ++j) {
-                dp[i % 2][j] = 0;
-                for (int d : diff) {
-                    int t = j + d;
-                    if (t < 0 || t >= arrLen) continue;
-                    dp[i % 2][j] = (dp[i % 2][j] + dp[(i - 1) % 2][t]) % mod;
-                }
-            }
-        }
-        return dp[steps % 2][0];
+        n = min(arrLen, steps);
+        dp = vector<vector<int>>(n, vector<int>(steps + 1, -1));
+        return solve(0, steps);
     }
 };
 ```
 
-## Solution 2. DP
+## Solution 2. Tabulation
+
+```cpp
+
+/*
+Given n as steps and m as arrLen,
+Time complexity: O(n⋅min(n,m))
+Our nested for-loops iterate over O(n⋅min(n,m)) states of curr, remain. Calculating each state is done in O(1).
+Space complexity: O(n⋅min(n,m))
+dp has a size of O(n⋅min(n,m)).
+*/
+
+class Solution {
+public:
+    int numWays(int steps, int arrLen) {
+        int n = min(arrLen, steps + 1);
+        const int MOD = 1e9 + 7;
+        vector<vector<int>> dp(steps + 1, vector<int>(n, 0));
+        dp[0][0] = 1;
+
+        for (int k = 1; k <= steps; ++k) {
+            for (int i = 0; i < n; ++i) {
+                dp[k][i] = dp[k - 1][i];
+                if (i > 0) {
+                    dp[k][i] = (dp[k][i] + dp[k - 1][i - 1]) % MOD;
+                }
+                if (i < n - 1) {
+                    dp[k][i] = (dp[k][i] + dp[k - 1][i + 1]) % MOD;
+                }
+            }
+        }
+
+        return dp[steps][0];
+    }
+};
+```
+
+## Solution 3. Space Optimization
 
 ```cpp
 // OJ: https://leetcode.com/problems/number-of-ways-to-stay-in-the-same-place-after-some-steps/
 // Author: github.com/lzl124631x
-// Time: O(S * min(S, L))
-// Space: O(min(S, L))
-// Ref: https://leetcode.com/problems/number-of-ways-to-stay-in-the-same-place-after-some-steps/discuss/436392/C%2B%2B-Bottom-Up-DP
+Given n as steps and m as arrLen,
+/*
+Time complexity: O(n⋅min(n,m))
+Our nested for-loops iterate over O(n⋅min(n,m)) states of curr, remain. Calculating each state is done in O(1).
+Space complexity: O(min(n,m))
+dp and prevDp have a size of O(min(n,m)).
+*/
 class Solution {
 public:
     int numWays(int steps, int arrLen) {
-        int N = min(steps / 2 + 1, arrLen);
-        vector<int> a(N + 2), b(N + 2);
-        a[1] = 1;
-        while (steps--) {
-            for (int i = 1; i <= N; ++i) b[i] = ((long)a[i - 1] + a[i] + a[i + 1]) % ((int)1e9+7);
-            swap(a, b);
+        int n = min(arrLen, steps + 1);
+        const int MOD = 1e9 + 7;
+        vector<int> prev(n, 0);
+        prev[0] = 1;
+
+        for (int k = 1; k <= steps; ++k) {
+            vector<int> curr(n, 0);
+            for (int i = 0; i < n; ++i) {
+                curr[i] = prev[i];
+                if (i > 0) {
+                    curr[i] = (curr[i] + prev[i - 1]) % MOD;
+                }
+                if (i < n - 1) {
+                    curr[i] = (curr[i] + prev[i + 1]) % MOD;
+                }
+            }
+            prev = curr;
         }
-        return a[1];
+
+        return prev[0];
     }
 };
 ```
