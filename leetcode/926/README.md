@@ -94,6 +94,40 @@ flipCount[i + 1] = flipCount[i]                      // if s[i + 1] == '1'
     where 1 <= i <= N - 2
 ```
 
+
+```cpp
+// TC : O(N) and SC : O(N)
+
+int minFlipsMonoIncr(string s) {
+    int n = s.length();
+    if (n == 0) return 0;
+
+    // Initialize flipCount and ones arrays
+    int flipCount[n + 1];
+    int ones[n + 1];
+
+    flipCount[0] = 0;
+    ones[0] = 0;
+
+    for (int i = 0; i < n; i++) {
+        if (s[i] == '1') {
+            // If the current character is '1', flipCount remains the same
+            flipCount[i + 1] = flipCount[i];
+            // Increment the count of '1's
+            ones[i + 1] = ones[i] + 1;
+        } else {
+            // If the current character is '0', choose the minimum between flipping it or not
+            flipCount[i + 1] = min(flipCount[i] + 1, ones[i]);
+            // The count of '1's remains the same
+            ones[i + 1] = ones[i];
+        }
+    }
+
+    return flipCount[n];
+}
+
+```
+
 ```cpp
 // OJ: https://leetcode.com/problems/flip-string-to-monotone-increasing/
 // Author: github.com/lzl124631x
