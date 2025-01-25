@@ -83,3 +83,61 @@ public:
     }
 };
 ```
+## Solution 2. Space Optimization
+```cpp
+class Solution {
+public:
+    int numMusicPlaylists(int N, int L, int K) {
+        long mod = 1e9 + 7;
+        vector<long> prev(N + 1, 0); 
+        vector<long> curr(N + 1, 0); 
+
+        prev[0] = 1; 
+
+        for (int i = 1; i <= L; ++i) { 
+            for (int j = 1; j <= N; ++j) { 
+                // Case 1: Add a new song (not played before)
+                curr[j] = prev[j - 1] * (N - j + 1) % mod;
+
+                // Case 2: Add a repeated song (played before, but not in the last K songs)
+                if (j > K) {
+                    curr[j] = (curr[j] + prev[j] * (j - K)) % mod;
+                }
+            }
+            prev = curr; 
+            curr.assign(N + 1, 0); 
+        }
+
+        return prev[N];
+    }
+};
+```
+## Solution 3. Memoization
+
+```cpp
+class Solution {
+public:
+    int numMusicPlaylists(int N, int L, int K) {
+        const long mod = 1e9 + 7;
+        vector<vector<long>> memo(L + 1, vector<long>(N + 1, -1));
+        return helper(N, L, K, memo, mod);
+    }
+
+private:
+    long helper(int N, int L, int K, vector<vector<long>>& memo, const long mod) {
+        if (L == 0 && N == 0) return 1;
+        if (L == 0 || N == 0) return 0;
+        if (memo[L][N] != -1) return memo[L][N];
+
+        long result = 0;
+        // Case 1: Add a new song that hasn't been played before
+        result += helper(N - 1, L - 1, K, memo, mod) * (N);
+        // Case 2: Add a song that has been played before, but not in the last K songs
+        result += helper(N, L - 1, K, memo, mod) * max(N - K, 0);
+
+        result %= mod;
+        memo[L][N] = result;
+        return result;
+    }
+};
+```
