@@ -35,69 +35,128 @@ The falling path with the smallest sum is&nbsp;[1,5,7], so the answer is&nbsp;13
 ## Solution 1. DP
 
 ```cpp
-// OJ: https://leetcode.com/problems/minimum-falling-path-sum-ii/
-// Author: github.com/lzl124631x
-// Time: O(N^2)
-// Space: O(1)
+// TC : O(N^3) and SC : O(N^2)
+
 class Solution {
-    pair<int, int> getSmallestTwo(vector<int> &A) {
-        auto p = make_pair(-1, -1);
-        for (int i = 0; i < A.size(); ++i) {
-            if (p.first == -1 || A[i] < A[p.first]) {
-                p.second = p.first;
-                p.first = i;
-            } else if (p.second == -1 || A[i] < A[p.second]) p.second = i;
-        }
-        return p;
-    }
 public:
-    int minFallingPathSum(vector<vector<int>>& A) {
-        int N = A.size();
-        if (N == 1) return A[0][0];
-        for (int i = 1; i < N; ++i) {
-            auto p = getSmallestTwo(A[i - 1]);
-            for (int j = 0; j < N; ++j) {
-                A[i][j] += A[i - 1][p.first == j ? p.second : p.first];
-            }
+    int solve(vector<vector<int>>& grid, int i, int j, vector<vector<int>>& dp) {
+        // Base case: If we reach the last row, return 0
+        if (i == grid.size()) {
+            return 0;
         }
-        return *min_element(A.back().begin(), A.back().end());
+
+        if (dp[i][j] != -1) {
+            return dp[i][j];
+        }
+
+        int minSum = INT_MAX;
+
+        for (int k = 0; k < grid[0].size(); k++) {
+            if (k == j) {
+                continue; 
+            }
+            minSum = min(minSum, solve(grid, i + 1, k, dp) + grid[i][j]);
+        }
+        return dp[i][j] = minSum;
+    }
+
+    int minFallingPathSum(vector<vector<int>>& grid) {
+        int n = grid.size();
+
+        // Edge case: If there's only one row, return the only element
+        if (n == 1) {
+            return grid[0][0];
+        }
+
+        vector<vector<int>> dp(n, vector<int>(n, -1));
+        int result = INT_MAX;
+
+        // Start the recursion from each column in the first row
+        for (int j = 0; j < n; j++) {
+            result = min(result, solve(grid, 0, j, dp));
+        }
+
+        return result;
     }
 };
 ```
 
-## Solution 2. DP
-
-In case it's not allowed to change input array.
-
+## Solution 2. Tabulation
 ```cpp
-// OJ: https://leetcode.com/problems/minimum-falling-path-sum-ii/
-// Author: github.com/lzl124631x
-// Time: O(N^2)
-// Space: O(N)
+// TC : O(N^3) and SC : O(N^2)
+
 class Solution {
-    pair<int, int> getSmallestTwo(vector<int> &A) {
-        auto p = make_pair(-1, -1);
-        for (int i = 0; i < A.size(); ++i) {
-            if (p.first == -1 || A[i] < A[p.first]) {
-                p.second = p.first;
-                p.first = i;
-            } else if (p.second == -1 || A[i] < A[p.second]) p.second = i;
-        }
-        return p;
-    }
 public:
-    int minFallingPathSum(vector<vector<int>>& A) {
-        int N = A.size();
-        if (N == 1) return A[0][0];
-        vector<vector<int>> dp(2, vector<int>(N));
-        for (int i = 0; i < N; ++i) dp[1][i] = A[0][i];
-        for (int i = 1; i < N; ++i) {
-            auto p = getSmallestTwo(dp[i % 2]);
-            for (int j = 0; j < N; ++j) {
-                dp[(i + 1) % 2][j] = A[i][j] + dp[i % 2][p.first == j ? p.second : p.first];
+    int minFallingPathSum(vector<vector<int>>& grid) {
+        int n = grid.size();
+
+        // Edge case: If there's only one row, return the only element
+        if (n == 1) {
+            return grid[0][0];
+        }
+        vector<vector<int>> dp(n, vector<int>(n));
+
+        // Fill the first row of the DP table with the values from the grid
+        for (int j = 0; j < n; j++) {
+            dp[0][j] = grid[0][j];
+        }
+
+        // Fill the DP table for the remaining rows
+        for (int i = 1; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                int minSum = INT_MAX;
+
+                for (int k = 0; k < n; k++) {
+                    if (k == j) {
+                        continue; 
+                    }
+                    minSum = min(minSum, dp[i - 1][k] + grid[i][j]);
+                }
+                dp[i][j] = minSum;
             }
         }
-        return *min_element(dp[N % 2].begin(), dp[N % 2].end());
+
+        // Return the minimum value in the last row of the DP table
+        return *min_element(dp[n - 1].begin(), dp[n - 1].end());
+    }
+};
+
+```
+
+## Solution 3. Space Optimization
+
+```cpp
+
+// TC : O(N^3) and SC : O(N)
+
+class Solution {
+public:
+    int minFallingPathSum(vector<vector<int>>& grid) {
+        int n = grid.size();
+        if (n == 1) {
+            return grid[0][0];
+        }
+
+        vector<int> prev(n);
+        vector<int> curr(n);
+
+        for (int j = 0; j < n; j++) {
+            prev[j] = grid[0][j];
+        }
+
+        for (int i = 1; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                int minSum = INT_MAX;
+                for (int k = 0; k < n; k++) {
+                    if (k == j) continue;
+                    minSum = min(minSum, prev[k] + grid[i][j]);
+                }
+                curr[j] = minSum;
+            }
+            swap(prev, curr);
+        }
+
+        return *min_element(prev.begin(), prev.end());
     }
 };
 ```
