@@ -63,7 +63,7 @@ public:
         for (char c : s) rightZeros += c == '0';
         int ans = rightZeros;
         for (char c : s) { // we make the current character the last `0`
-            if (c == '1') leftOnes++;
+            if (c == '1') leftOnes++;		// The character till the current is left
             else rightZeros--;
             ans = min(ans, rightZeros + leftOnes);
         }
