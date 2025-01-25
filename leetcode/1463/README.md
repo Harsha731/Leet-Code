@@ -83,35 +83,39 @@ Since there are some states unreacheable at the upper part of the `grid`, using 
 // Time: O(M * N^2)
 // Space: O(M * N^2)
 class Solution {
-    int m[70][70][70], M, N;
-    int dp(vector<vector<int>> & A, int i, int a, int b) {
-        if (i == M) return 0;
-        if (m[i][a][b] != -1) return m[i][a][b];
-        int v = a == b ? A[i][a] : (A[i][a] + A[i][b]);
-        int ans = 0;
-        for (int x = -1; x <= 1; ++x) {
-            for (int y = -1; y <= 1; ++y) {
-                int p = a + x, q = b + y;
-                if (p < 0 || q < 0 || p >= N || q >= N) continue;
-                ans = max(ans, dp(A, i + 1, p, q));
-            }
-        }
-        return m[i][a][b] = v + ans;
-    }
 public:
-    int cherryPickup(vector<vector<int>>& A) {
-        M = A.size(), N = A[0].size();
-        memset(m, -1, sizeof(m));
-        return dp(A, 0, 0, N - 1);
+
+int fun(int i, int j1, int j2, int n, int m, vector<vector<int>>& grid, vector<vector<vector<int>>>& dp){
+    if(j1<0 || j1>=m || j2<0 || j2>=m) return INT_MIN;
+    if(i==n) return 0;
+    if(dp[i][j1][j2]!=-1) return dp[i][j1][j2];
+    
+    int maxi = INT_MIN;
+    for(int di=-1;di<=1;di++){
+        for(int dj=-1;dj<=1;dj++){
+            int ans;
+            if(j1==j2){
+                ans = grid[i][j1] + fun(i+1, j1+di, j2+dj, n, m, grid, dp);
+            }
+            else{
+                ans = grid[i][j1] + grid[i][j2] + fun(i+1, j1+di, j2+dj, n, m, grid, dp);
+            }
+            maxi = max(maxi, ans);
+        }
+    }
+    return dp[i][j1][j2] = maxi;
+}  
+
+    int cherryPickup(vector<vector<int>>& grid) {
+        int n = grid.size();
+        int m = grid[0].size();
+        vector<vector<vector<int>>> dp(n, vector<vector<int>>(m, vector<int>(m, -1)));
+        return fun(0, 0, m-1, n, m, grid, dp);
     }
 };
 ```
 
 ## Solution 2. DP Bottom-up
-
-Populate from the last row to the first row.
-
-The `r`th row pulls values from the `r + 1`th row.
 
 ```cpp
 // OJ: https://leetcode.com/problems/cherry-pickup-ii/
@@ -141,159 +145,70 @@ public:
 };
 ```
 
-## Solution 3. DP Bottom-up
-
-Populate from the last row to the first row.
-
-The `r`th row pushes values to the `r - 1`th row.
+## Solution 3. DP Space Optimization
 
 ```cpp
-// OJ: https://leetcode.com/problems/cherry-pickup-ii/
-// Author: github.com/lzl124631x
-// Time: O(M * N^2)
-// Space: O(M * N^2)
-class Solution {
-public:
-    int cherryPickup(vector<vector<int>>& A) {
-        int M = A.size(), N = A[0].size(), dp[70][70][70] = {0};
-        for (int r = M - 1; r > 0; --r) {
-            for (int i = 0; i < N; ++i) {
-                for (int j = i + 1; j < N; ++j) {
-                    dp[r][i][j] += i == j ? A[r][i] : A[r][i] + A[r][j];
-                    for (int a = i - 1; a <= i + 1; ++a) {
-                        if (a < 0 || a >= N) continue;
-                        for (int b = j - 1; b <= j + 1; ++b) {
-                            if (b < 0 || b >= N || b <= a) continue;
-                            dp[r - 1][a][b] = max(dp[r - 1][a][b], dp[r][i][j]);
-                        }
-                    }
-                }
-            }
-        }
-        return dp[0][0][N - 1] + A[0][0] + A[0][N - 1];
-    }
-};
-```
-
-## Solution 4. DP Bottom-up
-
-Populate from the first row to the last row.
-
-The `r`th row pulls values from `r - 1`th row.
-
-If the previous state is not reachable `dp[r - 1][i][j] == -1`, we don't need to pull.
-
-```cpp
-// OJ: https://leetcode.com/problems/cherry-pickup-ii/
-// Author: github.com/lzl124631x
-// Time: O(M * N^2)
-// Space: O(M * N^2)
-class Solution {
-public:
-    int cherryPickup(vector<vector<int>>& A) {
-        int M = A.size(), N = A[0].size(), dp[70][70][70], ans = 0;
-        memset(dp, -1, sizeof(dp));
-        dp[0][0][N - 1] = A[0][0] + A[0][N - 1];
-        for (int r = 1; r < M; ++r) {
-            for (int i = 0; i < N; ++i) {
-                for (int j = i + 1; j < N; ++j) {
-                    if (dp[r - 1][i][j] == -1) continue;
-                    for (int a = i - 1; a <= i + 1; ++a) {
-                        if (a < 0 || a >= N) continue;
-                        for (int b = j - 1; b <= j + 1; ++b) {
-                            if (b < 0 || b >= N || b <= a) continue;
-                            dp[r][a][b] = max(dp[r][a][b],
-                                                  dp[r - 1][i][j] + (a == b ? A[r][a] : A[r][a] + A[r][b]));
-                            if (r == M - 1) ans = max(ans, dp[r][a][b]);
-                        }
-                    }
-                }
-            }
-        }
-        return ans;
-    }
-};
-```
-
-## Solution 4. DP Bottom-up
-
-Populate from the first row to the last row.
-
-The `r`th row pushes values to the `r + 1`th row.
-
-If the current state is not reachable `dp[r][i][j] == -1`, we don't need to push.
-
-```cpp
-// OJ: https://leetcode.com/problems/cherry-pickup-ii/
-// Author: github.com/lzl124631x
-// Time: O(M * N^2)
-// Space: O(M * N^2)
-class Solution {
-public:
-    int cherryPickup(vector<vector<int>>& A) {
-        int M = A.size(), N = A[0].size(), dp[70][70][70], ans = 0;
-        memset(dp, -1, sizeof(dp));
-        dp[0][0][N - 1] = A[0][0] + A[0][N - 1];
-        for (int r = 0; r < M - 1; ++r) {
-            for (int i = 0; i < N; ++i) {
-                for (int j = i + 1; j < N; ++j) {
-                    if (dp[r][i][j] == -1) continue;
-                    for (int a = i - 1; a <= i + 1; ++a) {
-                        if (a < 0 || a >= N) continue;
-                        for (int b = j - 1; b <= j + 1; ++b) {
-                            if (b < 0 || b >= N || b <= a) continue;
-                            dp[r + 1][a][b] = max(dp[r + 1][a][b],
-                                                  dp[r][i][j] + (a == b ? A[r + 1][a] : A[r + 1][a] + A[r + 1][b]));
-                            if (r + 1 == M - 1) ans = max(ans, dp[r + 1][a][b]);
-                        }
-                    }
-                }
-            }
-        }
-        return ans;
-    }
-};
-```
-
-## Solution 5. DP Bottom-up
-
-Since we only care about the recent two rows, we can reduce the `dp` array size from `M * N^2` to `N^2` by swapping arrays.
-
-In the following code, we are populating from the first row to the last row, and the `r`th row pulls values from `r - 1`th row.
-
-```cpp
-// OJ: https://leetcode.com/problems/cherry-pickup-ii/
-// Author: github.com/lzl124631x
 // Time: O(M * N^2)
 // Space: O(N^2)
 class Solution {
 public:
-    int cherryPickup(vector<vector<int>>& A) {
-        int M = A.size(), N = A[0].size(), ans = 0;
-        vector<vector<int>> d(N, vector<int>(N, -1)), e(N, vector<int>(N));
-        d[0][N - 1] = A[0][0] + A[0][N - 1];
-        for (int i = 1; i < M; ++i) {
-            for (int j = 0; j < N; ++j) {
-                for (int k = j + 1; k < N; ++k) e[j][k] = -1;
-            }
-            for (int j = 0; j < N; ++j) {
-                for (int k = j + 1; k < N; ++k) {
-                    if (d[j][k] < 0) continue;
-                    for (int a = j - 1; a <= j + 1; ++a) {
-                        if (a < 0 || a >= N) continue;
-                        for (int b = k - 1; b <= k + 1; ++b) {
-                            if (b < 0 || b >= N) continue;
-                            e[a][b] = max(e[a][b], d[j][k] + (a == b ? A[i][a] : (A[i][a] + A[i][b])));
-                        }
-                    }
+    int cherryPickup(vector<vector<int>>& grid) {
+        int n = grid.size();
+        int m = grid[0].size();
+
+        // Initialize the DP tables
+        vector<vector<int>> curr(m, vector<int>(m, 0)); // Represents the current row
+        vector<vector<int>> next(m, vector<int>(m, 0)); // Represents the next row
+
+        // Base case: Fill the last row
+        for (int j1 = 0; j1 < m; j1++) {
+            for (int j2 = 0; j2 < m; j2++) {
+                if (j1 == j2) {
+                    next[j1][j2] = grid[n-1][j1]; // Only one robot picks the cherry
+                } else {
+                    next[j1][j2] = grid[n-1][j1] + grid[n-1][j2]; // Both robots pick cherries
                 }
             }
-            swap(d, e);
         }
-        for (int j = 0; j < N; ++j) {
-            for (int k = j + 1; k < N; ++k) ans = max(ans, d[j][k]);
+
+        // Fill the DP tables from the second last row to the first row
+        for (int i = n-2; i >= 0; i--) {
+            for (int j1 = 0; j1 < m; j1++) {
+                for (int j2 = 0; j2 < m; j2++) {
+                    int maxi = INT_MIN;
+
+                    // Explore all 9 possible moves (di, dj)
+                    for (int di = -1; di <= 1; di++) {
+                        for (int dj = -1; dj <= 1; dj++) {
+                            int value;
+
+                            if (j1 == j2) {
+                                value = grid[i][j1]; // Only one robot picks the cherry
+                            } else {
+                                value = grid[i][j1] + grid[i][j2]; // Both robots pick cherries
+                            }
+
+                            // Check if the new positions are valid
+                            if (j1 + di >= 0 && j1 + di < m && j2 + dj >= 0 && j2 + dj < m) {
+                                value += next[j1+di][j2+dj]; // Add the result from the next row
+                            } else {
+                                value += INT_MIN; // Invalid move, ignore
+                            }
+
+                            maxi = max(maxi, value); // Track the maximum value
+                        }
+                    }
+
+                    curr[j1][j2] = maxi; // Store the result in the current row
+                }
+            }
+
+            // Swap curr and next for the next iteration
+            swap(curr, next);
         }
-        return ans;
+
+        // The result is the maximum cherries collected starting from the first row
+        return next[0][m-1];
     }
 };
 ```
