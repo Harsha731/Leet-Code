@@ -47,40 +47,112 @@
 * Can we break the problem down into smaller subproblems and use DP?
 * Paid painters will be used for a maximum of N/2 units of time. There is no need to use paid painter for a time greater than this.
 
-## Solution 1.
-
-Let `dp[k]` be the minimum cost to finish `k` walls. 
-
-Initially
-```
-dp[0] = 0
-dp[k>0] = inf
-```
-
-For `i`th wall, we update `dp[j]` with this dp equation
-
-```
-dp[j] = min(dp[j], dp[max(j - time[i] - 1, 0)] + cost[i])
-```
-
-If we paint `i`th wall, we increase cost by `cost[i]`, and we can paint `time[i]` more walls with free painters. So, we can paint `time[i] + 1` walls with this choice. Thus, we can try to use `dp[max(j - time[i] - 1, 0)] + cost[i]` to update `dp[j]`.
+## Solution 1. Memoization
 
 ```cpp
 // OJ: https://leetcode.com/problems/painting-the-walls
 // Author: github.com/lzl124631x
 // Time: O(N^2)
 // Space: O(N)
-// Ref: https://leetcode.com/problems/painting-the-walls/solutions/3650707/java-c-python-7-lines-knapsack-dp/
+
+class Solution {
+public:
+    int solve(vector<int>& cost, vector<int>& time, int idx, int walls, vector<vector<int>>& dp) {
+        // Base case: If no walls are left to paint, no cost is needed.
+        if (walls <= 0) {
+            return 0;
+        }
+        // Base case: If no painters are left but walls remain, return a large value (invalid state).
+        if (idx >= cost.size()) {
+            return 1e9;
+        }
+        // If the result is already computed, return it.
+        if (dp[idx][walls] != -1) {
+            return dp[idx][walls];
+        }
+
+        // Case 1: Do not take the current painter.
+        int skip = solve(cost, time, idx + 1, walls, dp);
+
+        // Case 2: Take the current painter. Subtract the walls painted by the current painter (time[idx] + 1).
+        int take = cost[idx] + solve(cost, time, idx + 1, walls - time[idx] - 1, dp);
+
+        return dp[idx][walls] = min(skip, take);
+    }
+
+    int paintWalls(vector<int>& cost, vector<int>& time) {
+        int n = time.size();
+        vector<vector<int>> dp(501, vector<int>(501, -1));
+        // Start solving from the first painter and all walls remaining.
+        return solve(cost, time, 0, n, dp);
+    }
+};
+```
+
+## Solution 2. Tabulation
+
+```cpp
+// dp[i][j] represents the minimum cost to paint j walls using the first i painters
+
 class Solution {
 public:
     int paintWalls(vector<int>& cost, vector<int>& time) {
         int n = cost.size();
-        vector<int> dp(n + 1, 1e9);
-        dp[0] = 0;
-        for (int i = 0; i < n; ++i)
-            for (int j = n; j > 0; --j)
-                dp[j] = min(dp[j], dp[max(j - time[i] - 1, 0)] + cost[i]);
-        return dp[n];
+        vector<vector<int>> dp(n + 1, vector<int>(n + 1, 1e9));
+
+        // Base case: If no walls are to be painted, the cost is 0.
+        for (int i = 0; i <= n; ++i) {
+            dp[i][0] = 0;
+        }
+
+        // Fill the DP table
+        for (int i = 1; i <= n; ++i) {
+            for (int j = 1; j <= n; ++j) {
+                // Case 1: Do not take the current painter
+                int notTake = dp[i - 1][j];
+                // Case 2: Take the current painter
+                int take = cost[i - 1] + dp[i - 1][max(j - time[i - 1] - 1, 0)];
+                // Choose the minimum of the two options
+                dp[i][j] = min(notTake, take);
+            }
+        }
+
+        // The answer is the minimum cost to paint all `n` walls
+        return dp[n][n];
+    }
+};
+```
+
+
+## Solution 3. Space Optimization
+
+```cpp
+
+// dp[i][j] represents the minimum cost to paint j walls using the first i painters
+
+class Solution {
+public:
+    int paintWalls(vector<int>& cost, vector<int>& time) {
+        int n = cost.size();
+        vector<int> prev(n + 1, 1e9); // Initialize prev array
+        prev[0] = 0; // Base case: No cost to paint 0 walls
+
+        // Iterate through each painter
+        for (int i = 0; i < n; ++i) {
+            vector<int> curr(n + 1, 1e9); // Initialize curr array
+            for (int j = 0; j <= n; ++j) {
+                // Case 1: Skip the current painter
+                int skip = prev[j];
+                // Case 2: Take the current painter
+                int take = cost[i] + prev[max(j - time[i] - 1, 0)];
+                // Choose the minimum of the two options
+                curr[j] = min(skip, take);
+            }
+            prev = curr; // Update prev for the next iteration
+        }
+
+        // The answer is the minimum cost to paint all `n` walls
+        return prev[n];
     }
 };
 ```
