@@ -63,22 +63,33 @@ The trivial case is `dp[N][j] = 0`, i.e. we can't get any value from the nonexis
 // Author: github.com/lzl124631x
 // Time: O(NM) where `M = sum(A[i].size())`
 // Space: O(NK)
+
+// dp[i][j] represents the maximum value achievable using the first i piles and j coins.
+
 class Solution {
 public:
+    int solve(int i, int j, vector<vector<int>>& A, int m[1001][2001]) {
+        if (i == A.size()) return 0; // Base case: no more piles
+        if (m[i][j] != -1) return m[i][j]; // Return cached result
+
+        int ans = solve(i + 1, j, A, m); // Option 1: skip the current pile
+        int sum = 0;
+
+        // Option 2: take coins from the current pile
+        for (int t = 1; t <= j && t <= A[i].size(); ++t) {
+            sum += A[i][t - 1]; // Add the value of the t-th coin in the pile
+            ans = max(ans, solve(i + 1, j - t, A, m) + sum); // Recur for the remaining piles and coins
+        }
+
+        return m[i][j] = ans; // Cache and return the result
+    }
+
     int maxValueOfCoins(vector<vector<int>>& A, int k) {
-        int N = A.size(), m[1001][2001] = {};
-        memset(m, -1, sizeof(m));
-        function<int(int, int)> dp =[&](int i, int j) {
-            if (i == N) return 0;
-            if (m[i][j] != -1) return m[i][j];
-            int ans = dp(i + 1, j), sum = 0;
-            for (int t = 1; t <= j && t <= A[i].size(); ++t) {
-                sum += A[i][t - 1];
-                ans = max(ans, dp(i + 1, j - t) + sum);
-            }
-            return m[i][j] = ans;
-        };
-        return dp(0, k);
+        int N = A.size();
+        int m[1001][2001]; // Memoization table
+        memset(m, -1, sizeof(m)); // Initialize the table with -1
+
+        return solve(0, k, A, m); // Start the DP from the first pile and all k coins
     }
 };
 ```
@@ -90,20 +101,22 @@ public:
 // Author: github.com/lzl124631x
 // Time: O(NK)
 // Space: O(NK)
+// dp[i][j] represents the maximum value achievable using the first i piles and j coins.
+
 class Solution {
 public:
     int maxValueOfCoins(vector<vector<int>>& A, int K) {
-        int N = A.size(), dp[1001][2001] = {};
-        for (int i = 0; i < N; ++i) {
-            for (int k = 1; k <= K; ++k) {
-                dp[i + 1][k] = dp[i][k];
-                for (int j = 0, sum = 0; j < k && j < A[i].size(); ++j) {
-                    sum += A[i][j];
-                    dp[i + 1][k] = max(dp[i + 1][k], sum + dp[i][k - j - 1]);
+        int N = A.size(), dp[1001][2001] = {}; 
+        for (int i = 0; i < N; ++i) { 			// Iterate through each pile
+            for (int k = 1; k <= K; ++k) {		 // Iterate through each possible number of coins
+                dp[i + 1][k] = dp[i][k]; 		// Option 1: Skip the current pile
+                for (int j = 0, sum = 0; j < k && j < A[i].size(); ++j) { 		// Option 2: Take coins from the current pile
+                    sum += A[i][j]; // Add the value of the j-th coin
+                    dp[i + 1][k] = max(dp[i + 1][k], sum + dp[i][k - j - 1]); // If we take till j=2 means, j=0,1,2. [3 coins]. So k - (j+1)
                 }
             }
         }
-        return dp[N][K];
+        return dp[N][K]; // Return the result for N piles and K coins
     }
 };
 ```
@@ -115,19 +128,26 @@ The space complexity can be reduced to `O(K)`.
 // Author: github.com/lzl124631x
 // Time: O(NK)
 // Space: O(K)
+
 class Solution {
 public:
-    int maxValueOfCoins(vector<vector<int>>& A, int k) {
-        int dp[2001] = {}, N = A.size();
-        for (int i = 0; i < N; ++i) {
-            for (int j = k; j >= 1; --j) {
-                for (int t = 1, sum = 0; t <= j && t <= A[i].size(); ++t) {
-                    sum += A[i][t - 1];
-                    dp[j] = max(dp[j], dp[j - t] + sum);
+    int maxValueOfCoins(vector<vector<int>>& A, int K) {
+        int N = A.size();
+        vector<int> prev(K + 1, 0); // Represents dp[i-1][k]
+        vector<int> curr(K + 1, 0); // Represents dp[i][k]
+
+        for (int i = 0; i < N; ++i) { 
+            for (int k = 1; k <= K; ++k) { 
+                curr[k] = prev[k]; 
+                for (int j = 0, sum = 0; j < k && j < A[i].size(); ++j) { 
+                    sum += A[i][j]; 
+                    curr[k] = max(curr[k], sum + prev[k - j - 1]); 
                 }
             }
+            prev = curr; // Update prev to curr for the next iteration
         }
-        return dp[k];
+
+        return prev[K]; 
     }
 };
 ```
