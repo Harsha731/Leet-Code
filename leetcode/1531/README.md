@@ -52,32 +52,121 @@ For `dp[i][j]`, we have two options:
     1. We scan `t` from `i` to `1`.
     2. If `s[t - 1] == s[i - 1]` then we merge them together; otherwise we delete `s[t - 1]`. We store the merge count using `cnt` and the deleted count using `del`.
     3. We can update `dp[i][j]` using `dp[t - 1][j - del]` and `1 + (cnt >= 100 ? 3 : cnt >= 10 ? 2 : cnt >= 2 ? 1 : 0))` which is the number of characters required to encode the merged `s[i - 1]` section.
+  
+Mine : -
+
+A single character has a length of 1.
+Two to nine consecutive characters have a length of 2 (e.g., a2, a3, ..., a9).
+Ten to ninety-nine consecutive characters have a length of 3 (e.g., a10, a11, ..., a99).
+One hundred or more consecutive characters have a length of 4 (e.g., a100, a101, ...).
+
+dp[i][j] represents the minimum length of the compressed string for the first i characters of the input string s, using at most j deletions.
+
+Logic : We are checking for each 'position' and 'del' possible by going backward (if possible, i.e, j >= del), 
+then do dp[i][j] = min(dp[i][j], dp[l - 1][j - del] + cost);
+If deletions still possible, consider deleting the current character
 
 ```cpp
-// OJ: https://leetcode.com/problems/string-compression-ii/
-// Author: github.com/lzl124631x
-// Time: O(N^2 * K)
-// Space: O(N^2)
-int dp[101][101];
+// TC : O(n^2 * k) and SC : O(n * k)
+
 class Solution {
 public:
     int getLengthOfOptimalCompression(string s, int k) {
-        int N = s.size();
-        memset(dp, 0x3f, sizeof(dp));
+        int n = s.length();
+        // Initialize a DP table with size 110x110 and fill it with a large value (9999)
+        vector<vector<int>> dp(110, vector<int>(110, 9999));
+        // Base case: No characters and no deletions result in a compressed length of 0
         dp[0][0] = 0;
-        for (int i = 1; i <= N; ++i) {
-            for (int j = 0; j <= k; ++j) {
-                if (j) dp[i][j] = min(dp[i][j], dp[i - 1][j - 1]);
-                int cnt = 0, del = 0;
-                for (int t = i; t > 0; --t) {
-                    if (s[t - 1] == s[i - 1]) ++cnt;
-                    else ++del;
-                    if (j - del < 0) break;
-                    dp[i][j] = min(dp[i][j], dp[t - 1][j - del] + 1 + (cnt >= 100 ? 3 : cnt >= 10 ? 2 : cnt >= 2 ? 1 : 0));
+
+        // Iterate through each character in the string
+        for (int i = 1; i <= n; i++) {
+            // Iterate through all possible deletion counts (0 to k)
+            for (int j = 0; j <= k; j++) {
+                int cnt = 0; // Count of consecutive characters
+                int del = 0; // Count of deletions used so far
+
+                // Iterate backward from the current character to count consecutive characters
+                for (int l = i; l >= 1; l--) {
+                    // If the character matches the current character, increment the count
+                    if (s[l - 1] == s[i - 1]) 
+                        cnt++;
+                    else // Otherwise, increment the deletion count
+                        del++;
+
+                    // If the remaining deletions (j - del) are valid
+                    if (j - del >= 0) {
+                        // Calculate the cost of compressing the current block of characters
+                        int cost = 1; // Base cost for the character
+                        if (cnt >= 100) cost = 4; // Cost for 100+ consecutive characters
+                        else if (cnt >= 10) cost = 3; // Cost for 10-99 consecutive characters
+                        else if (cnt >= 2) cost = 2; // Cost for 2-9 consecutive characters
+
+                        // Update the DP table with the minimum length
+                        dp[i][j] = min(dp[i][j], dp[l - 1][j - del] + cost);
+                    }
+                }
+
+                // If there are remaining deletions (j > 0), consider deleting the current character
+                if (j > 0) {
+                    dp[i][j] = min(dp[i][j], dp[i - 1][j - 1]);
                 }
             }
         }
-        return dp[N][k];
+
+        // Return the minimum length of the compressed string after at most k deletions
+        return dp[n][k];
     }
 };
+
+```
+
+## Solution 2. Memoization
+```cpp
+
+
+class Solution {
+public:
+    int dp[110][110]; // Memoization table
+
+    int solve(string& s, int i, int k) {
+        if (k < 0) return 9999; // Invalid case (too many deletions)
+        if (i <= 0) return 0;   // Base case: no characters left
+
+        if (dp[i][k] != -1) return dp[i][k]; // Return memoized result
+
+        int cnt = 0, del = 0;
+        int res = 9999;
+
+        for (int l = i; l >= 1; l--) {
+            if (s[l - 1] == s[i - 1]) cnt++;
+            else del++;
+
+            if (k - del >= 0) {
+                int cost = 1;
+                if (cnt >= 100) cost = 4;
+                else if (cnt >= 10) cost = 3;
+                else if (cnt >= 2) cost = 2;
+                res = min(res, solve(s, l - 1, k - del) + cost);
+            }
+        }
+
+        if (k > 0) {
+            res = min(res, solve(s, i - 1, k - 1));
+        }
+
+        dp[i][k] = res;
+        return res;
+    }
+
+    int getLengthOfOptimalCompression(string s, int k) {
+        memset(dp, -1, sizeof(dp)); // Initialize memoization table with -1
+        return solve(s, s.length(), k);
+    }
+};
+```
+
+```cpp
+// Space optimzation is not possible
+// As the dp[i][j] = min(dp[i][j], dp[l - 1][j - del] + cost);
+// it is dependent on l-1 too
 ```
