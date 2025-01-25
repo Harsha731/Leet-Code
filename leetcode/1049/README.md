@@ -49,29 +49,116 @@ we can combine 1 and 1 to get 0, so the array converts to [1], then that's the o
 **Related Topics**:  
 [Dynamic Programming](https://leetcode.com/tag/dynamic-programming/)
 
-## Solution 1.
+```cpp
+This question is same as DP on subseqeunces - striver - Partition Set Into 2 Subsets With Min Absolute Sum Diff (DP-16)
+Here, We do 1 + 2 - 4 + 6 - 2 - 3 simply
+So, 2 partitions are needed here
+```
 
 ```cpp
-// OJ: https://leetcode.com/problems/last-stone-weight-ii/
-// Author: github.com/lzl124631x
-// Time: O(N + SUM(A))
-// Space: O(SUM(A))
-// Ref: https://leetcode.com/problems/last-stone-weight-ii/discuss/294888/JavaC%2B%2BPython-Easy-Knapsacks-DP
-class Solution {
-public:
-    int lastStoneWeightII(vector<int>& A) {
-        bitset<1501> dp = {1};
-        int sum = 0;
-        for (int a : A) {
-            sum += a;
-            for (int i = min(1500, sum); i >= a; --i) {
-                dp[i] = dp[i] + dp[i - a];
+// Memoization
+/*
+Time Complexity (TC): The TC is O(n . totalSum), where n is the number of elements and totalSum is the sum of all
+elements, as we solve n · totalSum subproblems.
+
+Space Complexity (SC): The SC is O(n . totalSum), due to the memoization table storing results for all subproblems. The
+recursion stack uses O(n) space, which is dominated by the memoization table.
+*/
+int solve(int i, int sumA, int sumB, vector<int>& nums, vector<vector<int>>& dp) {
+    // Base case: If all elements are processed, return the absolute difference
+    if (i == nums.size()) {
+        return abs(sumA - sumB);
+    }
+
+    if (dp[i][sumA] != -1) {
+        return dp[i][sumA];
+    }
+
+    // Include the current element in subset A
+    int includeInA = solve(i + 1, sumA + nums[i], sumB, nums, dp);
+
+    // Include the current element in subset B
+    int includeInB = solve(i + 1, sumA, sumB + nums[i], nums, dp);
+
+    return dp[i][sumA] = min(includeInA, includeInB);
+}
+
+int minSubsetSumDifference(vector<int>& nums, int n) {
+    int totalSum = accumulate(nums.begin(), nums.end(), 0);
+    vector<vector<int>> dp(n, vector<int>(totalSum + 1, -1));
+    return solve(0, 0, 0, nums, dp);
+}
+```
+_________________________________________
+
+```cpp
+// Tabulation
+
+int minSubsetSumDifference(vector<int>& arr, int n) {
+    int totalSum = 0;
+    for (int num : arr) {
+        totalSum += num;
+    }
+
+    // Initialize DP array
+    vector<bool> dp(totalSum + 1, false);
+    dp[0] = true;
+
+    // Fill the DP array
+    for (int i = 0; i < n; i++) {
+        for (int j = totalSum; j >= arr[i]; j--) {
+            dp[j] = dp[j] || dp[j - arr[i]];
+        }
+    }
+
+    // Find the largest j <= totalSum / 2 for which dp[j] is true
+    int minDiff = INT_MAX;
+    for (int j = totalSum / 2; j >= 0; j--) {
+        if (dp[j]) {
+            minDiff = totalSum - 2 * j;
+            break;
+        }
+    }
+
+    return minDiff;
+}
+```
+_________________________________________
+
+```cpp
+// Space Optimization
+
+int minSubsetSumDifference(vector<int>& arr, int n) {
+    int totalSum = accumulate(arr.begin(), arr.end(), 0);
+
+    // Initialize DP arrays
+    vector<bool> prev(totalSum + 1, false);
+    vector<bool> curr(totalSum + 1, false);
+    prev[0] = true; // A sum of 0 is always possible with 0 elements
+
+    // Fill the DP arrays
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j <= totalSum; j++) {
+            // Exclude the current element
+            curr[j] = prev[j];
+            // Include the current element
+            if (j >= arr[i]) {
+                curr[j] = curr[j] || prev[j - arr[i]];
             }
         }
-        for (int i = sum / 2; i >= 0; --i) {
-            if (dp[i]) return sum - i - i;
-        }
-        return 0;
+        // Swap prev and curr for the next iteration
+        swap(prev, curr);
     }
-};
+
+    // Find the largest j <= totalSum / 2 for which prev[j] is true
+    int minDiff = INT_MAX;
+    for (int j = totalSum / 2; j >= 0; j--) {
+        if (prev[j]) {
+            minDiff = totalSum - 2 * j;
+            break;
+        }
+    }
+
+    return minDiff;
+}
 ```
