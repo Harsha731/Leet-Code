@@ -31,8 +31,7 @@
 
 ## Solution 1. Two Pointers
 
-Approach 3: Two pointer Approach
-```cpp
+```
 Explanation :
 1.) Through intution explanation we know that if all the elements are positive or the negative elements are even then ur 
 answer will be product of complete array which u will get in variable l and r at the last iteration.
