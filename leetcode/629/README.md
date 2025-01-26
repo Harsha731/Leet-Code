@@ -41,104 +41,92 @@ The array [1,3,2] and [2,1,3] have exactly 1 inverse pair.
 [Dynamic Programming](https://leetcode.com/tag/dynamic-programming/)
 
 ## Solution 1.
+```cpp
+/*
+Intuition :
+Let's say we have n elements in our permutation then Depending on where we put the element (n+1) in our permutation, we may add 0, 1, 2, ..., n new inverse pairs. For example, if we have some permutation of 1...4, then:
 
-Let `dp[i][j]` be the number ways to form `k` reverse pairs with `i` numbers.
+5 x x x x creates 4 new inverse pairs
+x 5 x x x creates 3 new inverse pairs
+...
+x x x x 5 creates 0 new inverse pairs
 
-For `i` numbers, there are `i!` permutations.
+Approach : 
+dp[n][k] = dp[n - 1][k - 0] + dp[n - 1][k - 1] + ... + dp[n - 1][k - (n - 1)]
 
-The decreasing sequence has `(i-1) + (i-2) + ... + 0 = (i-1) * i / 2` reverse pairs.
+Time complexity: O(n∗k∗k) to O(n∗k)
+Space complexity:O(n∗k) to O(k)
 
-```
-dp[1][0] = 1       (1)
+Let dp[i][j] be the number ways to form j reverse pairs with i numbers.
 
-dp[2][0] = 1       (12)
-dp[2][1] = 1       (21)
-
-dp[3][0] = 1       (123)
-dp[3][1] = 2       (132, 213)
-dp[3][2] = 2       (312, 231)
-dp[3][3] = 1       (321)
-
-dp[4][0] = 1       (1234)
-dp[4][1] = 3        (2134,1324,1243)
-dp[4][2] = 
-dp[4][3] = 
-dp[4][4] =          (4321)
-dp[4][5] = 
-dp[4][6] = 
-
-```
-
-Denote `R(n, k)` as the result number, `P` as a permutation.
-
-
-For `n = 1`, only 1 case for `k = 0`. So `R(1, 0) = 1`.
-
-```
-| 1 |               // If P[0] = 1
-```
-
-For `n = 2`:
-
-```
-| 1 |               // If P[0] = 1
-    | 1 |           // If P[0] = 2
-|
-V
-| 1 | 1 |
-```
-
-For `n = 3`:
-
-```
-| 1 | 1 |               // If P[0] = 1
-    | 1 | 1 |           // If P[0] = 2
-        | 1 | 1 |       // If P[0] = 3
-|
-V
-| 1 | 2 | 2 | 1 |
-
-```
-
-For `n = 4`:
-```
-| 1 | 2 | 2 | 1 |              // If P[0] = 1
-    | 1 | 2 | 2 | 1 |          // If P[0] = 2
-        | 1 | 2 | 2 | 1 |      // If P[0] = 3
-            | 1 | 2 | 2 | 1 |  // If P[0] = 4
-|
-V
-| 1 | 3 | 5 | 6 | 5 | 3 | 1 |
-
+If you place N in the last position (i = 0), it creates 0 new inverse pairs.            [Notice that it is i=0 for last position]
+If you place N in the second-to-last position (i = 1), it creates 1 new inverse pair.
+If you place N in the first position (i = N-1), it creates N-1 new inverse pairs.
+However, you cannot create more than N-1 new inverse pairs by placing N in any position. 
+Therefore, the maximum number of new inverse pairs you can create by placing N is N-1.
+*/
 ```
 
 ```cpp
 // OJ: https://leetcode.com/problems/k-inverse-pairs-array/
 // Author: github.com/lzl124631x
-// Time: O(N * K^2)
-// Space: O(K)
+// Time: O(N^2 * K)
+// Space: O(N * K)
 class Solution {
+private:
+    const int mod=int(1e9+7);
+    int dp[1001][1001];
+    int f(int n,int k) {
+        //base case
+        if(k<=0) return k==0;
+        if(dp[n][k]!=-1) return dp[n][k];
+
+
+        int ans=0;
+        for(int i=0;i<n;++i) {
+            ans+=f(n-1,k-i);
+            ans%=mod;
+        }
+        return dp[n][k]=ans;
+    }
 public:
     int kInversePairs(int n, int k) {
-        if (k > n * (n - 1) / 2) return 0;
-        int mod = 1e9 + 7;
-        vector<int> prev(1, 1);
-        for (int i = 1; i <= n; ++i) {
-            vector<int> cnt(min(k + 1, (int)prev.size() + i - 1));
-            for (int j = 0; j < i; ++j) {
-                for (int t = 0; t < prev.size(); ++t) {
-                    if (j + t > k) break;
-                    cnt[j + t] = (cnt[j + t] + prev[t]) % mod;
-                }
-            }
-            prev = cnt;
-        }
-        return prev[k];
+        memset(dp,-1,sizeof(dp));
+        return f(n,k);
     }
 };
 ```
 
-## Solution 2. DP
+## Solution 2. Tabulation
+
+```cpp
+// Time: O(N * K * min(N, K))
+// Space: O(N * K)
+
+class Solution {
+private:
+    const int mod=int(1e9+7);
+public:
+    int kInversePairs(int n, int k) {
+        vector<vector<int>> dp(n+1,vector<int>(k+1,0));
+        //base case
+        for(int N=0;N<=n;++N) dp[N][0]=1;
+        for(int N=1;N<=n;++N) {
+            for(int K=0;K<=k;++K) {
+                int ans=0;
+                for(int i=0;i<min(N,K+1);++i) {
+                    ans+=dp[N-1][K-i];
+                    ans%=mod;
+                }
+                dp[N][K]=ans;
+            }
+        }
+        return dp[n][k];
+    }
+};
+```
+
+## Solution 3. DP Time Optimized    
 
 Denote `F(N, K)` as the result.
 
@@ -159,40 +147,28 @@ We can use this formula to compute `F(n, K)` for `N = 1, 2, 3, ..., N`.
 ```cpp
 // OJ: https://leetcode.com/problems/k-inverse-pairs-array/
 // Author: github.com/lzl124631x
-// Time: O(NK * min(N, K))
-// Space: O(K)
+// Time: O(NK)
+// Space: O(NK)
 class Solution {
+private:
+    const int mod=int(1e9+7);
 public:
-    int kInversePairs(int N, int K) {
-        if (K > N * (N - 1) / 2) return 0;
-        vector<int> m(K + 1, 0);
-        m[0] = 1;
-        int mod = 1e9 + 7;
-        for (int n = 2; n <= N; ++n) {
-            for (int k = min(K, (n * (n - 1) / 2)); k > 0; --k) {
-                for (int i = max(0, k - n + 1); i < k && m[i]; ++i) {
-                    m[k] = (m[k] + m[i]) % mod;
-                }
+    int kInversePairs(int n, int k) {
+        vector<vector<int>> dp(n+1,vector<int>(k+1,0));
+        //base case
+        for(int N=0;N<=n;++N) dp[N][0]=1;
+        for(int N=1;N<=n;++N) {
+            for(int K=0;K<=k;++K) {
+                dp[N][K] = (dp[N - 1][K] + (K > 0 ? dp[N][K - 1] : 0)) % mod;
+                dp[N][K] = (dp[N][K] + mod - (K >= N ? dp[N-1][K-N] : 0)) % mod;
             }
         }
-        return m[K];
+        return dp[n][k];
     }
 };
 ```
 
-## Solution 3. DP + Cumulative Sum
-
-In Solution 2, we alway compute the sum of a segment of the previous row. Considering this, we can use Cumulative Sum to make it faster.
-
-Denote `G(N, K)` as `Sum{k=[0,K]}(F(N, k))`.
-
-```
-G(N, K) = G(N, K - 1) + F(N, K)
-        = G(N, K - 1) + [F(N - 1, K - min(K, N - 1)) + ... + F(N - 1, K)]
-        = G(N, K - 1) + [G(N - 1, K) - G(N - 1, K - min(K, N - 1) - 1)]
-```
-
-After all the `G(N, K)` are computed, we can get `F(N, K) = G(N, K) - G(N, K - 1)`.
+## Solution 4. DP Time + Space Optimization
 
 ```cpp
 // OJ: https://leetcode.com/problems/k-inverse-pairs-array/
@@ -200,19 +176,20 @@ After all the `G(N, K)` are computed, we can get `F(N, K) = G(N, K) - G(N, K - 1
 // Time: O(NK)
 // Space: O(K)
 class Solution {
+private:
+    const int mod=int(1e9+7);
 public:
-    int kInversePairs(int N, int K) {
-        if (K > N * (N - 1) / 2) return 0;
-        vector<vector<int>> dp(2, vector<int>(K + 1, 0));
-        dp[0][0] = dp[1][0] = 1;
-        int mod = 1e9 + 7;
-        for (int n = 2; n <= N; ++n) {
-            int bound = min(K, n * (n - 1) / 2);
-            for (int k = 1; k <= bound; ++k) {
-                dp[n % 2][k] = (dp[n % 2][k - 1] + (mod + dp[(n - 1) % 2][k] - dp[(n - 1) % 2][k - min(k, n - 1) - 1]) % mod) % mod;
+    int kInversePairs(int n, int k) {
+        vector<int> prev(k+1,0),curr(k+1,0);
+        prev[0]=curr[0]=1;
+        for(int N=1;N<=n;++N) {
+            for(int K=0;K<=k;++K) {
+                curr[K] = (prev[K] + (K > 0 ? curr[K - 1] : 0)) % mod;
+                curr[K] = (curr[K] + mod - (K >= N ? prev[K-N] : 0)) % mod;
             }
+            prev = curr;
         }
-        return dp[N % 2][K];
+        return curr[k];
     }
 };
 ```
