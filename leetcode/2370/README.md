@@ -56,20 +56,102 @@ Note that &quot;acfgbd&quot; is not ideal because &#39;c&#39; and &#39;f&#39; ha
 ## Solution 1.
 
 ```cpp
-// OJ: https://leetcode.com/problems/longest-ideal-subsequence
-// Author: github.com/lzl124631x
-// Time: O(N)
-// Space: O(1)
+// s[index] means it stores the ascii value
+// 150 is used as there will 
+// ('a' to 'z') ranges from 97 to 122
+// ('A' to 'Z') ranges from 65 to 90.
+
 class Solution {
 public:
     int longestIdealString(string s, int k) {
-        int dp[26] = {};
-        for (char c : s) {
-            int mx = 0, ch = c - 'a';
-            for (int i = max(0, ch - k); i <= min(25, ch + k); ++i) mx = max(mx, dp[i]);
-            dp[ch] = 1 + mx;
+        int n = s.size();
+        vector<vector<int>> dp(n + 1, vector<int>(150, -1)); 
+        return solve(s, 0, 0, k, dp); // Start recursion from index 0 with prev = 0
+    }
+
+    int solve(string& s, int index, int prev, int& k, vector<vector<int>>& dp) {
+        // Base case: if we reach the end of the string, return 0
+        if (index >= s.size()) {
+            return 0;
         }
-        return *max_element(begin(dp), end(dp));
+
+        if (dp[index][prev] != -1) {
+            return dp[index][prev];
+        }
+
+        int include = 0, exclude = 0;
+
+        // Check if the current character can be included in the ideal string
+        if (prev == 0 || abs(s[index] - prev) <= k) {
+            include = 1 + solve(s, index + 1, s[index], k, dp); // Include current character
+        }
+
+        // Exclude the current character and move to the next index
+        exclude = solve(s, index + 1, prev, k, dp);
+
+        return dp[index][prev] = max(include, exclude);
+    }
+};
+```
+
+## Solution 2. Tabulation
+```cpp
+// We calculate the whole dp table here, for all the prev for 0 to 149 unlike in memoization
+
+class Solution {
+public:
+    int longestIdealString(string s, int k) {
+        int n = s.size();
+        vector<vector<int>> dp(n + 1, vector<int>(150, 0)); 
+
+        // Iterate from the end of the string to the beginning
+        for (int index = n - 1; index >= 0; index--) {
+            for (int prev = 0; prev < 150; prev++) {
+                int include = 0, exclude = 0;
+
+                // Check if the current character can be included
+                if (prev == 0 || abs(s[index] - prev) <= k) {
+                    include = 1 + dp[index + 1][s[index]]; // Include current character
+                }
+
+                // Exclude the current character
+                exclude = dp[index + 1][prev];
+
+                // Store the result in the DP table
+                dp[index][prev] = max(include, exclude);
+            }
+        }
+
+        // The result is the maximum length starting from index 0 with prev = 0
+        return dp[0][0];
+    }
+};
+```
+
+## Solution 3. Space Optimization
+```cpp
+class Solution {
+public:
+    int longestIdealString(string s, int k) {
+        int n = s.size();
+        vector<int> curr(150, 0);
+        vector<int> next(150, 0);
+
+        for (int index = n - 1; index >= 0; index--) {
+            for (int prev = 0; prev < 150; prev++) {
+                int include = 0, exclude = 0;
+
+                if (prev == 0 || abs(s[index] - prev) <= k) {
+                    include = 1 + next[s[index]];
+                }
+
+                exclude = next[prev];
+                curr[prev] = max(include, exclude);
+            }
+            next = curr;
+        }
+
+        return curr[0];
     }
 };
 ```
