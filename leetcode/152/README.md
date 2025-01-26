@@ -31,12 +31,15 @@
 
 ## Solution 1. Two Pointers
 
-The problem is the same as finding the longest subarray with even number negative numbers without 0.
-
-We can use two pointers.
-* the fast pointer keeps reading number until it reaches 0 or end of array; meanwhile, we keep updating answer with the greatest product we've seen.
-* if the product is negative, we move the slow pointer until the product becomes positive, and update the answer if it's greater.
-* we move both pointers to the next non-zero number and loop until the fast pointer reaches the end.
+Approach 3: Two pointer Approach
+Explanation :
+1.) Through intution explanation we know that if all the elements are positive or the negative elements are even then ur 
+answer will be product of complete array which u will get in variable l and r at the last iteration.
+2.) But if negative elements are odd then u have to remove one negative element and it is sure that it will be either 
+right of max prefix product or left of max suffix product. So u need not to modify anything in your code as u are 
+getting prefix product in l and suffix prduxt in r.
+3.) If array also contains 0 then your l and r will become 0 at that point...then just update it to 1(or else u 
+will keep multiplying with 0) to get the product ahead making another subarray.
 
 ```cpp
 // OJ: https://leetcode.com/problems/maximum-product-subarray/
@@ -45,33 +48,49 @@ We can use two pointers.
 // Space: O(1)
 class Solution {
 public:
-    int maxProduct(vector<int>& A) {
-        int ans = A[0], N = A.size(), j = 0;
-        while (j < N) {
-            int i = j, prod = 1;
-            while (j < N && A[j] != 0) {
-                prod *= A[j++];
-                ans = max(ans, prod);
-            }
-            if (j < N) ans = max(ans, 0);
-            while (i < N && prod < 0) {
-                prod /= A[i++];
-                if (i != j) ans = max(ans, prod);
-            }
-            while (j < N && A[j] == 0) ++j;
+    int maxProduct(std::vector<int>& nums) {
+        int n = nums.size();
+        if (n == 0) return 0; // Edge case: empty array
+
+        int leftProduct = 1;  // Tracks the prefix product
+        int rightProduct = 1; // Tracks the suffix product
+        int result = nums[0]; // Stores the final result (maximum product found so far)
+
+        for (int i = 0; i < n; i++) {
+            // If leftProduct or rightProduct becomes 0, reset it to 1
+            leftProduct = (leftProduct == 0) ? 1 : leftProduct;
+            rightProduct = (rightProduct == 0) ? 1 : rightProduct;
+
+            // Update prefix product (left to right)
+            leftProduct *= nums[i];
+
+            // Update suffix product (right to left)
+            rightProduct *= nums[n - 1 - i];
+
+            // Update the result with the maximum of prefix and suffix products
+            result = std::max(result, std::max(leftProduct, rightProduct));
         }
-        return ans;
+
+        return result;
     }
 };
 ```
 
 ## Solution 2. DP
 
-Let `max[i]` be the maximum product of subarrays ending at `A[i]`, `min[i]` be the minimum product of subarrays ending at `A[i]`.
-
 ```
-max[i] = max(A[i], A[i] * max[i - 1], A[i] * min[i - 1])
-min[i] = min(A[i], A[i] * max[i - 1], A[i] * min[i - 1])
+Case 1: All Elements are Positive
+maxProd is enough
+
+Case 2: Array Has Both Positive and Negative Elements
+Even Number of Negatives: maxProd and minProd keeps getting swapped, at the end maxProd is answer
+Odd: swapping helps us
+
+Case 3: Array Contains Zeros
+maxProd, minProd becomes 0
+
+Taking nums[i] in max consideration is important when the previous product (either maxProd or minProd) is zero or negative, and starting fresh with the current element yields a better result.
+
 ```
 
 ```cpp
