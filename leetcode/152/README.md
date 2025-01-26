@@ -32,6 +32,7 @@
 ## Solution 1. Two Pointers
 
 Approach 3: Two pointer Approach
+```cpp
 Explanation :
 1.) Through intution explanation we know that if all the elements are positive or the negative elements are even then ur 
 answer will be product of complete array which u will get in variable l and r at the last iteration.
@@ -40,7 +41,7 @@ right of max prefix product or left of max suffix product. So u need not to modi
 getting prefix product in l and suffix prduxt in r.
 3.) If array also contains 0 then your l and r will become 0 at that point...then just update it to 1(or else u 
 will keep multiplying with 0) to get the product ahead making another subarray.
-
+```
 ```cpp
 // OJ: https://leetcode.com/problems/maximum-product-subarray/
 // Author: github.com/lzl124631x
