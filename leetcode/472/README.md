@@ -30,46 +30,91 @@ Given a list of words (<b>without duplicates</b>), please write a program that r
 **Similar Questions**:
 * [Word Break II (Hard)](https://leetcode.com/problems/word-break-ii/)
 
-## Solution 1. DP
-
-Use `dp[i]` to denote whether we can get `word[0..i]` by concatenating one or more words in the word list.
+## Solution 1. 
 
 ```cpp
-// OJ: https://leetcode.com/problems/concatenated-words/
-// Author: github.com/lzl124631x
-// Time: O(N*W^3)
-// Space: O(C) where C is the length sum of words.
-// Ref: https://discuss.leetcode.com/topic/72393/c-772-ms-dp-solution
+// Time complexity: O(n * L^2)
+// Space complexity: O(n * L).
+
 class Solution {
 private:
-    unordered_set<string> s;
-    bool isConcatenatedWord(string &word) {
-        int W = word.size();
-        vector<bool> dp(W, false);
-        for (int i = 0; i < W - 1; ++i) {
-            if (s.count(word.substr(0, i + 1))) dp[i] = true; // If `s[0..i]` is in the word list, we mark `i` as reachable.
-            if (!dp[i]) continue; // If `i` is not reachable, skip
-            for (int j = i + 1; j < W; ++j) { // Given that we can reach `i`, we see if we can reach `j` via string `s[(i+1)..(j)]`.
-                if (s.count(word.substr(i + 1, j - i))) dp[j] = true;
+    bool dfs(const string& word, unordered_set<string>& wordSet) {
+        for (int i = 1; i < word.length(); ++i) {
+            string prefix = word.substr(0, i);
+            string suffix = word.substr(i);
+
+            // If prefix exists in the set, check if suffix is also valid
+            if (wordSet.count(prefix)) {
+                if (wordSet.count(suffix) || dfs(suffix, wordSet)) {
+                    wordSet.insert(word);  // Add concatenated word to the set for quick lookup
+                    return true;
+                }
             }
-            if (dp[W - 1]) return true;
         }
         return false;
     }
+
 public:
     vector<string> findAllConcatenatedWordsInADict(vector<string>& words) {
-        s = unordered_set<string>(words.begin(), words.end());
+        unordered_set<string> wordSet(words.begin(), words.end());
         vector<string> ans;
-        for (string &word : words) {
-            if (isConcatenatedWord(word)) ans.push_back(word);
+
+        for (const string& word : words) {
+            if (word.empty()) continue;  // Skip empty strings
+            if (dfs(word, wordSet)) {
+                ans.push_back(word);
+            }
         }
+
         return ans;
     }
 };
 ```
 
+## Solution 2. DP Tabulation
 
-## Solution 2. Trie + DP
+```cpp
+/*
+dp[i] is 1 if the substring word[0..i-1] can be formed by concatenating words from the set.
+dp[0] = 1: An empty string is always considered valid (no words are needed to form it).
+TC : O(N * L^2) and SC : O(N * L)
+*/
+
+class Solution {
+public:
+    vector<string> findAllConcatenatedWordsInADict(vector<string>& words) {
+        unordered_set<string> words_set(words.begin(), words.end());
+        vector<string> result;
+
+        for (const string& word : words) {
+            int length = word.size();
+            vector<int> dp(length + 1, 0);
+            dp[0] = 1;
+
+            for (int i = 0; i < length; ++i) {
+                if (dp[i] == 0) continue;
+
+                for (int j = i + 1; j <= length; ++j) {
+                    if (j - i < length && words_set.count(word.substr(i, j - i))) {     // (i+1, j) => j-i is the size
+                        // j-i < length is for checking that we are trying for the entire word. i.e, it should be a combination of 2 words
+                        dp[j] = 1;
+                    }
+                }
+
+                if (dp[length]) {
+                    result.push_back(word);
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+};
+```
+
+
+## Solution 3. Trie + DP
 
 ### Complexity Analysis
 
