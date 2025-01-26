@@ -50,69 +50,103 @@
 **Related Topics**:  
 [Dynamic Programming](https://leetcode.com/tag/dynamic-programming/)
 
-## Solution 1. DP
-
-**Intuition**: The brute force way is enumerating all the `2^N` subsequences which has lots of repetitive computation. Given the first `i + 1` elements `A[0...i]`, the greatest alternating sum is a fixed value, we can memoize it and keep extending `i`. So we should use Dynamic Programming.
-
-**Algorithm**:
-
-Let `dp[i+1][0]` and `dp[i+1][1]` be the maximum alternating subsequence sum of the first `i + 1` elements `A[0...i]` where `A[i]` is even-indexed and odd-indexed, respectively.
-
-```
-dp[i+1][0] = max(
-                    dp[i][1] + A[i],  // if we pick A[i] as the last even-indexed number
-                    dp[i][0]          // otherwise
-                )
-dp[i+1][1] = max(
-                    dp[i][0] - A[i],  // if we pick A[i] as the last odd-indexed number
-                    dp[i][1]          // otherwise
-                )
-
-dp[0][0] = dp[0][1] = 0
-```
-
-The answer must has odd number of elements, so must be `dp[N][0]`.
-
-Since `dp[i+1][?]` is only dependent on `dp[i][?]`, instead of using an `N x 2` array, we can simply using a `1 x 2` array to store the DP values.
-
+## Solution 1. DP Memoization
+ 
 ```cpp
 // OJ: https://leetcode.com/contest/biweekly-contest-55/problems/maximum-alternating-subsequence-sum/
 // Author: github.com/lzl124631x
 // Time: O(N)
-// Space: O(1)
+// Space: O(N)
+
 class Solution {
-    typedef long long LL;
 public:
-    long long maxAlternatingSum(vector<int>& A) {
-        LL N = A.size(), dp[2] = {};
-        for (int i = 0; i < N; ++i) {
-            LL next[2] = {};
-            next[0] = max(dp[1] + A[i], dp[0]);
-            next[1] = max(dp[0] - A[i], dp[1]);
-            swap(next, dp);
+    long long dp[2][100001]; 
+
+    long long helper(int index, vector<int>& nums, bool isPositive) {
+        // Base case: if we've reached the end of the array, return 0
+        if (index >= nums.size()) {
+            return 0;
         }
-        return dp[0];
+
+        if (dp[isPositive][index] != -1) {
+            return dp[isPositive][index];
+        }
+
+        // Calculate the current value based on whether it's positive or negative
+        long long currentValue = isPositive ? nums[index] : -nums[index];
+
+        // Recursively compute the maximum alternating sum by either including or excluding the current element
+        long long includeCurrent = currentValue + helper(index + 1, nums, !isPositive);
+        long long excludeCurrent = helper(index + 1, nums, isPositive);
+
+        return dp[isPositive][index] = max(includeCurrent, excludeCurrent);
+    }
+
+    long long maxAlternatingSum(vector<int>& nums) {
+        memset(dp, -1, sizeof(dp));
+        return helper(0, nums, true);
     }
 };
+
 ```
 
-Or
+## Solution 2. DP Tabulation
 
 ```cpp
 // OJ: https://leetcode.com/problems/maximum-alternating-subsequence-sum/
 // Author: github.com/lzl124631x
 // Time: O(N)
-// Space: O(1)
+// Space: O(N)
 class Solution {
 public:
-    long long maxAlternatingSum(vector<int>& A) {
-        long long even = 0, odd = 0;
-        for (int n : A) {
-            long long o = even - n, e = odd + n;
-            even = max(even, e);
-            odd = max(odd, o);
+    long long maxAlternatingSum(vector<int>& nums) {
+        int n = nums.size();
+        long long dp[2][n + 1]; // DP table
+
+        // Base case: When no elements are left, the sum is 0
+        dp[0][n] = 0;
+        dp[1][n] = 0;
+
+        // Fill the DP table from the end to the beginning
+        for (int j = n - 1; j >= 0; j--) {
+            // If the current element is treated as positive
+            dp[1][j] = max(nums[j] + dp[0][j + 1], dp[1][j + 1]);
+
+            // If the current element is treated as negative
+            dp[0][j] = max(-nums[j] + dp[1][j + 1], dp[0][j + 1]);
         }
-        return even; 
+
+        // The result is the maximum sum starting from index 0, treating the first element as positive
+        return dp[1][0];
     }
 };
+```
+## Solution 3. DP Space Optimization
+
+```cpp
+
+// TC : O(N) and SC : O(1)
+class Solution {
+public:
+    long long maxAlternatingSum(vector<int>& nums) {
+        int n = nums.size();
+        long long cur[2] = {0, 0}; // cur[0]: negative, cur[1]: positive
+        long long next[2] = {0, 0}; // next[0]: negative, next[1]: positive
+
+        // Iterate from the end to the beginning
+        for (int j = n - 1; j >= 0; j--) {
+            // Compute next states
+            next[1] = max(nums[j] + cur[0], cur[1]); // Treat current element as positive
+            next[0] = max(-nums[j] + cur[1], cur[0]); // Treat current element as negative
+
+            // Update cur for the next iteration
+            cur[0] = next[0];
+            cur[1] = next[1];
+        }
+
+        // The result is the maximum sum when the first element is treated as positive
+        return cur[1];
+    }
+};
+
 ```
