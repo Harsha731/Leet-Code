@@ -58,6 +58,15 @@ For `dp(n, k)`:
 * If we don't pick `1` as the first number, we need to use the rest `n-1` numbers to get `k` visible numbers, i.e. `dp(n-1, k)` cases. We can put `1` after one of the `n-1` numbers so we need to multiply it by `n-1`. This in total will add `dp(n-1, k) * (n-1)` cases.
 
 ```cpp
+Notes :-
+i) If we place the shortest stick (height = 1) at the first position, it will always be visible because there are no sticks to its left.
+After placing the shortest stick, we are left with i-1 sticks, and we need to arrange them such that j-1 sticks are visible (since the first stick is already visible).
+
+ii) If we don't place the shortest stick (height = 1) at the first position, we can place any of the remaining i-1 sticks at the first position.
+Placing a taller stick at the first position will block the visibility of the shortest stick (height = 1) if it appears later in the arrangement.
+After placing a taller stick at the first position, we are left with i-1 sticks, and we still need j sticks to be visible.
+```
+```cpp
 // OJ: https://leetcode.com/problems/number-of-ways-to-rearrange-sticks-with-k-sticks-visible/
 // Author: github.com/lzl124631x
 // Time: O(NK)
