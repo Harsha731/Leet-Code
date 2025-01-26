@@ -60,19 +60,38 @@ Note that when `k < 0`, we need to do `k = max(0, k)` because negative profit go
 // Author: github.com/lzl124631x
 // Time: O(MNP) where `M` is the number of crimes, `N` is the number of members, and `P` is `minProfit`
 // Space: O(MNP)
+// When committing a crime, the profit gained can exceed the required profit (k), and the code uses 
+// max(0, k - profitGained) to ensure that any excess profit is treated as if the requirement is already met.
+// If minProfit = 5, and a scheme achieves 7 profit, it will still be counted in dp[i][j][5] because 7 ≥ 5.
+// (i, j, k) => (crimeIndex, membersLeft, profitNeeded)
+
 class Solution {
+private:
+    long mod = 1e9 + 7; 
+    long dp[101][101][101]; // DP table for memoization
+
+    long countSchemes(int i, int j, int k, vector<int>& group, vector<int>& profit) {
+
+        if (j < 0) return 0L; // If we don't have enough members, return 0
+        
+        if (i == group.size()) return k <= 0 ? 1L : 0L; // If the profit goal is not positive, it's achievable and we return 1; otherwise, return 0.
+
+        k = max(0, k); // Negative profit goal is the same as 0 profit goal         
+        // This is done for storing it in the dp[][][] vector
+
+        if (dp[i][j][k] != -1) return dp[i][j][k]; // Return memoized result
+
+        return dp[i][j][k] = (countSchemes(i + 1, j, k, group, profit) + countSchemes(i + 1, j - group[i], k - profit[i], group, profit)) % mod; 
+        // skip crime `i` or pick crime `i`.
+    }
+
 public:
     int profitableSchemes(int N, int minProfit, vector<int>& group, vector<int>& profit) {
-        long mod = 1e9 + 7, M = group.size(), dp[101][101][101] = {}; // crime, members, profit
-        memset(dp, -1, sizeof(dp));
-        function<long(int, int, int)> dfs = [&](int i, int j, int k) {
-            if (j < 0) return 0L; // If we don't have enough members, return 0
-            if (i == M) return k <= 0 ? 1L : 0L; // If the profit goal is not positive, it's achievable and we return 1; otherwise, return 0.
-            k = max(0, k); // Negative profit goal is the same as 0 profit goal
-            if (dp[i][j][k] != -1) return dp[i][j][k];
-            return dp[i][j][k] = (dfs(i + 1, j, k) + dfs(i + 1, j - group[i], k - profit[i])) % mod; // skip crime `i` or pick crime `i`.
-        };
-        return dfs(0, N, minProfit);
+
+        int M = group.size();
+        memset(dp, -1, sizeof(dp)); // Initialize DP table with -1
+
+        return countSchemes(0, N, minProfit, group, profit); // Start DFS from the first crime, all members, and the minimum profit goal
     }
 };
 ```
@@ -87,19 +106,42 @@ public:
 class Solution {
 public:
     int profitableSchemes(int N, int minProfit, vector<int>& group, vector<int>& profit) {
-        long mod = 1e9 + 7, M = group.size(), dp[101][101][101] = {}; // crime, members, profit
-        for (int j = 0; j <= N; ++j) dp[0][j][0] = 1;
-        for (int i = 0; i < M; ++i) {
-            for (int j = 0; j <= N; ++j) {
-                for (int k = 0; k <= minProfit; ++k) {
-                    long val = dp[i][j][k];
-                    if (j - group[i] >= 0)
-                        val = (val + dp[i][j - group[i]][max(0, k - profit[i])]) % mod;
-                    dp[i + 1][j][k] = val;
+        const long MOD = 1e9 + 7;
+        int M = group.size();
+
+        // DP table: dp[crimeIndex][membersLeft][profitNeeded]
+        long dp[101][101][101] = {0};
+
+        // Base case: 1 way to achieve 0 profit with 0 members and 0 crimes
+        dp[0][0][0] = 1;
+
+        // Fill the DP table
+        for (int i = 1; i <= M; i++) { // Iterate over crimes
+            int membersRequired = group[i - 1];
+            int profitGained = profit[i - 1];
+
+            for (int j = 0; j <= N; j++) { // Iterate over members, 0 members is also possible in dp table
+                for (int k = 0; k <= minProfit; k++) { // Iterate over profit,  0 profit is also possible in dp table. But i=0 crime is not, so keep it 0.
+                    // Option 1: Skip the current crime
+                    dp[i][j][k] = dp[i - 1][j][k];
+
+                    // Option 2: Commit the current crime (if enough members are available)
+                    if (j >= membersRequired) {
+                        int remainingMembers = j - membersRequired;
+                        int remainingProfit = max(0, k - profitGained);     // Important
+                        dp[i][j][k] = (dp[i][j][k] + dp[i - 1][remainingMembers][remainingProfit]) % MOD;
+                    }
                 }
             }
         }
-        return dp[M][N][minProfit];
+
+        // Sum all valid schemes with at least `minProfit` and at most `N` members
+        long result = 0;
+        for (int j = 0; j <= N; j++) {
+            result = (result + dp[M][j][minProfit]) % MOD;
+        }
+
+        return result;
     }
 };
 ```
@@ -111,23 +153,57 @@ Since `dp[i+1]` values only depends on `dp[i]`, we can reduce the space complexi
 // Author: github.com/lzl124631x
 // Time: O(MNP)
 // Space: O(NP)
+
 class Solution {
 public:
     int profitableSchemes(int N, int minProfit, vector<int>& group, vector<int>& profit) {
-        long mod = 1e9 + 7, M = group.size(), dp[101][101] = {}, tmp[101][101] = {}; // crime, members, profit
-        for (int j = 0; j <= N; ++j) dp[j][0] = 1;
-        for (int i = 0; i < M; ++i) {
-            swap(tmp, dp);
-            for (int j = 0; j <= N; ++j) {
-                for (int k = 0; k <= minProfit; ++k) {
-                    long val = tmp[j][k];
-                    if (j - group[i] >= 0)
-                        val = (val + tmp[j - group[i]][max(0, k - profit[i])]) % mod;
-                    dp[j][k] = val;
+        const long MOD = 1e9 + 7;
+        int M = group.size();
+
+        // prev[j][k]: Number of ways to achieve at least k profit using j members (for the previous crime)
+        // curr[j][k]: Number of ways to achieve at least k profit using j members (for the current crime)
+        long prev[101][101] = {0};
+        long curr[101][101] = {0};
+
+        // Base case: 1 way to achieve 0 profit with 0 members
+        prev[0][0] = 1;
+
+        // Fill the DP table
+        for (int i = 1; i <= M; i++) { // Iterate over crimes
+            int membersRequired = group[i - 1];
+            int profitGained = profit[i - 1];
+
+            // Reset curr for the current crime
+            for (int j = 0; j <= N; j++) {
+                for (int k = 0; k <= minProfit; k++) {
+                    // Option 1: Skip the current crime
+                    curr[j][k] = prev[j][k];
+
+                    // Option 2: Commit the current crime (if enough members are available)
+                    if (j >= membersRequired) {
+                        int remainingMembers = j - membersRequired;
+                        int remainingProfit = max(0, k - profitGained);
+                        curr[j][k] = (curr[j][k] + prev[remainingMembers][remainingProfit]) % MOD;
+                    }
+                }
+            }
+
+            // Update prev to curr for the next iteration
+            for (int j = 0; j <= N; j++) {
+                for (int k = 0; k <= minProfit; k++) {
+                    prev[j][k] = curr[j][k];
                 }
             }
         }
-        return dp[N][minProfit];
+
+        // Sum all valid schemes with at least `minProfit` and at most `N` members
+        long result = 0;
+        for (int j = 0; j <= N; j++) {
+            result = (result + prev[j][minProfit]) % MOD;
+        }
+
+        return result;
     }
 };
+
 ```
