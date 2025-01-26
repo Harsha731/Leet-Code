@@ -58,6 +58,9 @@
 // Time: O(N)
 // Space: O(N)
 
+// dp[i][0] = If ith element is considered, it is taken as -ve. It may be ignored also
+// This is simmilar to Buy and Sell Stock questions
+
 class Solution {
 public:
     long long dp[2][100001]; 
