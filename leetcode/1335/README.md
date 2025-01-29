@@ -57,7 +57,7 @@ The difficulty of the schedule = 6 + 1 = 7
 [Dynamic Programming](https://leetcode.com/tag/dynamic-programming/)
 
 ## Solution 1. DP
-
+```cpp
 /*
 Jobs are dependent (i.e To work on the ith job, you have to finish all the jobs j where 0 <= j < i).    
 Input Validation:
@@ -73,7 +73,6 @@ For each partition point i (from idx to N - d), compute the maximum difficulty o
 Recursively compute the minimum difficulty for the remaining jobs (i + 1 to N-1) over the remaining d - 1 days.
 Track the minimum sum of the current day's difficulty and the recursive result.
 Store the result in the memoization table and return it.
-*/
 ```
 
 ```cpp
