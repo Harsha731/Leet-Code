@@ -67,7 +67,7 @@
 **Related Topics**:  
 [Dynamic Programming](https://leetcode.com/tag/dynamic-programming/)
 
-```cpp
+```
 dp[i+1][j+1] represents the number of ways to match target[0..j] using cnt[0..i].
 The base case is dp[i] = 1, meaning there's one way to match an empty target.
 We need dp[L][N] at the end
