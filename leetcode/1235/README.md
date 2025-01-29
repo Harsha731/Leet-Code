@@ -66,6 +66,12 @@ dp[startTime[i]] = max( maxProfit, profit[i] + dp[endTime[i]] )
 // Author: github.com/lzl124631x
 // Time: O(NlogN)
 // Space: O(N)
+/*
+If you choose a job that ends at time X you will be able to start another job that starts at time X.
+last job has dp.lower_bound(e)->second as 0
+We want >=, so we use lower bound directly
+*/
+
 class Solution {
 public:
     int jobScheduling(vector<int>& startTime, vector<int>& endTime, vector<int>& profit) {
@@ -97,12 +103,16 @@ dp[endTime[i]] = max( maxProfit, profit[i] + dp[startTime[i]] )
 // Author: github.com/lzl124631x
 // Time: O(NlogN)
 // Space: O(N)
+
+// first job has dp.upper_bound(s)->second as 0
+// We need e1 <= s2, so we use upper bound to get > and do prev of it, we get <=
+
 class Solution {
 public:
     int jobScheduling(vector<int>& startTime, vector<int>& endTime, vector<int>& profit) {
         vector<array<int, 3>> jobs;
         for (int i = 0; i < startTime.size(); ++i) jobs.push_back({ endTime[i], startTime[i], profit[i] });
-        sort(begin(jobs), end(jobs));
+        sort(begin(jobs), end(jobs));	// Ascending order
         map<int, int> dp{{0, 0}}; // endTime to max profit
         int ans = 0;
         for (auto &[e, s, p] : jobs) {
