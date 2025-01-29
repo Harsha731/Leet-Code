@@ -49,6 +49,10 @@ For each position `matrix[x][y]`,
 * if `cnt[x][y]` is not zero, which means it's already visited, return `cnt[x][y]` right away.
 * otherwise, probe the 4 directions, `cnt[x][y]` is one greater than its largest neightbor.
 
+// NOTE :-
+// Here, we are using cnt array for DFS, it is like DP here.
+// For BFS, DP is not needed, the indegree becoming 0 helps us 
+
 ```cpp
 // OJ: https://leetcode.com/problems/longest-increasing-path-in-a-matrix/
 // Author: github.com/lzl124631x
