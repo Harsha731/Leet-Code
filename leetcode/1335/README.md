@@ -58,41 +58,73 @@ The difficulty of the schedule = 6 + 1 = 7
 
 ## Solution 1. DP
 
-Let `dp[d][i]` be the answer for the subproblem with `d` days at `i`th job.
+/*
+Jobs are dependent (i.e To work on the ith job, you have to finish all the jobs j where 0 <= j < i).    
+Input Validation:
+Check if the number of jobs N is less than the number of days D. If so, return -1 because it's impossible to schedule the jobs.
+memo[d][idx] means
 
-Let `mx[i][j]` be the maximum value in `A[i..j]`.
+i) Base Case:
+If d == 1, it means there's only one day left. Compute the maximum difficulty of all remaining jobs from idx to N-1 and return it.
 
-```
-dp[d][i] = min( dp[d-1][j-1] + mx[j][i] | d-1 <= j <= i )
+ii) Recursive Case:
+Iterate over all possible partitions for the current day:
+For each partition point i (from idx to N - d), compute the maximum difficulty of jobs from idx to i (this represents the difficulty of the current day).
+Recursively compute the minimum difficulty for the remaining jobs (i + 1 to N-1) over the remaining d - 1 days.
+Track the minimum sum of the current day's difficulty and the recursive result.
+Store the result in the memoization table and return it.
+*/
 ```
 
 ```cpp
 // OJ: https://leetcode.com/problems/minimum-difficulty-of-a-job-schedule/
 // Author: github.com/lzl124631x
 // Time: O(N^2 * D)
-// Space: O(N^2 + ND)
+// Space: O(ND)
 class Solution {
-    typedef long long LL;
-    inline void setMin(LL &a, LL b) { a = min(a, b); }
 public:
     int minDifficulty(vector<int>& A, int D) {
         int N = A.size();
         if (D > N) return -1;
-        vector<vector<LL>> mx(N, vector<LL>(N)), dp(D + 1, vector<LL>(N, 1e9));
-        for (int i = 0; i < N; ++i) {
-            for (int j = i; j < N; ++j) mx[i][j] = *max_element(A.begin() + i, A.begin() + j + 1);
-        }
-        for (int i = 0; i < N; ++i) dp[1][i] = mx[0][i];
-        for (int d = 2; d <= D; ++d) {
-            for (int i = d - 1; i < N; ++i) {
-                for (int j = d - 1; j <= i; ++j) {
-                    setMin(dp[d][i], dp[d - 1][j - 1] + mx[j][i]);
-                }
+
+        // Initialize memoization table with -1 (uncomputed)
+        vector<vector<int>> memo(D + 1, vector<int>(N, -1));
+
+        // Call the helper function
+        return helper(A, D, 0, memo);
+    }
+
+private:
+    int helper(vector<int>& A, int d, int idx, vector<vector<int>>& memo) {
+        int N = A.size();
+
+        // If we have already computed this subproblem, return the result
+        if (memo[d][idx] != -1) return memo[d][idx];
+
+        // Base case: only one day left, so we have to do all remaining jobs
+        if (d == 1) {
+            int maxVal = 0;
+            for (int i = idx; i < N; ++i) {
+                maxVal = max(maxVal, A[i]);
             }
+            return memo[d][idx] = maxVal;
         }
-        return dp[D][N - 1];
+
+        int minDiff = INT_MAX;
+        int currMax = 0;
+
+        // Try all possible partitions for the current day
+        for (int i = idx; i <= N - d; ++i) {
+            currMax = max(currMax, A[i]);
+            int nextDiff = helper(A, d - 1, i + 1, memo);
+            minDiff = min(minDiff, currMax + nextDiff);
+        }
+
+        // Store the result in the memo table
+        return memo[d][idx] = minDiff;
     }
 };
+
 ```
 
 ## Solution 2. DP
@@ -103,28 +135,38 @@ We can compute the `mx` while computing `dp` instead of computing `mx` array bef
 // OJ: https://leetcode.com/problems/minimum-difficulty-of-a-job-schedule/
 // Author: github.com/lzl124631x
 // Time: O(N^2 * D)
-// Space: O(ND) 
+// Space: O(ND)
+
 class Solution {
-    typedef long long LL;
-    inline void setMin(LL &a, LL b) { a = min(a, b); }
 public:
     int minDifficulty(vector<int>& A, int D) {
-        int N = A.size(), inf = 1e9;
-        if (D > N) return -1;
-        vector<vector<LL>> dp(D + 1, vector<LL>(N, inf));
-        for (int i = 0; i < N; ++i) dp[1][i] = i == 0 ? A[0] : max(dp[1][i - 1], (LL)A[i]);
+        int N = A.size(); // Get the number of jobs
+        if (D > N) return -1; // If there are more days than jobs, it's impossible
+
+        // dp[d][i] will hold the minimum difficulty to schedule the first i jobs in d days
+        vector<vector<long long>> dp(D + 1, vector<long long>(N, 1e9));
+
+        // Base case: for 1 day, the difficulty is the maximum of the jobs up to i
+        for (int i = 0; i < N; ++i) 
+            dp[1][i] = i == 0 ? A[0] : max(dp[1][i - 1], (long long)A[i]);      // Important line
+
+        // Fill the dp array for each day starting from the 2nd day
         for (int d = 2; d <= D; ++d) {
-            for (int i = d - 1; i < N; ++i) {
-                int mx = 0;
+            for (int i = d - 1; i < N; ++i) { // Ensure we have enough jobs for the days. i.e, for d=3 => 3 jobs, we take dp[][2] onwards
+                int currMax = 0;  // To store the maximum value in the current subarray
+                // Iterate backwards to find the best partition point
                 for (int j = i; j >= d - 1; --j) {
-                    mx = max(mx, A[j]);
-                    setMin(dp[d][i], dp[d - 1][j - 1] + mx);
+                    currMax = max(currMax, A[j]);  // Update the maximum for the current subarray
+                    // Update the dp value considering the current partition
+                    dp[d][i] = min(dp[d][i], dp[d - 1][j - 1] + currMax);
                 }
             }
         }
-        return dp[D][N - 1];
+
+        return dp[D][N - 1]; // Return the minimum difficulty for D days with all jobs
     }
 };
+
 ```
 
 ## Solution 3. DP
@@ -137,25 +179,35 @@ Since `dp[d][i]` is dependent on `dp[d-1][j-1]` and `j <= i`, we can flip the lo
 // Time: O(NND)
 // Space: O(N)
 class Solution {
-    typedef long long LL;
-    inline void setMin(LL &a, LL b) { a = min(a, b); }
 public:
     int minDifficulty(vector<int>& A, int D) {
-        int N = A.size(), inf = 1e9;
+        int N = A.size();
         if (D > N) return -1;
-        vector<LL> dp(N);
-        for (int i = 0; i < N; ++i) dp[i] = i == 0 ? A[0] : max(dp[i - 1], (LL)A[i]);
+
+        // Initialize dp arrays with large values
+        vector<long long> prev(N, 1e9), curr(N, 1e9);
+
+        // Initialize the prev array for the first day
+        for (int i = 0; i < N; ++i) prev[i] = i == 0 ? A[0] : max(prev[i - 1], (long long)A[i]);
+
+        // Fill the dp array for each day
         for (int d = 2; d <= D; ++d) {
-            for (int i = N - 1; i >= d - 1; --i) {
-                int mx = 0;
-                dp[i] = inf;
+            // Reset curr for the current day
+            fill(curr.begin(), curr.end(), 1e9);
+            
+            for (int i = d - 1; i < N; ++i) {
+                int currMax = 0;  // To store the maximum value in the current subarray
                 for (int j = i; j >= d - 1; --j) {
-                    mx = max(mx, A[j]);
-                    setMin(dp[i], dp[j - 1] + mx);
+                    currMax = max(currMax, A[j]);  // Update the maximum for the current subarray
+                    curr[i] = min(curr[i], prev[j - 1] + currMax);
                 }
             }
+            
+            // Move current row to previous row for the next day
+            swap(prev, curr);
         }
-        return dp[N - 1];
+
+        return prev[N - 1];
     }
 };
 ```
