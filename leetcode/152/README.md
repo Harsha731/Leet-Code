@@ -91,6 +91,9 @@ maxProd, minProd becomes 0
 
 Taking nums[i] in max consideration is important when the previous product (either maxProd or minProd) is zero or negative, and starting fresh with the current element yields a better result.
 
+** When ever '0' appears, then maxProd, minProd both becomes 0 as we multiply with A[i]
+So, we include currentElement while taking max
+
 ```
 
 ```cpp
@@ -105,7 +108,7 @@ public:
         for (int n : A) {
             int a = n * maxProd, b = n * minProd;
             maxProd = max({n, a, b});
-            minProd = min({n, a, b});
+            minProd = min({n, a, b});    // When ever '0' appears, then maxProd, minProd both becomes 0 as we multiply with A[i]
             ans = max(ans, maxProd);
         }
         return ans;
