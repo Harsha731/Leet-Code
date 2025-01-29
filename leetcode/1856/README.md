@@ -78,6 +78,17 @@ Similarly, for other numbers. In essense, we don't want to go over the previous/
 
 For "how to get the next smaller element", check out the mono-stack solutions to [496. Next Greater Element I (Easy)](https://leetcode.com/problems/next-greater-element-i/)
 
+```
+We consider what if the A[i] is the smallest element, then we get the subarray l, r values
+eg. 1 2 3 2 => Start, 1, 2, 3, 2, End
+For the element 2, prevSmaller = 1, nextSmaller = E
+We get the subarray sum * A[i]
+Sum[i+1] gives sum till 'i' index
+Sum[nextSmaller[i]] - Sum[prevSmaller[i]+1] * A[i]
+i,e, sum till the element before nextSmaller-1 and sum till prevSmaller
+The window comes twice for the two 2's. It happens if the minimum in the window occurs more than once
+```
+
 ```cpp
 // OJ: https://leetcode.com/problems/maximum-subarray-min-product/
 // Author: github.com/lzl124631x
