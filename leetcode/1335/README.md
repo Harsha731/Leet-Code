@@ -113,7 +113,7 @@ private:
         int currMax = 0;
 
         // Try all possible partitions for the current day
-        for (int i = idx; i <= N - d; ++i) {
+        for (int i = idx; i <= N - d; ++i) {		// Here, we are making N >= d sure
             currMax = max(currMax, A[i]);
             int nextDiff = helper(A, d - 1, i + 1, memo);
             minDiff = min(minDiff, currMax + nextDiff);
