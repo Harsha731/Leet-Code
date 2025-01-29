@@ -65,6 +65,18 @@ After placing the shortest stick, we are left with i-1 sticks, and we need to ar
 ii) If we don't place the shortest stick (height = 1) at the first position, we can place any of the remaining i-1 sticks at the first position.
 Placing a taller stick at the first position will block the visibility of the shortest stick (height = 1) if it appears later in the arrangement.
 After placing a taller stick at the first position, we are left with i-1 sticks, and we still need j sticks to be visible.
+
+k : needed sticks to be visible
+n : available sticks
+
+We are only interested in cases, not the exact number. 
+Case -> One according to the needed, Simple ignorant case
+
+At the end, we return 1, if the case is valid
+return 0, if n < k or k=0
+
+dp[i][j] : 'i' avaiable sticks and 'j' needed sticks
+
 ```
 ```cpp
 // OJ: https://leetcode.com/problems/number-of-ways-to-rearrange-sticks-with-k-sticks-visible/
@@ -136,6 +148,11 @@ dp[i][j] = 0 if i < j
 // Author: github.com/lzl124631x
 // Time: O(NK)
 // Space: O(NK)
+/*
+min(i, k) is used to limit the range of the inner loop to ensure that the number of visible sticks (j) 
+cannot exceed either the total number of sticks (i) or the target number of visible sticks (k).
+As they need to be 0
+*/
 class Solution {
 public:
     int rearrangeSticks(int n, int k) {
