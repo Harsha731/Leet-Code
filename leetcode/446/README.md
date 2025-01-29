@@ -46,7 +46,7 @@ All arithmetic subsequence slices are:
 **Similar Questions**:
 * [Arithmetic Slices (Medium)](https://leetcode.com/problems/arithmetic-slices/)
 
-## Solution 1. DP
+## Solution 2. DP Tabulation
 
 Let `dp[i][d]` be the number of weak arithmetic subsequences ending at `A[i]` and with common difference `d`. Here `weak` means the subsequence can be of size `2`.
 
@@ -63,85 +63,82 @@ While summing the answer, we can ignore the `1`s corresponding to weak arithmeti
 ```cpp
 // OJ: https://leetcode.com/problems/arithmetic-slices-ii-subsequence/
 // Author: github.com/lzl124631x
-// Time: O(N^2)
-// Space: O(N^2)
+// Time Complexity : O(n^2) where n is the length of the input array, due to the nested loops.
+// Space Complexity: O(n^2)  in the worst case for storing counts in the hash maps
+
 // Ref: https://leetcode.com/problems/arithmetic-slices-ii-subsequence/solution/
 class Solution {
-    typedef long long LL;
 public:
-    int numberOfArithmeticSlices(vector<int>& A) {
-        int N = A.size(), ans = 0;
-        vector<unordered_map<LL, int>> dp(N);
-        for (int i = 1; i < N; ++i) {
+    int numberOfArithmeticSlices(vector<int>& nums) {
+        int n = nums.size();
+        vector<unordered_map<long long, int>> dp(n);
+        int totalCount = 0;
+
+        for (int i = 0; i < n; ++i) {
             for (int j = 0; j < i; ++j) {
-                LL d = (LL)A[i] - A[j];
-                int sum = dp[j].count(d) ? dp[j][d] : 0;
-                dp[i][d] += sum + 1;
-                ans += sum;
+                long long diff = static_cast<long long>(nums[i]) - nums[j];
+                
+                // Get the count of sequences ending at index j with the same difference
+                int countAtJ = dp[j][diff];
+                
+                // Add the count to the total count of arithmetic slices
+                totalCount += countAtJ;
+                
+                // Update the count of sequences ending at index i with this difference
+                dp[i][diff] += countAtJ + 1; // +1 for the new sequence formed by nums[j] and nums[i]
             }
         }
-        return ans;
+
+        return totalCount;
     }
 };
+
 ```
 
-## Solution 2. DP
 
-One optimization based on Solution 1 is that we can skip updating `dp[i][d]` if there won't be a next element appendable to this subsequence. This would save lots of runtime and space consumption.
+## Solution 1. DP Memoization
 
 ```cpp
 // OJ: https://leetcode.com/problems/arithmetic-slices-ii-subsequence/
 // Author: github.com/lzl124631x
 // Time: O(N^2)
 // Space: O(N^2)
+
 class Solution {
-    typedef long long LL;
+private:
+    vector<unordered_map<long long, int>> dp;
+
+    int dfs(int i, long long diff, const vector<int>& nums) {
+        if (dp[i].count(diff)) return dp[i][diff];
+
+        int count = 0;
+        for (int j = 0; j < i; ++j) {
+            if ((long long)nums[i] - nums[j] == diff) {
+                count += dfs(j, diff, nums) + 1; // Add subsequences ending at j and the new pair (j, i)
+            }
+        }
+
+        return dp[i][diff] = count;
+    }
+
 public:
-    int numberOfArithmeticSlices(vector<int>& A) {
-        if (A.empty()) return 0;
-        int ans = 0, N = A.size();
-        vector<unordered_map<LL, int>> dp(N);
-        unordered_set<int> s(A.begin(), A.end());
-        for (int i = 1; i < N; ++i) {
+    int numberOfArithmeticSlices(vector<int>& nums) {
+        int n = nums.size();
+        if (n < 3) return 0;
+
+        dp.resize(n);
+        int totalCount = 0;
+
+        // Iterate over all pairs (i, j) to calculate subsequences
+        for (int i = 1; i < n; ++i) {
             for (int j = 0; j < i; ++j) {
-                LL d = (LL)A[i] - A[j];
-                int count = dp[j].count(d) ? dp[j][d] : 0;
-                ans += count;
-                if (s.count(A[i] + d)) dp[i][d] += 1 + count;
+                long long diff = (long long)nums[i] - nums[j];
+                totalCount += dfs(j, diff, nums); // Add all subsequences ending at j with difference `diff`
             }
         }
-        return ans;
+
+        return totalCount;
     }
 };
-```
 
-## Solution 3. DP
-
-```cpp
-// OJ: https://leetcode.com/problems/arithmetic-slices-ii-subsequence/
-// Author: github.com/lzl124631x
-// Time: O(N^2)
-// Space: O(N^2)
-class Solution {
-public:
-    int numberOfArithmeticSlices(vector<int>& A) {
-        if (A.size() < 3) return 0;
-        int N = A.size(), ans = 0;
-        vector<vector<int>> dp(N, vector<int>(N));
-        unordered_map<int, vector<int>> pos;
-        for (int i = 0; i < N; ++i) pos[A[i]].push_back(i);
-        for (int i = 2; i < N; ++i) {
-            for (int j = 1; j < i; ++j) {
-                long num = 2l * A[j] - A[i];
-                if (num < INT_MIN || num > INT_MAX || !pos.count(num)) continue;
-                for (int k : pos[num]) {
-                    if (k >= j) break;
-                    dp[i][j] += dp[j][k] + 1;
-                }
-                ans += dp[i][j];
-            }
-        }
-        return ans;
-    }
-};
 ```
