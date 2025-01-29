@@ -67,6 +67,68 @@
 **Related Topics**:  
 [Dynamic Programming](https://leetcode.com/tag/dynamic-programming/)
 
+```cpp
+dp[i+1][j+1] represents the number of ways to match target[0..j] using cnt[0..i].
+The base case is dp[i] = 1, meaning there's one way to match an empty target.
+We need dp[L][N] at the end
+For each position i in the flattened array and each position j in the target:
+    dp[i + 1][j + 1] = ((cnt[i][target[j] - 'a'] * dp[i][j]) % mod + dp[i][j + 1]) % mod;
+
+This transition considers two cases:
+i) Using the current character at position i to match target[j].
+ii) Not using the current character and reusing the previous result.
+```
+
+## Soltuion 0. Recursion
+
+```cpp
+class Solution {
+private:
+    vector<array<int, 26>> cnt;
+    vector<vector<long long>> memo;
+    int M, L, N;
+    const int MOD = 1e9 + 7;
+
+    long long dfs(int i, int j, const string& target) {
+        if (j == N) return 1; // Successfully formed the target
+        if (i == L) return 0; // Reached end of words without forming target
+        if (memo[i][j] != -1) return memo[i][j];
+
+        // Skip current position
+        long long result = dfs(i + 1, j, target);
+
+        // Use current position if possible
+        if (cnt[i][target[j] - 'a'] > 0) {
+            result += cnt[i][target[j] - 'a'] * dfs(i + 1, j + 1, target);
+            result %= MOD;
+        }
+
+        return memo[i][j] = result;
+    }
+
+public:
+    int numWays(vector<string>& words, string target) {
+        M = words.size();
+        L = words[0].size();
+        N = target.size();
+
+        // Initialize count array
+        cnt.resize(L, array<int, 26>());
+        for (int i = 0; i < L; ++i) {
+            for (int j = 0; j < M; ++j) {
+                cnt[i][words[j][i] - 'a']++;
+            }
+        }
+
+        // Initialize memoization array
+        memo.resize(L, vector<long long>(N, -1));
+
+        return dfs(0, 0, target);
+    }
+};
+
+```
+
 ## Solution 1. DP
 
 Intuition: we can think of flattening the `words` array into a string where each place has multiple character options. And we use this spacial string to match `target`.
@@ -156,3 +218,4 @@ public:
     }
 };
 ```
+
