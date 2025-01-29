@@ -39,30 +39,38 @@ In 6 out of W = 10 possibilities, she is at or below N = 6 points.
 **Related Topics**:  
 [Dynamic Programming](https://leetcode.com/tag/dynamic-programming/)
 
-## Solution 1. Brute Force (TLE)
-
-Let `dp[i]` be the possibility to land on node `i`.
-
-For each node `i` in `[0, K)`, try jump `j` steps to node `i + j` where `j` is in `[1, W]`. When landing on node `i + j` from node `i`, `p[i + j]` should increase by `dp[i] / W`.
+## Solution 1. Memoization
 
 ```cpp
-// OJ: https://leetcode.com/problems/new-21-game/
-// Author: github.com/lzl124631x
-// Time: O(KW)
-// Space: O(1)
-// NOTE: This solution will get TLE
 class Solution {
+private:
+    vector<double> memo;
+    int n, k, maxPts;
+
+    double dfs(int i) {
+        if (i >= k) return i <= n ? 1.0 : 0.0;
+        if (memo[i] != -1.0) return memo[i];
+
+        double prob = 0.0;
+        for (int j = 1; j <= maxPts; ++j) {
+            prob += dfs(i + j);
+        }
+        return memo[i] = prob / maxPts;
+    }
+
 public:
     double new21Game(int N, int K, int W) {
-        if (N >= K + W - 1) return 1;
-        vector<double> dp(K + W);
-        dp[0] = 1;
-        for (int i = 0; i < K; ++i) {
-            for (int j = 1; j <= W && i + j <= N; ++j) dp[i + j] += dp[i] / W;
-        }
-        return accumulate(begin(dp) + K, begin(dp) + N + 1, 0.0);
+        if (K == 0 || N >= K + W) return 1.0;
+
+        n = N;
+        k = K;
+        maxPts = W;
+        memo.assign(k + maxPts, -1.0);
+
+        return dfs(0);
     }
 };
+
 ```
 
 ## Solution 2. DP
@@ -113,41 +121,31 @@ The answer is `sum( dp[i] | K <= i <= N )`.
 // Space: O(min(N, K + W))
 class Solution {
 public:
-    double new21Game(int N, int K, int W) {
-        if (!K || N >= K + W - 1) return 1;
-        vector<double> dp(N + 1);
-        dp[0] = 1;
-        double ans = 0;
-        for (int i = 1; i <= N; ++i) {
-            if (i > 1) dp[i] += dp[i - 1];
-            if (i <= K) dp[i] += dp[i - 1] / W;
-            if (i > W) dp[i] -= dp[i - W - 1]/W;
-            if (i >= K) ans += dp[i];
+    double new21Game(int n, int k, int maxPts) {
+        if (k == 0 || n >= k + maxPts) {
+            return 1.0;
         }
-        return ans;
+        
+        vector<double> dp(n + 1);
+        dp[0] = 1.0;
+        double windowSum = 1.0;
+        double result = 0.0;
+        
+        for (int i = 1; i <= n; i++) {
+            dp[i] = windowSum / maxPts;
+            
+            if (i < k) {
+                windowSum += dp[i];
+            } else {
+                result += dp[i];
+            }
+            
+            if (i >= maxPts) {
+                windowSum -= dp[i - maxPts];
+            }
+        }
+        
+        return result;
     }
 };
-```
-
-## Solution 3. DP
-
-```cpp
-// OJ: https://leetcode.com/problems/new-21-game/
-// Author: github.com/lzl124631x
-// Time: O(K + W)
-// Space: O(K + W)
-class Solution {
-public:
-    double new21Game(int N, int K, int W) {
-        if (!K || N >= K + W - 1) return 1;
-        vector<double> dp(K + W);
-        for (int i = K; i < K + W && i <= N; ++i) dp[i] = 1;
-        double sum = min(N - K + 1, W);
-        for (int i = K - 1; i >= 0; --i) {
-            dp[i] = sum / W;
-            sum += dp[i] - dp[i + W];
-        }
-        return dp[0];
-    }
-}
 ```
