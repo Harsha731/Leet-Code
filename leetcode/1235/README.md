@@ -125,7 +125,7 @@ public:
 ```
 
 
-## Note
+## Note (No need)
 
 We can use an auxiliary index array `id` to do the sorting which saves some space.
 
