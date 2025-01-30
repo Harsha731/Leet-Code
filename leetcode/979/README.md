@@ -74,21 +74,33 @@
 ```cpp
 // OJ: https://leetcode.com/problems/distribute-coins-in-binary-tree/
 // Author: github.com/lzl124631x
-// Time: O(N)
-// Space: O(H)
 class Solution {
-private:
-    int ans = 0;
-    int postorder(TreeNode *root) {
-        if (!root) return 0;
-        int move = 1 - root->val + postorder(root->left) + postorder(root->right);
-        ans += abs(move);
-        return move;
-    }
 public:
+    int moves = 0;
+
+    int dfs(TreeNode* node){
+        if(!node) return 0;
+
+        int left_excess = dfs(node->left);
+        int right_excess = dfs(node->right);
+
+        moves += abs(left_excess) + abs(right_excess);
+
+        return (node->val) + left_excess + right_excess - 1;
+    }
+
     int distributeCoins(TreeNode* root) {
-        postorder(root);
-        return ans;
+        dfs(root);      
+        return moves;
     }
 };
+
+/*
+Time complexity: O(n)
+Traversing the tree using DFS costs O(n), as we visit each node exactly once and perform O(1) of work at each visit.
+Space complexity: O(n)
+The space complexity of DFS, when implemented recursively, is determined by the maximum depth of the call stack, 
+which corresponds to the depth of the tree. In the worst case, if the tree is entirely unbalanced (e.g., a linked list 
+or a left/right skewed tree), the call stack can grow as deep as the number of nodes, resulting in a space complexity of O(n).
+*/
 ```
