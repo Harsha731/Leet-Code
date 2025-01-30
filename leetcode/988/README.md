@@ -76,6 +76,7 @@ class Solution {
     void dfs(TreeNode *root) {
         if (!root) return;
         path += 'a' + root->val;
+	// We are not doing path = 'a' + root->val + path, because we can't use path.pop_back() at that time
         if (!root->left && !root->right) {
             reverse(begin(path), end(path));
             if (ans.empty() || path < ans) ans = path;
