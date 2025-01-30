@@ -69,7 +69,9 @@
 ```cpp
 // OJ: https://leetcode.com/problems/smallest-string-starting-from-leaf/
 // Author: github.com/lzl124631x
-// Time: O(N + (logN)^2)
+// Time: O(NlogN)
+// Reversing the path string: O(logN)
+// Comparing the reversed path with the current answer: O(logN)
 // Space: O(logN)
 class Solution {
     string ans, path;
