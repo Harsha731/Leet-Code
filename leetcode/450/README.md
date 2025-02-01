@@ -57,7 +57,7 @@ Please notice that another valid answer is [5,2,6,null,4,null,7] and it's also a
 **Similar Questions**:
 * [Split BST (Medium)](https://leetcode.com/problems/split-bst/)
 
-## Solution 1.
+## Solution 1. Recursive
 
 ```cpp
 // OJ: https://leetcode.com/problems/delete-node-in-a-bst/
@@ -68,83 +68,99 @@ class Solution {
 public:
     TreeNode* deleteNode(TreeNode* root, int key) {
         if (!root) return NULL;
-        if (root->val > key) root->left = deleteNode(root->left, key);
-        else if (root->val < key) root->right = deleteNode(root->right, key);
-        else if (root->left) {
-            auto p = root->left;
-            while (p->right) p = p->right;
-            root->val = p->val;
-            root->left = deleteNode(root->left, root->val);
-        } else if (root->right) {
-            auto p = root->right;
-            while (p->left) p = p->left;
-            root->val = p->val;
-            root->right = deleteNode(root->right, root->val);
-        } else {
-            delete root;
-            root = NULL;
-        }
-        return root;
-    }
-};
-```
 
-## Solution 2.
-
-```cpp
-// OJ: https://leetcode.com/problems/delete-node-in-a-bst/
-// Author: github.com/lzl124631x
-// Time: O(H)
-// Space: O(H)
-class Solution {
-public:
-    TreeNode* deleteNode(TreeNode* root, int key) {
-        if (!root) return NULL;
-        if (root->val > key) root->left = deleteNode(root->left, key);
-        else if (root->val < key) root->right = deleteNode(root->right, key);
-        else if (!root->left) {
-            auto right = root->right;
-            delete root;
-            return right;
-        } else if (!root->right) {
-            auto left = root->left;
-            delete root;
-            return left;
-        } else {
-            auto node = root->right;
-            while (node->left) node = node->left;
-            root->val = node->val;
-            root->right = deleteNode(root->right, root->val);
-        }
-        return root;
-    }
-};
-```
-
-## Solution 3.
-
-```cpp
-// OJ: https://leetcode.com/problems/delete-node-in-a-bst/
-// Author: github.com/lzl124631x
-// Time: O(H)
-// Space: O(H)
-class Solution {
-public:
-    TreeNode* deleteNode(TreeNode* root, int key) {
-        if (!root) return NULL;
         if (root->val < key) {
             root->right = deleteNode(root->right, key);
-            return root;
         } else if (root->val > key) {
             root->left = deleteNode(root->left, key);
-            return root;
+        } else {
+            // Case when the node to be deleted is found
+            if (!root->right && !root->left) {
+                return NULL;
+            } else if (!root->right) {
+                return root->left;
+            } else if (!root->left) {
+                return root->right;
+            } else {
+                TreeNode* temp = root->right;
+                while (temp->left) {
+                    temp = temp->left;
+                }
+                temp->left = root->left;
+                return root->right;
+            }
         }
-        if (!root->left || !root->right) return root->left ? root->left : root->right;
-        auto newRoot = root->right, left = newRoot->left, node = root->left; // Use `root->right` as the new root. Put `root->right->left` as the right child of the rightmost child of `root->left`.
-        newRoot->left = root->left;
-        while (node->right) node = node->right;
-        node->right = left;
-        return newRoot;
+        return root;
     }
 };
 ```
+
+## Solution 2. Iterative
+
+```cpp
+// OJ: https://leetcode.com/problems/delete-node-in-a-bst/
+// Author: github.com/lzl124631x
+// Time: O(H)
+// Space: O(H)
+
+class Solution {
+public:
+    TreeNode* deleteNode(TreeNode* root, int key) {
+        // Base case: If the tree is empty, return NULL
+        if (!root) return NULL;
+
+        TreeNode* parent = NULL; // Parent of the node to be deleted
+        TreeNode* curr = root; // Current node being processed
+
+        // Traverse the tree to find the node with the given key
+        while (curr && curr->val != key) {
+            parent = curr; // Update parent pointer
+            if (key < curr->val) curr = curr->left; // Move left if key is smaller
+            else curr = curr->right; // Move right if key is larger
+        }
+
+        // If the key is not found, return the original tree
+        if (!curr) return root;
+
+        // Handle different cases for deleting the node
+        if (!curr->right && !curr->left) {
+            // Case 1: Node has no children (leaf node)
+            if (!parent) return NULL; // Deleting the root node
+            if (parent->left == curr) parent->left = NULL; // Remove from parent's left
+            else parent->right = NULL; // Remove from parent's right
+            delete curr; // Free memory
+            return root;
+        } else if (!curr->right) {
+            // Case 2: Node has only a left child
+            if (!parent) return curr->left; // Deleting the root node
+            if (parent->left == curr) parent->left = curr->left; // Replace with left child
+            else parent->right = curr->left; // Replace with left child
+            delete curr; // Free memory
+            return root;
+        } else if (!curr->left) {
+            // Case 3: Node has only a right child
+            if (!parent) return curr->right; // Deleting the root node
+            if (parent->left == curr) parent->left = curr->right; // Replace with right child
+            else parent->right = curr->right; // Replace with right child
+            delete curr; // Free memory
+            return root;
+        } else {
+            // Case 4: Node has both left and right children
+            // Find the in-order successor (smallest node in the right subtree)
+            TreeNode* temp = curr->right;
+            while (temp->left) {
+                temp = temp->left; // Move to the smallest node
+            }
+            // Attach the left child of the node to be deleted to the in-order successor
+            temp->left = curr->left;
+            if (!parent) return curr->right; // Deleting the root node
+            if (parent->left == curr) parent->left = curr->right; // Replace with right subtree
+            else parent->right = curr->right; // Replace with right subtree
+            delete curr; // Free memory
+            return root;
+        }
+    }
+};
+
+```
+
