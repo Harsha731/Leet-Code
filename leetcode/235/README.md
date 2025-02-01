@@ -59,32 +59,42 @@
 // Space: O(H)
 class Solution {
 public:
+    TreeNode* dfs(TreeNode* node, TreeNode* p, TreeNode* q) {
+        if (!node) return nullptr;
+        if (node->val >= p->val && node->val <= q->val) return node;
+        if (node->val < p->val) return dfs(node->right, p, q);
+        return dfs(node->left, p, q);
+    }
+
     TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
         if (p->val > q->val) swap(p, q);
-        function<TreeNode*(TreeNode*)> dfs = [&](TreeNode *node) -> TreeNode* {
-            if (!node) return nullptr;
-            if (node->val >= p->val && node->val <= q->val) return node;
-            if (node->val < p->val) return dfs(node->right);
-            return dfs(node->left);
-        };
-        return dfs(root);
+        return dfs(root, p, q);
     }
 };
+
 ```
 
-## Solution 2. DFS
+## Solution 2. Iterative
 
 ```cpp
 // OJ: https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/
 // Author: github.com/lzl124631x
 // Time: O(H)
-// Space: O(H)
+// Space: O(1)
 class Solution {
 public:
     TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
-        if (root->val > p->val && root->val > q->val) return lowestCommonAncestor(root->left, p, q);
-        if (root->val < p->val && root->val < q->val) return lowestCommonAncestor(root->right, p, q);
-        return root;
+        int small = min(p->val, q->val);
+        int large = max(p->val, q->val);
+        while (root != nullptr) {
+            if (root->val > large) // p, q belong to the left subtree
+                root = root->left;
+            else if (root->val < small) // p, q belong to the right subtree
+                root = root->right;
+            else // Now, small <= root.val <= large -> This root is the LCA between p and q
+                return root;
+        }
+        return nullptr;
     }
 };
 ```
