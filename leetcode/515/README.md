@@ -68,19 +68,24 @@ public:
 // Author: github.com/lzl124631x
 // Time: O(N)
 // Space: O(logN)
+
 class Solution {
+private:
+    vector<int> ans;
+
+    void dfs(TreeNode* node, int depth) {
+        if (!node) return;
+        if (depth == ans.size()) ans.push_back(INT_MIN);
+        ans[depth] = max(ans[depth], node->val);
+        dfs(node->left, depth + 1);
+        dfs(node->right, depth + 1);
+    }
+
 public:
     vector<int> largestValues(TreeNode* root) {
-        vector<int> ans;
-        function<void(TreeNode*, int)> dfs = [&](TreeNode *node, int d) {
-            if (!node) return;
-            if (d == ans.size()) ans.push_back(INT_MIN);
-            ans[d] = max(ans[d], node->val);
-            dfs(node->left, d + 1);
-            dfs(node->right, d + 1);
-        };
         dfs(root, 0);
         return ans;
     }
 };
+
 ```
