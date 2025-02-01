@@ -73,3 +73,34 @@ public:
     }
 };
 ```
+
+## Solution 2. Iterative
+```cpp
+class Solution {
+public:
+    int goodNodes(TreeNode* root) {
+        stack<pair<TreeNode*, int>> stack;
+        stack.push({root, root->val});
+        int goodNodeCount = 0;
+
+        while (!stack.empty()) {
+            auto [node, maxVal] = stack.top();
+            stack.pop();
+
+            // If the current node's value is greater than or equal to the max value seen so far, it's a good node
+            if (node->val >= maxVal) {
+                goodNodeCount++;
+                maxVal = node->val; // Update max value for children
+            }
+
+            // Add children to the stack with the updated max value
+            if (node->right) stack.push({node->right, maxVal});
+            if (node->left) stack.push({node->left, maxVal});
+        }
+
+        return goodNodeCount;
+    }
+};
+
+
+```
