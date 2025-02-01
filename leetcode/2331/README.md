@@ -95,3 +95,45 @@ public:
     }
 };
 ```
+
+## Solution 3. Stack
+
+```cpp
+class Solution {
+public:
+    bool evaluateTree(TreeNode* r) {
+        stack<TreeNode*> s;
+        s.push(r);
+        unordered_map<TreeNode*, bool> m;
+
+        while (!s.empty()) {
+            TreeNode* n = s.top();
+
+            // If the node is a leaf node, store its value in the map
+            if (!n->left && !n->right) {
+                s.pop();
+                m[n] = n->val;
+                continue;
+            }
+
+            // If both children have already been evaluated, use their values to evaluate the current node.
+            if (m.find(n->left) != m.end() && m.find(n->right) != m.end()) {
+                s.pop();
+                if (n->val == 2) {
+                    m[n] = m[n->left] || m[n->right];
+                } else {
+                    m[n] = m[n->left] && m[n->right];
+                }
+            } else {
+                // If both children are not leaf nodes, push the current node
+                // along with its left and right child back into the stack.
+                s.push(n->right);
+                s.push(n->left);
+            }
+        }
+
+        return m[r] == 1;
+    }
+};
+
+```
