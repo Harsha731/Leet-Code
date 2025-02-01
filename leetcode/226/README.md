@@ -54,3 +54,32 @@ public:
     }
 };
 ```
+
+## Solution 2. Iterative - Stack
+
+```cpp
+class Solution {
+public:
+    TreeNode* invertTree(TreeNode* root) {
+        if (!root) return nullptr;
+
+        std::queue<TreeNode*> q;
+        q.push(root);
+
+        while (!q.empty()) {
+            TreeNode* node = q.front();
+            q.pop();
+
+            // Swap left and right children
+            std::swap(node->left, node->right);
+
+            // Add non-null children to the queue
+            if (node->left) q.push(node->left);
+            if (node->right) q.push(node->right);
+        }
+
+        return root;
+    }
+};
+
+```
