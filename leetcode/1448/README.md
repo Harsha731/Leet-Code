@@ -76,6 +76,8 @@ public:
 
 ## Solution 2. Iterative
 ```cpp
+
+// The same as above
 class Solution {
 public:
     int goodNodes(TreeNode* root) {
