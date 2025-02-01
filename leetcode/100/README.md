@@ -51,7 +51,53 @@
 class Solution {
 public:
     bool isSameTree(TreeNode* p, TreeNode* q) {
-        return (!p && !q) || (p && q && p->val == q->val && isSameTree(p->left, q->left) && isSameTree(p->right, q->right));
+        // If both trees are empty, they are the same
+        if (!p && !q) return true;
+        
+        // If one tree is empty and the other is not, they are not the same
+        if (!p || !q) return false;
+        
+        // If the current nodes have different values, the trees are not the same
+        if (p->val != q->val) return false;
+        
+        // Recursively check the left and right subtrees
+        return isSameTree(p->left, q->left) && isSameTree(p->right, q->right);
     }
 };
+```
+
+## Solution 2. Iterative
+
+```cpp
+class Solution {
+public:
+    bool isSameTree(TreeNode* p, TreeNode* q) {
+        queue<TreeNode*> queue;
+        queue.push(p);
+        queue.push(q);
+        
+        while (!queue.empty()) {
+            TreeNode* nodeP = queue.front(); queue.pop();
+            TreeNode* nodeQ = queue.front(); queue.pop();
+            
+            // If both nodes are null, continue to the next pair
+            if (!nodeP && !nodeQ) continue;
+            
+            // If one node is null and the other is not, the trees are not the same
+            if (!nodeP || !nodeQ) return false;
+            
+            // If the current nodes have different values, the trees are not the same
+            if (nodeP->val != nodeQ->val) return false;
+            
+            // Add the left and right children to the queue
+            queue.push(nodeP->left);
+            queue.push(nodeQ->left);
+            queue.push(nodeP->right);
+            queue.push(nodeQ->right);
+        }
+        
+        return true;
+    }
+};
+
 ```
