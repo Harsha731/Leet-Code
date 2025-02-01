@@ -45,19 +45,20 @@
 // Author: github.com/lzl124631x
 // Time: O(N)
 // Space: O(H)
-class Solution {
-public:
-    int kthSmallest(TreeNode* root, int k) {
-        function<int(TreeNode*)> inorder = [&](TreeNode *root) {
-            if (!root) return -1;
-            int val = inorder(root->left);
-            if (val != -1) return val;
-            if (--k == 0) return root->val;
-            return inorder(root->right);
-        };
-        return inorder(root);
-    }
-};
+// In-order traversal function
+
+int inorder(TreeNode* root, int& k) {
+    if (!root) return -1;
+    int val = inorder(root->left, k);
+    if (val != -1) return val;
+    if (--k == 0) return root->val;
+    return inorder(root->right, k);
+}
+
+// Function to find the kth smallest element
+int kthSmallest(TreeNode* root, int k) {
+    return inorder(root, k);
+}
 ```
 
 ## Solution 1. In-order traversal (Iterative)
