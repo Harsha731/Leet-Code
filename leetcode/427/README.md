@@ -96,68 +96,104 @@ Explanation is shown in the photo below:
 **Related Topics**:  
 [Array](https://leetcode.com/tag/array/), [Divide and Conquer](https://leetcode.com/tag/divide-and-conquer/), [Tree](https://leetcode.com/tag/tree/), [Matrix](https://leetcode.com/tag/matrix/)
 
-## Solution 1. Brute Force
+## Solution 1. Solution 1
 
 ```cpp
 // OJ: https://leetcode.com/problems/construct-quad-tree/
 // Author: github.com/lzl124631x
-// Time: O(log_4^N * N^2)
-// Space: O(log_4^N)
+
+/*
+Time Complexity:
+O(n^2 log n): This is because at each level of the recursion, we potentially process the entire grid (n^2 operations), 
+and there are log n levels due to the division of the grid into quarters at each step.
+Space Complexity:
+O(n^2): In the worst case, every cell in the grid could be a leaf node in the Quad Tree, resulting in a space complexity 
+of O(n^2). However, the recursion stack itself has a space complexity of O(log n) due to the recursive calls.
+*/
+
 class Solution {
-private:
-    Node *dfs(vector<vector<int>> &grid, int x, int y, int N) {
-        bool same = true;
-        for (int i = 0; i < N && same; ++i) {
-            for (int j = 0; j < N && same; ++j) {
-                same = grid[x][y] == grid[x + i][y + j];
-            }
-        }
-        if (same) return new Node(grid[x][y], true);
-        return new Node(true, false,
-                             dfs(grid, x, y, N / 2),
-                             dfs(grid, x, y + N / 2, N / 2),
-                             dfs(grid, x + N / 2, y, N / 2),
-                             dfs(grid, x + N / 2, y + N / 2, N / 2));
-    }
 public:
     Node* construct(vector<vector<int>>& grid) {
-        return dfs(grid, 0, 0, grid.size());
+        return construct(grid, 0, 0, grid.size());
+    }
+
+    Node* construct(vector<vector<int>>& grid, int x, int y, int length) {
+        if (isSame(grid, x, y, length)) {
+            return new Node(grid[x][y], true);
+        } else {
+            Node* node = new Node(false, false);
+            node->topLeft = construct(grid, x, y, length / 2);
+            node->topRight = construct(grid, x, y + length / 2, length / 2);
+            node->bottomLeft = construct(grid, x + length / 2, y, length / 2);
+            node->bottomRight = construct(grid, x + length / 2, y + length / 2, length / 2);
+            return node;
+        }
+    }
+
+    bool isSame(vector<vector<int>>& grid, int x, int y, int length) {
+        int val = grid[x][y];
+        for (int i = x; i < x + length; i++) {
+            for (int j = y; j < y + length; j++) {
+                if (grid[i][j] != val) return false;
+            }
+        }
+        return true;
     }
 };
+
 ```
 
-## Solution 2. Prefix Sum
+## Solution 2. Optimized
 
 ```cpp
 // OJ: https://leetcode.com/problems/construct-quad-tree/
 // Author: github.com/lzl124631x
-// Time: O(N^2 + log_4^N * N)
-// Space: O(N^2)
+
+/*
+Time Complexity:
+O(n^2): Each cell in the grid is visited once during the construction process.
+Space Complexity:
+O(n^2): In the worst case, every cell could be a leaf node in the Quad Tree, resulting in a space complexity of O(n^2).
+*/
+
 class Solution {
-        if (d * d == target || target == 0) return new Node(target, true);
-    vector<vector<int>> prefix;
-private:
-    Node *dfs(int x, int y, int N) {
-        int sum = prefix[x + N][y + N] - prefix[x + N][y] - prefix[x][y + N] + prefix[x][y];
-        if (N * N == sum || sum == 0) return new Node(sum, true);
-        return new Node(true, false,
-                             dfs(x, y, N / 2),
-                             dfs(x, y + N / 2, N / 2),
-                             dfs(x + N / 2, y, N / 2),
-                             dfs(x + N / 2, y + N / 2, N / 2));
-    }
 public:
-    Node* construct(vector<vector<int>>& G) {
-        int N = G.size();
-        prefix.assign(N + 1, vector<int>(N + 1));
-        for (int i = 0; i < N; ++i) {
-            int sum = 0;
-            for (int j = 0; j < N; ++j) {
-                sum += G[i][j];
-                prefix[i + 1][j + 1] = sum + prefix[i][j + 1];
+    // Start constructing the quad tree from the root node.
+    Node* construct(vector<vector<int>>& grid) {
+        return construct(grid, 0, 0, grid.size());
+    }
+
+    // Recursively construct the quad tree for a given sub-grid.
+    Node* construct(vector<vector<int>>& grid, int x, int y, int length) {
+        // Base case: If the sub-grid is a single cell, create a leaf node.
+        if (length == 1) {
+            return new Node(grid[x][y], true);
+        } else {
+            // Create a new internal node.
+            Node* node = new Node(false, false);    // val, isLeaf
+
+            // Recursively construct the four child nodes.
+            Node* topLeft = construct(grid, x, y, length / 2);
+            Node* topRight = construct(grid, x, y + length / 2, length / 2);
+            Node* bottomLeft = construct(grid, x + length / 2, y, length / 2);
+            Node* bottomRight = construct(grid, x + length / 2, y + length / 2, length / 2);
+
+            // Check if all child nodes are leaf nodes with the same value.
+            if (topLeft->isLeaf && topRight->isLeaf && bottomLeft->isLeaf && bottomRight->isLeaf &&
+                topLeft->val == topRight->val && topLeft->val == bottomRight->val && topLeft->val == bottomLeft->val) {
+                // If so, merge them into a single leaf node.
+                node->isLeaf = true;
+                node->val = topLeft->val;
+            } else {
+                // Otherwise, keep the child nodes as separate nodes.
+                node->topLeft = topLeft;
+                node->topRight = topRight;
+                node->bottomLeft = bottomLeft;
+                node->bottomRight = bottomRight;
             }
+            return node;
         }
-        return dfs(0, 0, G.size());
     }
 };
+
 ```
