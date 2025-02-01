@@ -83,11 +83,11 @@ class LockingTree {
     int N;
     bool upwardValid(int i) {
         if (i == -1) return true;
-        if (locked[i]) return false;
+        if (locked[i]) return false;	// The 3rd condition for upgrade is checked here. If it is locked. We can't upgrade
         return upwardValid(parent[i]);
     }
     bool downwardValid(int i) {
-        if (locked[i]) return true;
+        if (locked[i]) return true;	
         for (int ch : child[i]) {
             if (downwardValid(ch)) return true;
         }
@@ -120,7 +120,13 @@ public:
         locked[num] = 0;
         return true;
     }
-    
+
+/* Note :-
+    i) The node is unlocked,
+    ii) It has at least one locked descendant (by any user), and
+    iii) It does not have any locked ancestors
+*/
+
     bool upgrade(int num, int user) {
         if (!upwardValid(num) || !downwardValid(num)) return false;
         downwardUnlock(num);
