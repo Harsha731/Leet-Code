@@ -40,6 +40,38 @@
 * [House Robber (Medium)](https://leetcode.com/problems/house-robber/)
 * [House Robber II (Medium)](https://leetcode.com/problems/house-robber-ii/)
 
+```cpp
+// Brute Force
+
+class Solution {
+public:
+    int rob(TreeNode* root) {
+        if(!root) return 0;
+        int dontRob = rob(root -> left) + rob(root -> right), robRoot = root -> val;
+        if(root -> left) robRoot += rob(root -> left -> left) + rob(root -> left -> right);
+        if(root -> right) robRoot += rob(root -> right -> left) + rob(root -> right -> right);
+        return max(dontRob, robRoot);
+    }
+};
+```
+```cpp
+// Better
+
+class Solution {
+public:
+    unordered_map<TreeNode*, int> dp;
+    int rob(TreeNode* root) {
+        if(!root) return 0;
+        if(dp.count(root)) return dp[root];
+        int dontRob = rob(root -> left) + rob(root -> right), robRoot = root -> val;
+        if(root -> left) robRoot += rob(root -> left -> left) + rob(root -> left -> right);
+        if(root -> right) robRoot += rob(root -> right -> left) + rob(root -> right -> right);
+        return dp[root] = max(dontRob, robRoot);
+    }
+};
+```
+
+
 ## Solution 1. DP
 
 At each node, we have two options, rob or skip.
@@ -55,22 +87,34 @@ So we can do a postorder traversal and return a pair of `rob(x)` and `skip(x)` a
 // Author: github.com/lzl124631x
 // Time: O(N)
 // Space: O(H)
+
+// Optimal
+
 class Solution {
-    pair<int, int> dfs(TreeNode* root) { // rob, skip
-        if (!root) return { 0, 0 }; 
-        auto [lr, ls] = dfs(root->left);
-        auto [rr, rs] = dfs(root->right);
-        return { root->val + ls + rs, max(lr, ls) + max(rr, rs) };
-    }
 public:
     int rob(TreeNode* root) {
-        auto [r, s] = dfs(root);
-        return max(r, s);
+        auto result = robHelper(root);
+        return max(result.first, result.second);
+    }
+
+private:
+    // Returns pair {rob_current_node, skip_current_node}
+    pair<int, int> robHelper(TreeNode* node) {
+        if (!node) return {0, 0};
+        
+        auto left = robHelper(node->left);
+        auto right = robHelper(node->right);
+        
+        int rob = node->val + left.second + right.second;
+        int skip = max(left.first, left.second) + max(right.first, right.second);
+        
+        return {rob, skip};
     }
 };
+
 ```
 
-## Solution 2. DP
+## Solution 2. DP  No need
 
 When doing post-order traversal, return a pair of numbers indicating:
 1. the maximum value we can get at the current node, including both rob and skip.
