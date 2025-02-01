@@ -37,6 +37,7 @@ class Solution {
 public:
     vector<TreeNode*> allPossibleFBT(int n) {
         if (n % 2 == 0) return {};
+	// A full binary tree is a tree where every node has either 0 or 2 children.
         if (n == 1) return { new TreeNode() };
         if (m.count(n)) return m[n];
         vector<TreeNode*> ans;
@@ -53,4 +54,35 @@ public:
         return m[n] = ans;
     }
 };
+```
+
+```cpp
+class Solution {
+public:
+    vector<TreeNode*> allPossibleFBT(int n) {
+        if (n % 2 == 0) return {}; // No full binary trees can be formed with an even number of nodes.
+
+        // Map to store results for different node counts
+        unordered_map<int, vector<TreeNode*>> m;
+        m[1] = { new TreeNode() }; // Base case: one node tree
+
+        // Iterate over odd numbers from 3 to n
+        for (int nodes = 3; nodes <= n; nodes += 2) {
+            vector<TreeNode*> ans;
+            // Split the nodes into left and right subtrees
+            for (int leftNodes = 1; leftNodes < nodes; leftNodes += 2) {
+                int rightNodes = nodes - leftNodes - 1; // Remaining nodes for the right subtree
+                for (auto L : m[leftNodes]) {
+                    for (auto R : m[rightNodes]) {
+                        ans.push_back(new TreeNode(0, L, R)); // Create a new root with left and right subtrees
+                    }
+                }
+            }
+            m[nodes] = ans; // Store the result for this number of nodes
+        }
+
+        return m[n]; // Return the result for n nodes
+    }
+};
+
 ```
