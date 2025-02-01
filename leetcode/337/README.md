@@ -72,7 +72,7 @@ public:
 ```
 
 
-## Solution 1. DP
+## Solution 3. DP
 
 At each node, we have two options, rob or skip.
 
@@ -114,7 +114,7 @@ private:
 
 ```
 
-## Solution 2. DP  No need
+## Solution 4. DP - No need
 
 When doing post-order traversal, return a pair of numbers indicating:
 1. the maximum value we can get at the current node, including both rob and skip.
