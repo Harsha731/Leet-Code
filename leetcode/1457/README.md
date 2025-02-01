@@ -85,13 +85,18 @@ Another variation that doesn't require the `O(9)` check of the count of odd occu
 // Author: github.com/lzl124631x
 // Time: O(N)
 // Space: O(H)
+// Time: O(N)
+// Space: O(H)
+
 class Solution {
     int cnt[10] = {}, odd = 0, ans = 0;
     void dfs(TreeNode *root) {
         if (!root) return;
         cnt[root->val]++;
-        int diff = cnt[root->val] % 2 ? 1 : -1;
+        int diff = cnt[root->val] % 2 ? 1 : -1;     // Calculate change in odd count. If odd, do +1. If even, do -1.
         odd += diff;
+        // *If 1 2 3 4 3 2 1 is there, then only one is odd atmost. So, odd has to
+
         ans += !root->left && !root->right && odd < 2;
         dfs(root->left);
         dfs(root->right);
