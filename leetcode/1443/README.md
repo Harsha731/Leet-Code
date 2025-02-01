@@ -52,25 +52,68 @@
 // Author: github.com/lzl124631x
 // Time: O(N)
 // Space: O(N)
+
 class Solution {
-    vector<vector<int>> G;
-    vector<bool> seen;
-    int dfs(int u, vector<bool> &hasApple) {
-        seen[u] = true;
-        int ans = 0;
-        for (auto v : G[u]) {
-            if (seen[v]) continue;
-            ans += dfs(v, hasApple);
-        }
-        if (!ans && !hasApple[u]) return 0;
-        return u == 0 ? ans : ans + 1;
-    }
 public:
-    int minTime(int n, vector<vector<int>>& E, vector<bool>& hasApple) {
-        seen.assign(n, false);
-        G.assign(n, {});
-        for (auto & e : E) G[e[0]].push_back(e[1]), G[e[1]].push_back(e[0]);
-        return 2 * dfs(0, hasApple);
+    int minTime(int n, vector<vector<int>>& edges, vector<bool>& hasApple) {
+        // Create adjacency list for the tree
+        vector<int> adj[n];
+        for (const auto& edge : edges) {
+            adj[edge[0]].push_back(edge[1]);
+            adj[edge[1]].push_back(edge[0]);
+        }
+
+        // Start DFS from the root node
+        return dfs(-1, 0, adj, hasApple);
+    }
+
+    int dfs(int prev, int curr, vector<int> adj[], vector<bool>& hasApple) {
+        int ans = 0; // Total time needed
+
+        // Explore neighbors
+        for (int neighbor : adj[curr]) {
+            if (neighbor != prev) { // Skip parent node
+                int res = dfs(curr, neighbor, adj, hasApple); // Recursively explore subtree
+                if (res > 0 || hasApple[neighbor]) {
+                    // Add time if subtree has apples or requires traversal
+                    ans += (res + 2);
+                }
+            }
+        }
+        return ans;
     }
 };
+```
+
+## Solution 2. simple count 
+```cpp
+/*
+Time/Space: O(NlogN); O(1) )
+
+If you carefully check the figure in the right-hand-side, the road length is is also same as the number of visited vodes for you to reach all apples.
+So we got second solution.
+Find the apples from the end and check where you come from, then, let the start point of edge true(as an apple). 
+Finally, count the number of edge you need to go through and it cost 2 seconds for each edge(back and forth).
+*/
+
+class Solution {
+public:
+    int minTime(int n, vector<vector<int>>& edges, vector<bool>& hasApple) {
+        int cnt = 0; // Count of edges to traverse
+
+        // Sort edges to ensure parent is before child
+        sort(edges.begin(), edges.end());
+
+        // Visit most distant children first
+        for (int i = edges.size() - 1; i >= 0; i--) {
+            if (hasApple[edges[i][1]]) {
+                cnt++; // Increment count if child has apples
+                hasApple[edges[i][0]] = true; // Mark parent as having apples, It is not a problem if parent have a apple already or not
+            }
+        }
+
+        return cnt * 2; // Return total time needed
+    }
+};
+
 ```
