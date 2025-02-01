@@ -25,7 +25,7 @@
 **Related Topics**:  
 [Dynamic Programming](https://leetcode.com/tag/dynamic-programming/), [Tree](https://leetcode.com/tag/tree/), [Recursion](https://leetcode.com/tag/recursion/), [Memoization](https://leetcode.com/tag/memoization/), [Binary Tree](https://leetcode.com/tag/binary-tree/)
 
-## Solution 1.
+## Solution 1. Memoization
 
 ```cpp
 // OJ: https://leetcode.com/problems/all-possible-full-binary-trees/
@@ -55,6 +55,8 @@ public:
     }
 };
 ```
+
+## Solution 2. Iterative
 
 ```cpp
 class Solution {
