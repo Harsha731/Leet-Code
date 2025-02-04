@@ -53,26 +53,45 @@
 // Space: O(N)
 class Solution {
     string decodeString(string &s, int &i) {
-        int N = s.size();
-        string ans;
+        int N = s.size(); 
+        string ans; 
+        
+        // Continue decoding until we reach the end of the string or encounter a ']'
         while (i < N && s[i] != ']') {
+            // Check if the current character is a digit
             if (isdigit(s[i])) {
-                int repeat = 0;
-                while (i < N && isdigit(s[i])) repeat = repeat * 10 + (s[i++] - '0');
-                ++i; // skip [
+                int repeat = 0; // Initialize a variable to store the repeat count
+                
+                // Extract the repeat count from the string
+                while (i < N && isdigit(s[i])) {
+                    repeat = repeat * 10 + (s[i++] - '0');
+                }
+                
+                // Skip the '[' character
+                ++i;
+                
+                // Recursively decode the substring enclosed in brackets
                 auto t = decodeString(s, i);
-                ++i; // skip ]
+                
+                // Skip the ']' character
+                ++i;
+                
+                // Repeat the decoded substring 'repeat' times
                 while (repeat--) ans += t;
             } else {
+                // If the current character is not a digit, simply append it to the result
                 ans += s[i++];
             }
         }
-        return ans;
+        
+        return ans; 
     }
+    
 public:
     string decodeString(string s) {
-        int i = 0;
-        return decodeString(s, i);
+        int i = 0; 
+        return decodeString(s, i); 
     }
 };
+
 ```
