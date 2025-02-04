@@ -99,7 +99,7 @@ public:
 };
 ```
 
-## Solution 3.
+## Solution 3. (Not necessary)
 
 The idea is that we can generate all the strings given the result of `n - 1` by inserting `()` into the strings.
 
