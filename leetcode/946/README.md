@@ -46,6 +46,9 @@ pop() -&gt; 5, pop() -&gt; 3, pop() -&gt; 2, pop() -&gt; 1
 // Author: github.com/lzl124631x
 // Time: O(N)
 // Space: O(N)
+
+// This is a 2 pointer approach. i, p are pointers
+
 class Solution {
 public:
     bool validateStackSequences(vector<int>& pushed, vector<int>& popped) {
@@ -70,6 +73,9 @@ public:
 // Author: github.com/lzl124631x
 // Time: O(N)
 // Space: O(1) extra space.
+
+// This is a 2 pointer approach. i, j, n are pointers and we return using i value
+
 class Solution {
 public:
     bool validateStackSequences(vector<int>& pushed, vector<int>& popped) {
