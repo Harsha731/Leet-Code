@@ -54,6 +54,41 @@
 [String](https://leetcode.com/tag/string/), [Stack](https://leetcode.com/tag/stack/)
 
 ## Solution 1.
+```cpp
+class Solution {
+public:
+    string simplifyPath(string p) {
+        stack<string> s; // Directory stack
+        string r; // Result
+        
+        for (int i = 0; i < p.size(); ++i) {
+            if (p[i] == '/') continue; // Skip '/'
+            
+            string t; // Current dir
+            while (i < p.size() && p[i] != '/') {
+                t += p[i];
+                ++i;
+            }       // We find the variable name and then process it
+            
+            if (t == ".") continue; // Ignore '.'
+            else if (t == "..") {
+                if (!s.empty()) s.pop(); // Move up
+            } else {
+                s.push(t); // Add dir
+            }
+        }
+        
+        while (!s.empty()) {
+            r = "/" + s.top() + r; // Build path
+            s.pop();
+        }
+        
+        return r.size() ? r : "/"; // Return path
+    }
+};
+```
+
+## Solution 1.
 
 ```cpp
 // OJ: https://leetcode.com/problems/simplify-path/
@@ -63,16 +98,22 @@
 class Solution {
 public:
     string simplifyPath(string path) {
-        vector<string> v;
-        istringstream ss(path);
-        string s, ans;
-        while (getline(ss, s, '/')) {
-            if (s == "..") { 
-                if (v.size()) v.pop_back();
-            } else if (s.size() && s != ".") v.push_back(s);
+        vector<string> stack;
+        string res, temp;
+        stringstream p(path);
+        
+        while (getline(p, temp, '/')) {
+            if (temp == "" or temp == ".") continue;
+            if (!stack.empty() && temp == "..")
+                stack.pop_back();
+            else if (temp != "..")
+                stack.push_back(temp);
         }
-        for (auto &p : v) ans += '/' + p;
-        return ans.size() ? ans : "/";
+        
+        for (auto s : stack)
+            res += "/" + s;
+        
+        return stack.empty() ? "/" : res;
     }
 };
 ```
