@@ -50,7 +50,7 @@ public:
         vector<int> ans(A.size());
         for (int i = A.size() - 1; i >= 0; --i) {
             while (s.size() && A[s.top()] <= A[i]) s.pop();
-            ans[i] = s.size() ? s.top() - i : 0;
+            ans[i] = s.size() ? s.top() - i : 0;		// We do for the A[i]
             s.push(i);
         }
         return ans;
@@ -58,7 +58,7 @@ public:
 };
 ```
 
-## Solution 2. Monotonic Stack
+## Solution 2. Monotonic Stack (Not necessary)
 
 Same idea as in [496. Next Greater Element I (Easy)](https://leetcode.com/problems/next-greater-element-i/).
 
@@ -74,7 +74,7 @@ public:
         stack<int> s;
         for (int i = 0; i < A.size(); ++i) {
             while (s.size() && A[s.top()] < A[i]) {
-                ans[s.top()] = i - s.top();
+                ans[s.top()] = i - s.top();			// We do for the A[s.top()]
                 s.pop();
             }
             s.push(i);
