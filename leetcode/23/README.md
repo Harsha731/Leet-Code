@@ -54,6 +54,42 @@ merging them into one sorted list:
 * [Merge Two Sorted Lists (Easy)](https://leetcode.com/problems/merge-two-sorted-lists/)
 * [Ugly Number II (Medium)](https://leetcode.com/problems/ugly-number-ii/)
 
+## Solution 0. Brute Force
+```cpp
+// Using merge 2 lists approach
+class Solution {
+public:
+    ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {
+        // Base cases
+        if (!list1) return list2;
+        if (!list2) return list1;
+
+        // Recursive merge logic
+        if (list1->val < list2->val) {
+            list1->next = mergeTwoLists(list1->next, list2);
+            return list1;
+        } else {
+            list2->next = mergeTwoLists(list1, list2->next);
+            return list2;
+        }
+    }
+
+    ListNode* mergeKLists(vector<ListNode*>& lists) {
+        if (lists.empty()) return nullptr;
+
+        // Start with the first list
+        ListNode* mergedList = lists[0];
+
+        // Recursively merge each list into the current merged list
+        for (int i = 1; i < lists.size(); i++) {
+            mergedList = mergeTwoLists(mergedList, lists[i]);
+        }
+
+        return mergedList;
+    }
+};
+```
+
 ## Solution 1. Heap
 
 ```cpp
