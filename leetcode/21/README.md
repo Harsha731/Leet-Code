@@ -77,23 +77,23 @@ public:
 // OJ: https://leetcode.com/problems/merge-two-sorted-lists/
 // Author: github.com/lzl124631x
 // Time: O(A + B)
-// Space: O(1)
+// Space: O(A + B)
 class Solution {
 public:
     ListNode* mergeTwoLists(ListNode* a, ListNode* b) {
-        ListNode head, *p = &head;
-        head.next = a;
-        while (p->next && b) {
-            if (p->next->val > b->val) {
-                auto node = b;
-                b = b->next;
-                node->next = p->next;
-                p->next = node;
-            }
-            p = p->next;
+        // Base cases
+        if (!a) return b; // If list a is empty, return b
+        if (!b) return a; // If list b is empty, return a
+        
+        // Recursive case
+        if (a->val <= b->val) {
+            a->next = mergeTwoLists(a->next, b); // Merge rest of list a with b
+            return a; // Return a as it is smaller or equal
+        } else {
+            b->next = mergeTwoLists(a, b->next); // Merge a with rest of list b
+            return b; // Return b as it is smaller
         }
-        if (b) p->next = b;
-        return head.next;
     }
 };
+
 ```
