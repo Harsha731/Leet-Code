@@ -91,3 +91,64 @@ public:
     }
 };
 ```
+
+```cpp
+// Time Complexity: O(1)
+// Space Complexity: O(N)
+
+class MyCircularQueue {
+public:
+    struct ListNode {
+        int val;
+        ListNode* next;
+        ListNode(int x) : val(x), next(nullptr) {}
+    };
+    
+    ListNode* front = nullptr;
+    ListNode* rear = nullptr;
+    int max_size, curr_size = 0;
+    
+    MyCircularQueue(int k) : max_size(k) {}
+    
+    bool enQueue(int value) {
+        if (curr_size >= max_size) return false;
+        
+        ListNode* new_node = new ListNode(value);
+        if (!rear) front = rear = new_node;
+        else {
+            rear->next = new_node;
+            rear = new_node;
+        }
+        curr_size++;
+        return true;
+    }
+    
+    bool deQueue() {
+        if (curr_size == 0) return false;
+        
+        ListNode* temp = front;
+        front = front->next;
+        delete temp;
+        curr_size--;
+        if (curr_size == 0) rear = nullptr;
+        return true;
+    }
+    
+    int Front() {
+        return front ? front->val : -1;
+    }
+    
+    int Rear() {
+        return rear ? rear->val : -1;
+    }
+    
+    bool isEmpty() {
+        return curr_size == 0;
+    }
+    
+    bool isFull() {
+        return curr_size == max_size;
+    }
+};
+
+```
