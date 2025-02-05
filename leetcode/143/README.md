@@ -43,6 +43,12 @@
 **Similar Questions**:
 * [Delete the Middle Node of a Linked List (Medium)](https://leetcode.com/problems/delete-the-middle-node-of-a-linked-list/)
 
+Algorithm :-
+Find the Middle: Split the list into two halves.
+Reverse the Second Half: Reverse the second half of the list.
+Interleave: Interleave the nodes from the first and reversed second halves.
+This approach ensures the list is reordered in-place with a time complexity of O(N) and space complexity of O(1).
+
 ## Solution 1.
 
 ```cpp
@@ -91,7 +97,7 @@ public:
 };
 ```
 
-## Solution 2.
+## Solution 2. [Both are same]
 
 ```cpp
 // OJ: https://leetcode.com/problems/reorder-list/
