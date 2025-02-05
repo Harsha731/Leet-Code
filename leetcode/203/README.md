@@ -72,6 +72,18 @@ Or
 // Author: github.com/lzl124631x
 // Time: O(N)
 // Space: O(1)
+
+Move the head pointer till we found the next element other than 'val'
+Then, attack the tail->next to the first of the element groups  2->1->1->1->2
+if val = 1
+Keep tail at 2, then tail->next at other 2
+
+The constructor ListNode(0, head) initializes the dummy node with:
+val = 0: This is the value of the dummy node. The choice of 0 is arbitrary; it could be any value since this node is temporary and will not be part of the final result.
+next = head: The next pointer of the dummy node points to the original head of the list. This effectively inserts the dummy node at the beginning of the list.
+
+
+
 class Solution {
 public:
     ListNode* removeElements(ListNode* head, int val) {
