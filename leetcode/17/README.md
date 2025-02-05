@@ -35,43 +35,61 @@
 * [Binary Watch (Easy)](https://leetcode.com/problems/binary-watch/)
 * [Count Number of Texts (Medium)](https://leetcode.com/problems/count-number-of-texts/)
 
-## Solution 1. DFS
+## Solution 1. Backtracking - DFS kind
 
 ```cpp
 // OJ: https://leetcode.com/problems/letter-combinations-of-a-phone-number/
 // Author: github.com/lzl124631x
-// Time: O(4^N)
-// Space: O(N)
+/*
+outer loop - O(n)
+inner loop - 4^n combinations
+Total - O(4^n)
+
+SC - worst case - stores all - O(4^n)
+*/
 class Solution {
 public:
-    vector<string> letterCombinations(string s) {
-        if (s.empty()) return {};
+    void solve(int i, string& s, string digits, vector<string> v, vector<string>& ans){
+        if(i==digits.length()) {
+            ans.push_back(s);
+            return;
+        }
+        int a = digits[i]-'0';
+        a = a-2;
+        for(int j=0;j<v[a].size();j++){
+            s.push_back(v[a].at(j)); // Push the character into the string
+            solve(i+1, s, digits, v, ans); // Pass the modified string to the recursive call
+            s.pop_back(); // Backtrack: remove the last character added   
+        }   
+    }
+
+    vector<string> letterCombinations(string digits) {
+        vector<string> v = {"abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
         vector<string> ans;
-        string tmp, m[8] = {"abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
-        function<void(int)> dfs = [&](int i) {
-            if (i == s.size()) {
-                ans.push_back(tmp);
-                return;
-            }
-            for (char c : m[s[i] - '2']) {
-                tmp.push_back(c);
-                dfs(i + 1);
-                tmp.pop_back();
-            }
-        };
-        dfs(0);
+        string s = "";
+        if(digits=="") return ans;
+        solve(0, s, digits, v, ans);
         return ans;
     }
 };
 ```
 
-## Solution 2.
+## Solution 2. ITerative
 
 ```cpp
 // OJ: https://leetcode.com/problems/letter-combinations-of-a-phone-number/
 // Author: github.com/lzl124631x
 // Time: O(4^N * N)
-// Space: O(4^N * N)
+// Space: O(4^N)
+
+/*
+outer loop - O(n)
+inner loop - 4^n combinations
+Total - O(4^n)
+
+SC - worst case - stores all - O(4^n)
+*/
+
 class Solution {
 private:
     vector<string> M{ "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz" };
