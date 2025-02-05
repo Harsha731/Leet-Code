@@ -63,6 +63,10 @@ For `visit`, we need to `resize` the `A` to size `i + 1` before pushing the `url
 //      BrowserHistory, back, forward: O(1)
 //      visit: O(N)
 // Space: O(N)
+
+// Resize is helpful for going removing all the forward things0
+// We are giving value to i during back, forward and also it keeps going forward if we ignore
+
 class BrowserHistory {
     vector<string> A;
     int i = 0;
@@ -101,7 +105,7 @@ public:
         A.push_back(homepage);
     }
     void visit(string url) {
-        sz = i + 2;
+        sz = i + 2;		// Actually size = i+1 till earlier and we are adding the new url here, so, size = i+2
         if (A.size() < sz) A.push_back("");
         A[++i] = url;
     }
@@ -112,4 +116,47 @@ public:
         return A[i = min(i + steps, sz - 1)];
     }
 };
+```
+
+```cpp
+// consturctor, visit - O(1) and backward, forward - O(steps)
+class BrowserHistory {
+public:
+    class Node {
+    public:
+        string url;
+        Node* next;
+        Node* prev;
+        
+        Node(string url) : url(url), next(nullptr), prev(nullptr) {}
+    };
+    
+    Node* curr;
+    
+    BrowserHistory(string homepage) {
+        curr = new Node(homepage);
+    }
+    
+    void visit(string url) {
+        Node* newNode = new Node(url);
+        curr->next = newNode;
+        newNode->prev = curr;
+        curr = newNode;
+    }
+    
+    string back(int steps) {
+        while (curr->prev && steps-- > 0) {
+            curr = curr->prev;
+        }
+        return curr->url;
+    }
+    
+    string forward(int steps) {
+        while (curr->next && steps-- > 0) {
+            curr = curr->next;
+        }
+        return curr->url;
+    }
+};
+
 ```
