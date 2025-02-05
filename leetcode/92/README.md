@@ -37,6 +37,8 @@
 **Similar Questions**:
 * [Reverse Linked List (Easy)](https://leetcode.com/problems/reverse-linked-list/)
 
+![Alt text](123.jpeg)
+
 ## Solution 1.
 
 ```cpp
