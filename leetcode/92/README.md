@@ -46,21 +46,33 @@
 // Author: github.com/lzl124631x
 // Time: O(N)
 // Space: O(1)
+
 class Solution {
 public:
     ListNode* reverseBetween(ListNode* head, int m, int n) {
-        ListNode dummy, *p = &dummy;
+        if (!head || m == n) return head;
+        
+        ListNode dummy(0);
         dummy.next = head;
-        for (int i = 1; i < m; ++i) p = p->next;
-        auto q = p->next, tail = q;
-        for (int i = m; i <= n; ++i) {
-            auto node = q;
-            q = q->next;
-            node->next = p->next;
-            p->next = node;
+        ListNode* p = &dummy;
+        
+        // Move p to the node before the start of the reversal
+        for (int i = 0; i < m - 1; i++) {
+            p = p->next;
         }
-        tail->next = q;
+        
+        ListNode* tail = p->next;
+        
+        // Reverse the nodes between m and n
+        for (int i = 0; i < n - m; i++) {
+            ListNode* tmp = p->next;         // a)
+            p->next = tail->next;            // b)
+            tail->next = tail->next->next;   // c)
+            p->next->next = tmp;             // d)
+        }
+        
         return dummy.next;
     }
 };
+
 ```
