@@ -58,7 +58,7 @@ class Solution {
 public:
     ListNode* swapNodes(ListNode* head, int k) {
         int len = getLength(head), r = len - k + 1;
-        if (r == k) return head;
+        if (r == k) return head;		// It is the same node, 1-2-3-4-5, here node 3 kind
         ListNode *a = getNode(head, k), *b = getNode(head, r);
         swap(a->val, b->val);
         return head;
