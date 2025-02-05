@@ -84,6 +84,12 @@ public:
 
 ## Solution 2.
 
+Algorithm :
+Find the Middle: Use two pointers (slow and fast) to find the middle of the list.
+Reverse the Second Half: Reverse the second half of the list.
+Calculate Twin Sums: Iterate through both halves simultaneously, calculating the sum of corresponding nodes.
+Find Maximum Sum: Keep track of the maximum sum encountered.
+
 ```cpp
 // OJ: https://leetcode.com/problems/maximum-twin-sum-of-a-linked-list/
 // Author: github.com/lzl124631x
