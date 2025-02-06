@@ -68,7 +68,7 @@ public:
                     left = mid + 1;
                 }
             }
-            ans[i] = m - left;
+            ans[i] = m - left;		// (m-1) - left + 1
         }
         return ans;
     }
