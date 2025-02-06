@@ -51,6 +51,53 @@ After typing mou, mous and mouse the system suggests ["mouse","mousepad"]
 **Related Topics**:  
 [Array](https://leetcode.com/tag/array/), [String](https://leetcode.com/tag/string/), [Trie](https://leetcode.com/tag/trie/)
 
+## Solution 1. Binary Search
+```cpp
+// TC : O(NlogN)
+// SC : O(M)
+
+/*
+eg. products[startIdx].size() is 5 and i is 5, then it means we are searching for the 6th character, but the word only contains 5 characters
+This particular word can't be used
+It is same with, i >= products[endIdx].size()
+
+eg. products[endIdx][i] > searchWord[i]  means, we have to step down as the current is more than wanted and the prev characters 
+are satisfying (thatswhy we came till i)
+*/
+
+class Solution {
+public:
+    vector<vector<string>> suggestedProducts(vector<string> &products, string searchWord) {
+        int n = products.size();
+        // Sort products lexicographically
+        sort(products.begin(), products.end());
+        
+        vector<vector<string>> ans;
+        int startIdx = 0, endIdx = n - 1;
+        
+        // Iterate over each character in searchWord
+        for (int i = 0; i < searchWord.length(); i++) {
+            // Update start index to match searchWord prefix
+            while (startIdx <= endIdx && (i >= products[startIdx].size() || products[startIdx][i] < searchWord[i]))
+                startIdx++;
+            // Update end index to match searchWord prefix
+            while (startIdx <= endIdx && (i >= products[endIdx].size() || products[endIdx][i] > searchWord[i]))
+                endIdx--;
+
+            // Add suggestions for current prefix
+            ans.push_back({});
+            for (int j = startIdx; j < min(startIdx + 3, endIdx + 1); ++j) {
+                ans.back().push_back(products[j]);
+            }
+        }
+        return ans;
+    }
+};
+
+
+
+```
+
 ## Solution 1. Trie
 
 We can use Trie to compress the `products`. In order to suggest words, we need to store the index of the product in the corresponding last Trie Node.
