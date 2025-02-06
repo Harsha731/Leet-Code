@@ -33,6 +33,10 @@
 ## Solution 1. PQ approach
 
 ```cpp
+
+// TC : O(NlogK)
+// SC : O(N) in the worst case
+
 class Solution {
 public:
     int findLeastNumOfUniqueInts(vector<int>& arr, int k) {
@@ -60,28 +64,45 @@ public:
 ## Solution 2. Counting sort approach
 
 ```cpp
+// TC and SC : O(N)
+
 class Solution {
 public:
     int findLeastNumOfUniqueInts(vector<int>& arr, int k) {
-        unordered_map<int, int> freq;
-        for (int i : arr) freq[i]++;
-
-        int n = arr.size(), uniqueCount = freq.size();
-        vector<int> freqCounts(n + 1, 0);
-
-        // Count occurrences of each frequency
-        for (auto& [_, f] : freq) freqCounts[f]++;
-
-        // Remove elements based on smallest frequencies
-        for (int i = 1; i <= n; i++) {
-            int removeCount = min(k / i, freqCounts[i]);
-            k -= i * removeCount;
-            uniqueCount -= removeCount;
-
-            if (k < i) return uniqueCount;  // Stop if k is exhausted
+        // Track frequencies of elements
+        unordered_map<int, int> map;
+        for (int i : arr) {
+            map[i]++;
         }
 
-        return 0;  // All elements removed
+        int n = arr.size();
+
+        // Array to track frequency counts
+        vector<int> countOfFrequencies(n + 1, 0);
+
+        // Populate countOfFrequencies array
+        for (auto it : map) {
+            countOfFrequencies[it.second]++;
+        }
+
+        int remainingUniqueElements = map.size();
+
+        // Traverse all possible frequencies
+        for (int i = 1; i <= n; i++) {
+            int numElementsToRemove = min(k / i, countOfFrequencies[i]);
+
+            // Remove elements and reduce k
+            k -= (i * numElementsToRemove);
+            remainingUniqueElements -= numElementsToRemove;
+
+            // If k becomes less than the current frequency, stop
+            if (k < i) {
+                return remainingUniqueElements;
+            }
+        }
+
+        // Return 0 if all elements are removed
+        return 0;
     }
 };
 
