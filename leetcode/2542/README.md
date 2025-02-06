@@ -74,6 +74,17 @@ Zip `A` and `B` into an array `C` such that `C[i] = (A[i], B[i])`. Sort `C` in d
 Traverse `C` from left to right. The last seen `B` value is the minimum value. To track the top `K` elements, we use a min heap. Whenever we visit a new `C[i]`, we push its `A` value into the heap, and add this value to `sum`. When heap has more than `K` elements, we pop the top, and remove this top value from `sum`. In this way, we keep track of the `sum` of the top `K` elements.
 
 ```cpp
+/*
+1) what if the current element which got pushed into PQ got popped out, so we should not do : sum * b
+The new b is smaller than older b's 
+We are saying what if the new a is smaller than old a. Then, with the (old sum) * (new smaller b), this sum*b is smaller, so it will be ignored in terms of ans 
+
+2) If some other, we don't have any problem
+*/
+
+// TC : O(NlogN) for sorting and O(NlogK) for PQ
+// SC : O(N)
+
 class Solution {
 public:
     long long maxScore(vector<int>& A, vector<int>& B, int k) {
@@ -92,9 +103,9 @@ public:
         priority_queue<int, vector<int>, greater<int>> minHeap;
         
         for (int i = 0; i < N; ++i) {
-            auto &[a, b] = pairs[i];
-            sum += b;
-            minHeap.push(b);
+            auto &[b, a] = pairs[i]; // Swap the order here
+            sum += a;
+            minHeap.push(a);
             
             // Keep only the k largest elements in sum
             if (minHeap.size() > k) {
@@ -103,10 +114,12 @@ public:
             }
             
             // Calculate the maximum score for subsequences of size k
-            if (minHeap.size() == k)  ans = max(ans, sum * a);
+            if (minHeap.size() == k)  ans = max(ans, sum * b);
         }
         return ans;
     }
 };
+
+
 
 ```
