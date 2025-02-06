@@ -38,27 +38,29 @@ The maximum difference is max(|nums[1] - nums[4]|, |nums[2] - nums[5]|) = max(0,
 ```cpp
 // Time: O(NlogN)
 // Space: O(1)
+
 class Solution {
 public:
+    bool valid(vector<int>& A, int t, int P) {
+        int cnt = 0, i = 1;
+        while (i < A.size() && cnt < P) {
+            if (A[i] - A[i - 1] <= t) ++cnt, i += 2;
+            else ++i;
+        }
+        return cnt == P;
+    }
+
     int minimizeMax(vector<int>& A, int P) {
         sort(A.begin(), A.end());
         int L = 0, R = A.back() - A[0];
         
-        auto valid = [&](int t) {
-            int cnt = 0, i = 1;
-            while (i < A.size() && cnt < P) {
-                if (A[i] - A[i - 1] <= t) ++cnt, i += 2;
-                else ++i;
-            }
-            return cnt == P;
-        };
-        
         while (L <= R) {
             int M = L + (R - L) / 2;
-            if (valid(M)) R = M - 1;
+            if (valid(A, M, P)) R = M - 1;
             else L = M + 1;
         }
         return L;
     }
 };
+
 ```
