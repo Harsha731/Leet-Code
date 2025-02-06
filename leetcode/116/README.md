@@ -97,6 +97,15 @@ This assumption is true because the root layer is connected, and if we do this l
 // Author: github.com/lzl124631x
 // Time: O(N)
 // Space: O(H)
+/*
+'first' pointer will be there at left most node every time (given perfect binary tree)
+      1
+    2   3
+   4 5 6 7
+suppose first is at 2, then (1) joins 4->5 and (2) joins 5->6
+Then p goes from 2 to 3
+*/
+
 class Solution {
 public:
     Node* connect(Node* root) {
