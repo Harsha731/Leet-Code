@@ -37,6 +37,10 @@
 // TC : O(NlogK)
 // SC : O(N) in the worst case
 
+// If K>0, it means it still remains. So, we do size+1
+// TC : O(NlogK)
+// SC : O(N) in the worst case only
+
 class Solution {
 public:
     int findLeastNumOfUniqueInts(vector<int>& arr, int k) {
@@ -64,7 +68,7 @@ public:
 ## Solution 2. Counting sort approach
 
 ```cpp
-// TC and SC : O(N)
+// TC and SC : O(N) always
 
 class Solution {
 public:
