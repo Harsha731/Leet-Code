@@ -76,7 +76,7 @@ public:
 
     string get(string key, int timestamp) {
         auto it = m[key].upper_bound(timestamp);
-        return it == m[key].begin() ? "" : prev(it)->second;
+        return it == m[key].begin() ? "" : prev(it)->second;	// As we want <=, we use > for upper bound and we do prev for it
     }
 };
 ```
