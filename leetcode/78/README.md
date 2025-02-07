@@ -39,58 +39,31 @@
 // Author: github.com/lzl124631x
 // Time: O(N * 2^N)
 // Space: O(N)
+
 class Solution {
+private:
+    void dfs(int i, vector<int>& nums, vector<vector<int>>& ans, vector<int>& tmp) {
+        if (i == nums.size()) {
+            ans.push_back(tmp);
+            return;
+        }
+        tmp.push_back(nums[i]);
+        dfs(i + 1, nums, ans, tmp); // Pick nums[i]
+        tmp.pop_back();
+        dfs(i + 1, nums, ans, tmp); // Skip nums[i]
+    }
+
 public:
-    vector<vector<int>> subsets(vector<int>& A) {
+    vector<vector<int>> subsets(vector<int>& nums) {
         vector<vector<int>> ans;
         vector<int> tmp;
-        function<void(int)> dfs = [&](int i) {
-            if (i == A.size()) {
-                ans.push_back(tmp);
-                return;
-            }
-            tmp.push_back(A[i]);
-            dfs(i + 1); // Pick A[i]
-            tmp.pop_back();
-            dfs(i + 1); // Skip A[i]
-        };
-        dfs(0);
+        dfs(0, nums, ans, tmp);
         return ans;
     }
 };
 ```
 
-## Solution 2. Backtracking
-
-```cpp
-// OJ: https://leetcode.com/problems/subsets
-// Author: github.com/lzl124631x
-// Time: O(N * 2^N)
-// Space: O(N)
-class Solution {
-public:
-    vector<vector<int>> subsets(vector<int>& A) {
-        vector<vector<int>> ans;
-        vector<int> tmp;
-        int N = A.size();
-        function<void(int, int)> dfs = [&](int start, int len) {
-            if (!len) {
-                ans.push_back(tmp);
-                return;
-            }
-            for (int i = start; i <= N - len; ++i) {
-                tmp.push_back(A[i]);
-                dfs(i + 1, len - 1);
-                tmp.pop_back(); // backtrack
-            }
-        };
-        for (int len = 0; len <= N; ++len) dfs(0, len);
-        return ans;
-    }
-};
-```
-
-## Solution 3. Bitmask
+## Solution 2. Bitmask
 
 ```cpp
 // OJ: https://leetcode.com/problems/subsets
@@ -98,6 +71,11 @@ public:
 // Time: O(N * 2^N)
 // Space: O(1)
 // Ref: https://discuss.leetcode.com/topic/2764/my-solution-using-bit-manipulation
+/*
+000 001 010 011
+100 101 110 111
+We check for each number 1,2,3 if it is in the 0 to 7, then we push it into jth subset
+*/
 class Solution {
 public:
     vector<vector<int>> subsets(vector<int>& A) {
@@ -113,12 +91,20 @@ public:
 };
 ```
 
-## Solution 4. DP
+## Solution 3. DP
 
 Let `dp[i]` be the subsets ending with `A[i]`.
 
 ```
 dp[i] = [ [k, A[i]] | k is in dp[i-1] ]
+
+ans(1) means it is of size 1 and it is an empty vector {}
+[] 
+[1]
+[2] [1 2]
+[3] [1 3] [2 3] [1 2 3]
+ans(j) do insert the same one, but this time with the element A[i]
+
 ```
 
 ```cpp
