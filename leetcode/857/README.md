@@ -55,19 +55,32 @@
 
 ```cpp
 
-// Time Complexity
-// O(NlogN) for sort.
-// O(NlogK) for priority queue. Both are needed for this problem
+/*
+Time Complexity
+O(NlogN) for sort.
+O(NlogK) for priority queue. Both are needed for this problem
 
-// wi : wj :: qi : qj    =>    wi / qi  =  wj / qj   => We select the minimum wi/qi ration
-// we need to provide the minimum wage to all the k workers
+wi : wj :: qi : qj    =>    wi / qi  =  wj / qj   => We select the minimum wi/qi ration
+we need to provide the minimum wage to all the k workers
 
-// We are simply multiplying the current wi/qi value with the sum of the min k quality workers till now
+We are simply multiplying the current wi/qi value with the sum of the min k quality workers till now
 
-// What is we are supposed to remove the worker[1] and we are multiplying with worker[0]
-// No problem, it will be more than the earlier, as sum is same with more value of worker[0]
-// causes it to ingore while applying the min function
+What is we are supposed to remove the worker[1] and we are multiplying with worker[0]
+No problem, it will be more than the earlier, as sum is same with more value of worker[0]
+causes it to ingore while applying the min function
 
+What is the problem ?
+Min cost to hire k workers, (sum of all the qualities) * (min w/q ratio) = answer
+
+why sorted asc ?
+We want to have the min w/q first, we add the first qualities, and the w/q at that point (as it will be the big one among the k)
+
+why max Heap ?
+We want to remove the max quality worker, to have the min cost
+
+what if the one entered is popped out ?
+qsum_new = qsum_old, but the w/q will be more, so it will be ignored while we are using min(ans, ...)
+*/
 
 class Solution {
 public:
