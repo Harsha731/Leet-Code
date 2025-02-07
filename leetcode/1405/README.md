@@ -50,6 +50,11 @@
 Not explained why even on LC editorial
 
 ```cpp
+
+// If b streak is 2 and c > b > a, we are still using a
+// which is wrong, actually c is to be used
+// TC : O(a+b+c) and SC : O(1)
+
 class Solution {
 public:
     string longestDiverseString(int a, int b, int c) {
