@@ -51,59 +51,40 @@ Therefore, output the final maximized capital, which is 0 + 1 + 3 = 4.
 ## Solution 1.
 
 ```cpp
-// OJ: https://leetcode.com/problems/ipo/
-// Author: github.com/lzl124631x
-// Time: O(NlogN)
-// Space: O(N)
+/*
+Time Complexity: O(n log n + k log n)
+    Sorting projects: O(n log n)
+    Iterating through projects and performing heap operations: O(k log n)
+Space Complexity: O(n)
+    Storing projects: O(n)
+    Priority queue for profits: O(n)
+*/
 class Solution {
 public:
-    int findMaximizedCapital(int k, int w, vector<int>& P, vector<int>& C) {
-        vector<int> id(P.size());
-        iota(begin(id), end(id), 0);
-        sort(begin(id), end(id), [&](int a, int b) { return C[a] < C[b]; });
-        auto cmp = [&](int a, int b) { return P[a] < P[b]; };
-        priority_queue<int, vector<int>, decltype(cmp)> pq(cmp);
-        for (int i = 0, j = 0; i < k; ++i) {
-            while (j < id.size() && w >= C[id[j]]) {
-                pq.push(id[j]);
-                ++j;
+    int findMaximizedCapital(int k, int w, vector<int>& profits, vector<int>& capital) {
+        int n = profits.size();
+        vector<pair<int, int>> projects(n);
+        
+        for (int i = 0; i < n; ++i) {
+            projects[i] = {capital[i], profits[i]};
+        }
+        
+        sort(projects.begin(), projects.end());
+
+        int i = 0;
+        priority_queue<int> pq;  // Max-heap to store profits
+
+        while (k--) {
+            while (i < n && projects[i].first <= w) {           // add as many as possible
+                pq.push(projects[i].second);
+                ++i;
             }
             if (pq.empty()) break;
-            int p = pq.top();
+            w += pq.top();                              // select the best possible
             pq.pop();
-            w += P[p];
         }
         return w;
     }
 };
 ```
 
-Or
-
-```cpp
-// OJ: https://leetcode.com/problems/ipo/
-// Author: github.com/lzl124631x
-// Time: O(NlogN)
-// Space: O(N)
-class Solution {
-    typedef pair<int, int> PII;
-public:
-    int findMaximizedCapital(int k, int W, vector<int>& Profits, vector<int>& Capital) {
-        auto capCmp = [](auto &a, auto &b) { return a.first > b.first; };
-        auto proCmp = [](auto &a, auto &b) { return a.second < b.second; };
-        priority_queue<PII, vector<PII>, decltype(capCmp)> cap(capCmp);
-        priority_queue<PII, vector<PII>, decltype(proCmp)> pro(proCmp);
-        for (int i = 0; i < Profits.size(); ++i) cap.push({ Capital[i], Profits[i] });
-        while (k--) {
-            while (cap.size() && cap.top().first <= W) {
-                pro.push(cap.top());
-                cap.pop();
-            }
-            if (pro.empty()) return W;
-            W += pro.top().second;
-            pro.pop();
-        }
-        return W;
-    }
-};
-```
