@@ -54,26 +54,101 @@ For each person, we return the number of flowers in full bloom during their arri
 ## Solution 1.
 
 ```cpp
-// OJ: https://leetcode.com/problems/number-of-flowers-in-full-bloom
-// Author: github.com/lzl124631x
-// Time: O(FlogF + PlogP + PlogF)
-// Space: O(F + P)
+// Approach 1: Heap/Priority Queue
+/*
+Time Complexity: O(n⋅logn + m⋅logn)
+    Sorting flowers and people: O(n⋅logn + m⋅logm)
+    Iterating through people and performing heap operations: O(m⋅logn)
+Space Complexity: O(n + m)
+    Sorted people array: O(m)
+    Map for bloom counts: O(m)
+    Priority queue for end times: O(n)
+*/
+
 class Solution {
 public:
-    vector<int> fullBloomFlowers(vector<vector<int>>& F, vector<int>& P) {
-        int M = F.size(), N = P.size();
-        vector<int> ans(N), id(N);
-        iota(begin(id), end(id), 0); // people ids
-        sort(begin(id), end(id), [&](int a, int b) { return P[a] < P[b]; }); // Sort people
-        sort(begin(F), end(F)); // sort flowers in ascending order of start time
-        priority_queue<int, vector<int>, greater<>> pq; // a min heap of blooming flowers' end times
-        for (int i = 0, j = 0; i < N; ++i) {
-            int p = P[id[i]];
-            while (j < M && F[j][0] <= p) pq.push(F[j++][1]); // push end time of flowers that `<=` people[i]'s arrival time into the min heap
-            while (pq.size() && pq.top() < p) pq.pop(); // remove flowers that ended blooming before people[i]'s arrival time from the min heap
-            ans[id[i]] = pq.size();
+    vector<int> fullBloomFlowers(vector<vector<int>>& f, vector<int>& p) {
+        // Sort people by arrival time
+        vector<int> sp(p.begin(), p.end());     // sorted people
+        sort(sp.begin(), sp.end());
+        
+        // Sort flowers by bloom start time
+        sort(f.begin(), f.end());
+        
+        unordered_map<int, int> m; // Map to store bloom counts
+        priority_queue<int, vector<int>, greater<int>> q; // Queue for end times
+        
+        int i = 0; // Index for flowers
+        for (int t : sp) { // Iterate through sorted people
+            // Add flowers that start blooming before or at this time
+            while (i < f.size() && f[i][0] <= t) {
+                q.push(f[i][1]); // Add end time to queue
+                i++;
+            }
+            
+            // Remove flowers that have finished blooming
+            while (!q.empty() && q.top() < t) {
+                q.pop();
+            }
+            
+            // Store bloom count for this time
+            m[t] = q.size();
         }
+        
+        vector<int> ans; // Final answer
+        for (int t : p) {
+            ans.push_back(m[t]); // Get bloom count for each person
+        }
+        
         return ans;
     }
 };
+
+```
+
+```cpp
+// Approach 2: Binary Search
+/*
+start :  1  3  4  9
+end   :  6  8 13 15
+start = 4 means, i = 3 as upper bound, so 3 flowers are blossemed
+end = 8 means, j = 2, so 2 flowers have fallen down
+
+Time complexity: O((n+m)⋅logn)
+    We first create two arrays of length n, starts and ends, then sort them. This costs O(n⋅logn).
+    Next, we iterate over people and perform two binary searches at each iteration. This costs O(m⋅logn).
+    Thus, our time complexity is O((n+m)⋅logn).
+Space complexity: O(n)
+    starts and ends both have a size of n.
+*/
+class Solution {
+public:
+    vector<int> fullBloomFlowers(vector<vector<int>>& f, vector<int>& p) {
+        vector<int> s; // Start times
+        vector<int> e; // End times
+        
+        // Separate start and end times
+        for (vector<int>& flower : f) {
+            s.push_back(flower[0]);
+            e.push_back(flower[1] + 1); // Adjust end time
+        }
+        
+        // Sort times
+        sort(s.begin(), s.end());
+        sort(e.begin(), e.end());
+        
+        vector<int> ans; // Answer vector
+        
+        // Calculate blooms for each person
+        for (int t : p) {
+            int i = upper_bound(s.begin(), s.end(), t) - s.begin(); // Started blooms
+            int j = upper_bound(e.begin(), e.end(), t) - e.begin(); // Finished blooms
+            ans.push_back(i - j); // Blooms in progress
+        }
+        
+        return ans;
+    }
+};
+
+
 ```
