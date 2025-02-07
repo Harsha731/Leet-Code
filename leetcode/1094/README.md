@@ -101,6 +101,8 @@ public:
 // Vacate as many people as people before inserting a new one 
 // If limit crosses any time, return false
 
+// trips[i] = [numPassengersi, fromi, toi]
+
 class Solution {
 public:
     static bool comp(vector<int> lhs, vector<int> rhs) {
@@ -114,12 +116,12 @@ public:
         priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
 
         for (int i = 0; i < trips.size(); i++) {
-            while (!pq.empty() && pq.top().first <= trips[i][1]) {
+            while (!pq.empty() && pq.top().first <= trips[i][1]) {      // toi <= fromi
                 curr -= pq.top().second;
                 pq.pop();
             }
             
-            pq.push({trips[i][2], trips[i][0]});
+            pq.push({trips[i][2], trips[i][0]});        // pq.push(toi, numPassengersi)
             curr += trips[i][0];
             
             if (curr > capacity) return false;
