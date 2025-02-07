@@ -61,27 +61,31 @@ These are the only two combinations.
 // Author: github.com/lzl124631x
 // Time: O(N^(T/M+1)) where N is the length of A, T is target and M is the minimum value of A[i]
 // Space: O(T/M)
+// backtracking
+
 class Solution {
 public:
-    vector<vector<int>> combinationSum(vector<int>& A, int target) {
-        vector<vector<int>> ans;
-        vector<int> tmp;
-        function<void(int, int)> dfs = [&](int i, int target) {
-            if (target == 0) {
-                ans.push_back(tmp);
-                return;
-            }
-            if (i == A.size()) return;
-            int cnt = 0;
-            do {
-                dfs(i + 1, target);
-                tmp.push_back(A[i]);
-                target -= A[i];
-                ++cnt;
-            } while (target >= 0);
-            while (cnt-- > 0) tmp.pop_back();
-        };
-        dfs(0, target);
+    vector<vector<int>> ans;
+
+    void solve(int i, vector<int>& arr, vector<int>& temp, int target) {
+        if (target == 0) {
+            ans.push_back(temp);
+            return;
+        }
+        if (target < 0) return;
+        if (i == arr.size()) return;
+
+        solve(i + 1, arr, temp, target);
+
+        temp.push_back(arr[i]);
+        solve(i, arr, temp, target - arr[i]);
+        temp.pop_back();
+    }
+
+    vector<vector<int>> combinationSum(vector<int>& arr, int target) {
+        ans.clear();
+        vector<int> temp;
+        solve(0, arr, temp, target);
         return ans;
     }
 };
@@ -95,52 +99,28 @@ public:
 // Time: O(N^(T/M+1)) where N is the length of A, T is target and M is the minimum value of A[i]
 // Space: O(T/M)
 class Solution {
+private:
+    void dfs(int start, int target, vector<int>& A, vector<vector<int>>& ans, vector<int>& tmp) {
+        if (target == 0) {
+            ans.push_back(tmp);
+            return;
+        }
+        if (target < 0) return;
+
+        for (int i = start; i < A.size(); ++i) {
+            tmp.push_back(A[i]);
+            dfs(i, target - A[i], A, ans, tmp);
+            tmp.pop_back(); // Backtrack
+        }
+    }
+
 public:
     vector<vector<int>> combinationSum(vector<int>& A, int target) {
         vector<vector<int>> ans;
         vector<int> tmp;
-        function<void(int, int)> dfs = [&](int start, int target) {
-            if (target == 0) {
-                ans.push_back(tmp);
-            } else if (target < 0) return;
-            for (int i = start; i < A.size(); ++i) {
-                tmp.push_back(A[i]);
-                dfs(i, target - A[i]);
-                tmp.pop_back();
-            }
-        };
-        dfs(0, target);
+        dfs(0, target, A, ans, tmp);
         return ans;
     }
 };
-```
 
-Or
-
-```cpp
-// OJ: https://leetcode.com/problems/combination-sum/
-// Author: github.com/lzl124631x
-// Time: O(N^(T/M+1)) where N is the length of A, T is target and M is the minimum value of A[i]
-// Space: O(T/M)
-// Ref: https://discuss.leetcode.com/topic/14654/accepted-16ms-c-solution-use-backtracking-easy-understand
-class Solution {
-public:
-    vector<vector<int>> combinationSum(vector<int>& A, int target) {
-        vector<vector<int>> ans;
-        vector<int> tmp;
-        sort(begin(A), end(A)); // sorting is a must for this algorithm
-        function<void(int, int)> dfs = [&](int start, int target) {
-            if (target == 0) {
-                ans.push_back(tmp);
-            }
-            for (int i = start; i < A.size() && target - A[i] >= 0; ++i) {
-                tmp.push_back(A[i]);
-                dfs(i, target - A[i]);
-                tmp.pop_back();
-            }
-        };
-        dfs(0, target);
-        return ans;
-    }
-};
 ```
