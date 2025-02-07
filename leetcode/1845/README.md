@@ -62,6 +62,11 @@ seatManager.unreserve(5); // Unreserve seat 5, so now the available seats are [5
 ## Solution 1.
 
 ```cpp
+
+// SeatManager : O(nlogn)
+// reserve : O(logn) - pop is not O(1)
+// unreserve : O(logn)
+
 class SeatManager {
 public:
     priority_queue <int, vector<int>, greater<int> > pq;
@@ -89,6 +94,11 @@ public:
 ## Solution 2.
 
 ```cpp
+
+// SeatManager : O(1)
+// reserve : O(logn) - pop is not O(1)
+// unreserve : O(logn)
+
 class SeatManager {
     int m; // Marker for the next unreserved seat.
     priority_queue<int, vector<int>, greater<int>> pq; // Min-heap for unreserved seats.
