@@ -60,30 +60,71 @@
 // Author: github.com/lzl124631x
 // Time: O((S + T) * logS)
 // Space: O(S + T)
+
+
+// Smallest weight server will be assigned first
+// If tie, then smallest index server
+// We have to assign the server which is free at that particular time (or more)
+// At a time 1 is sent to busy from idle, more than 1 can be sent to idle from busy at a time
+
 class Solution {
 public:
     vector<int> assignTasks(vector<int>& S, vector<int>& T) {
-        vector<int> avail(S.size()), ans(T.size()); // `avail[i]` is the next available time of server i
-        auto idleCmp = [&](int a, int b) { return S[a] != S[b] ? S[a] > S[b] : a > b; }; // the idle server with smallest weight and index is at the top
-        auto busyCmp = [&](int a, int b) { return avail[a] > avail[b]; }; // The busy server with the smallest available time is at the top
+        // Vector to store the next available time for each server
+        vector<int> avail(S.size());
+        
+        // Vector to store the server assigned to each task
+        vector<int> ans(T.size());
+        
+        // The idle server with smallest weight and index is at the top
+        auto idleCmp = [&](int a, int b) { 
+            return S[a] != S[b] ? S[a] > S[b] : a > b; 
+        };
+        
+        // The busy server with the smallest available time is at the top
+        auto busyCmp = [&](int a, int b) { 
+            return avail[a] > avail[b]; 
+        };
+        
+        // Priority queue for idle servers
         priority_queue<int, vector<int>, decltype(idleCmp)> idle(idleCmp);
+        
+        // Priority queue for busy servers
         priority_queue<int, vector<int>, decltype(busyCmp)> busy(busyCmp);
+        
+        // Initialize idle servers
         for (int i = 0; i < S.size(); ++i) idle.push(i);
-        int time = 0;
+        
+        int time = 0; // Current time
+        
+        // Assign tasks to servers
         for (int i = 0; i < T.size(); ++i) {
-            time = max(i, time); // the current time is at least `i`
-            if (idle.empty()) time = avail[busy.top()]; // no idle servers, jump to the next available time
-            while (busy.size() && avail[busy.top()] <= time) { // collect all the idle servers
+            // Ensure current time is at least the task index
+            time = max(i, time);
+            
+            // If no idle servers, jump to the next available time
+            if (idle.empty()) time = avail[busy.top()];
+            
+            // Move available busy servers back to idle queue
+            while (busy.size() && avail[busy.top()] <= time) {
                 idle.push(busy.top());
                 busy.pop();
             }
+            
+            // Assign task to the next available server
             int s = idle.top();
             idle.pop();
-            ans[i] = s; // use server `s` for task `i`
-            avail[s] = time + T[i]; // update available time of server `s` as current time + T[i]
+            ans[i] = s; // Store assigned server
+            
+            // Update server's available time
+            avail[s] = time + T[i];
+            
+            // Mark server as busy
             busy.push(s);
         }
-        return ans;
+        
+        return ans; // Return assigned servers
     }
 };
+
 ```
