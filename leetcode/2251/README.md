@@ -51,10 +51,9 @@ For each person, we return the number of flowers in full bloom during their arri
 * We can store the starting times in sorted order, which then allows us to binary search to find how many flowers have started blooming for a given time t.
 * We do the same for the ending times to find how many flowers have stopped blooming at time t.
 
-## Solution 1.
+## Approach 1: Heap/Priority Queue
 
 ```cpp
-// Approach 1: Heap/Priority Queue
 /*
 Time Complexity: O(n⋅logn + m⋅logn)
     Sorting flowers and people: O(n⋅logn + m⋅logm)
@@ -106,8 +105,9 @@ public:
 
 ```
 
+## Approach 2: Binary Search
 ```cpp
-// Approach 2: Binary Search
+
 /*
 start :  1  3  4  9
 end   :  6  8 13 15
