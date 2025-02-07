@@ -32,7 +32,7 @@
 * [Find Array Given Subset Sums (Hard)](https://leetcode.com/problems/find-array-given-subset-sums/)
 * [Count Number of Maximum Bitwise-OR Subsets (Medium)](https://leetcode.com/problems/count-number-of-maximum-bitwise-or-subsets/)
 
-## Solution 1. DFS
+## Solution 1. Backtracking 1
 
 ```cpp
 // OJ: https://leetcode.com/problems/subsets/
@@ -63,7 +63,38 @@ public:
 };
 ```
 
-## Solution 2. Bitmask
+## Backtracking 2.
+
+```cpp
+class Solution {
+private:
+    void dfs(int start, int len, vector<int>& A, int N, vector<vector<int>>& ans, vector<int>& tmp) {
+        if (!len) {
+            ans.push_back(tmp);
+            return;
+        }
+        for (int i = start; i <= N - len; ++i) {
+            tmp.push_back(A[i]);
+            dfs(i + 1, len - 1, A, N, ans, tmp);
+            tmp.pop_back(); // backtrack
+        }
+    }
+
+public:
+    vector<vector<int>> subsets(vector<int>& nums) {
+        vector<vector<int>> ans;
+        vector<int> tmp;
+        int N = nums.size();
+        for (int len = 0; len <= N; ++len) {
+            dfs(0, len, nums, N, ans, tmp);
+        }
+        return ans;
+    }
+};
+
+```
+
+## Solution 3. Bitmask
 
 ```cpp
 // OJ: https://leetcode.com/problems/subsets
@@ -91,7 +122,7 @@ public:
 };
 ```
 
-## Solution 3. DP
+## Solution 4. DP
 
 Let `dp[i]` be the subsets ending with `A[i]`.
 
