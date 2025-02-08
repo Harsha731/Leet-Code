@@ -67,6 +67,7 @@ class Solution {
 public:
     vector<vector<int>> ans;
 
+	// 2 times DFS method
     void solve(int i, vector<int>& arr, vector<int>& temp, int target) {
         if (target == 0) {
             ans.push_back(temp);
@@ -100,6 +101,8 @@ public:
 // Space: O(T/M)
 class Solution {
 private:
+
+	// for loop DFS method
     void dfs(int start, int target, vector<int>& A, vector<vector<int>>& ans, vector<int>& tmp) {
         if (target == 0) {
             ans.push_back(tmp);
