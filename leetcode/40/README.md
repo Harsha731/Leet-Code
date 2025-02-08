@@ -39,7 +39,7 @@
 **Similar Questions**:
 * [Combination Sum (Medium)](https://leetcode.com/problems/combination-sum/)
 
-## Solution 1. Backtracking
+## Solution 1. Backtracking - 2 times DFS
 
 ```cpp
 // OJ: https://leetcode.com/problems/combination-sum-ii
@@ -52,28 +52,30 @@ public:
         sort(begin(A), end(A));
         vector<vector<int>> ans;
         vector<int> tmp;
-        function<void(int, int)> dfs = [&](int i, int target) {
-            if (target == 0) {
-                ans.push_back(tmp);
-                return;
-            }
-            if (i == A.size()) return;
-            if (target >= A[i]) { // pick A[i]
-                tmp.push_back(A[i]);
-                dfs(i + 1, target - A[i]);
-                tmp.pop_back();
-            }
-            // if we skip A[i], we need to skip all elements that are the same as A[i]
-            while (i + 1 < A.size() && A[i + 1] == A[i]) ++i;
-            dfs(i + 1, target);
-        };
-        dfs(0, target);
+        dfs(A, 0, target, tmp, ans);
         return ans;
+    }
+
+private:
+    void dfs(vector<int>& A, int i, int target, vector<int>& tmp, vector<vector<int>>& ans) {
+        if (target == 0) {
+            ans.push_back(tmp);
+            return;
+        }
+        if (i == A.size()) return;
+        if (target >= A[i]) { // pick A[i]
+            tmp.push_back(A[i]);
+            dfs(A, i + 1, target - A[i], tmp, ans);
+            tmp.pop_back();
+        }
+        // if we skip A[i], we need to skip all elements that are the same as A[i]
+        while (i + 1 < A.size() && A[i + 1] == A[i]) ++i;
+        dfs(A, i + 1, target, tmp, ans);
     }
 };
 ```
 
-## Solution 2. Backtracking
+## Solution 2. Backtracking - for loop DFS
 
 ```cpp
 // OJ: https://leetcode.com/problems/combination-sum-ii/
@@ -86,20 +88,23 @@ public:
         sort(begin(A), end(A));
         vector<vector<int>> ans;
         vector<int> tmp;
-        function<void(int, int)> dfs = [&](int start, int target) {
-            if (target == 0) {
-                ans.push_back(tmp);
-                return;
-            }
-            for (int i = start; i < A.size() && target >= A[i]; ++i) {
-                if (i != start && A[i] == A[i - 1]) continue;
-                tmp.push_back(A[i]);
-                dfs(i + 1, target - A[i]);
-                tmp.pop_back();
-            }
-        };
-        dfs(0, target);
+        dfs(A, 0, target, tmp, ans);
         return ans;
+    }
+
+private:
+    void dfs(vector<int>& A, int start, int target, vector<int>& tmp, vector<vector<int>>& ans) {
+        if (target == 0) {
+            ans.push_back(tmp);
+            return;
+        }
+
+        for (int i = start; i < A.size() && target >= A[i]; ++i) {
+            if (i != start && A[i] == A[i - 1]) continue;
+            tmp.push_back(A[i]);
+            dfs(A, i + 1, target - A[i], tmp, ans);
+            tmp.pop_back();
+        }
     }
 };
 ```
