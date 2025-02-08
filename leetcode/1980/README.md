@@ -54,23 +54,87 @@
 ## Solution 1.
 
 ```cpp
-// OJ: https://leetcode.com/problems/find-unique-binary-string/
-// Author: github.com/lzl124631x
+class Solution {
+public:
+    unordered_set<string> numsSet;
+    
+    string generate(string curr, int n) {
+        if (curr.size() == n) {
+            // Return if unique, else empty
+            return numsSet.find(curr) == numsSet.end() ? curr : "";
+        }
+        
+        // Try appending '0'
+        string addZero = generate(curr + "0", n);
+        if (!addZero.empty()) return addZero; // Found a unique string
+        
+        // If '0' doesn't work, try appending '1'
+        return generate(curr + "1", n);
+    }
+    
+    string findDifferentBinaryString(vector<string>& nums) {
+        int n = nums.size(); 
+        for (const auto& s : nums) numsSet.insert(s); 
+        return generate("", n); 
+    }
+};
+
+/*
+Time complexity: O(n^2)
+We require O(n^2) to convert nums to a hash set.
+Due to the optimization, we check O(n) binary strings in our recursion. At each call, we perform some string concatenation 
+operations, which costs up to O(n) (unless you have mutable strings like in C++).
+
+Space complexity: O(n)
+The recursion call stack when generating strings grows to a size of O(n). The hash set uses O(n) space.
+*/
+```
+
+## Solution 2. Iterate Over Integer Equivalents
+```cpp
 // Time: O(N^2)
 // Space: O(N)
 class Solution {
-public:
-    string findDifferentBinaryString(vector<string>& A) {
-        int n = A.size();
-        unordered_set<int> s;
-        for (auto &n : A) s.insert(stoi(n, 0, 2));
-        for (int i = 0; i <= n; ++i) {
-            if (s.count(i)) continue;
-            string ans;
-            for (int j = 0; j < n; ++j) ans[len - j - 1] = '0' + (i >> j & 1);
-            return ans;
+    public:
+        string findDifferentBinaryString(vector<string>& A) {
+            int n = A.size();
+            unordered_set<int> s; // Store the integer representation of strings in A
+            for (auto &str : A) s.insert(stoi(str, 0, 2)); // Convert binary string to integer and insert into set
+            for (int i = 0; i <= n; ++i) {
+                if (s.count(i)) continue; // If i is present in set, continue to next number
+    
+                string ans(n, '0');  // Initialize the answer string with '0's. Size n
+                int len = n;        // store n for easier access
+                
+                //Convert i to binary string of length n
+                for (int j = 0; j < n; ++j) ans[len - j - 1] = '0' + (i >> j & 1); 
+                return ans; // Return the unique binary string
+            }
+            return ""; // Should not reach here if a solution exists.
         }
-        return "";
+    };
+```
+
+## Solution 3. Cantor's Diagonal Argument
+```cpp
+
+/*
+Time complexity: O(n)
+Space complexity: O(1)
+
+Since ans differs from each string in nums at least at one position, it is guaranteed to be unique and not present in nums.
+*/
+
+class Solution {
+public:
+    string findDifferentBinaryString(vector<string>& nums) {
+        string ans;
+        for (int i = 0; i < nums.size(); i++) {
+            char curr = nums[i][i];
+            ans += curr == '0' ? '1' : '0';
+        }
+        
+        return ans;
     }
 };
 ```
