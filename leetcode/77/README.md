@@ -41,26 +41,67 @@ Note that combinations are unordered, i.e., [1,2] and [2,1] are considered to be
 ```cpp
 // OJ: https://leetcode.com/problems/combinations/
 // Author: github.com/lzl124631x
-// Time: O(K!)
+// Time: O(C(N, K) * K)  // More accurate Time Complexity
 // Space: O(K)
 class Solution {
 public:
     vector<vector<int>> combine(int n, int k) {
         vector<vector<int>> ans;
         vector<int> tmp;
-        function<void(int)> dfs = [&](int start) {
+        dfs(n, k, 1, tmp, ans);
+        return ans;
+    }
+
+private:
+    void dfs(int n, int k, int start, vector<int>& tmp, vector<vector<int>>& ans) {
+        if (tmp.size() == k) {
+            ans.push_back(tmp);
+            return;
+        }
+
+        if (start > n - k + tmp.size() + 1) {
+            return; // Pruning: Not enough elements left to form a combination
+        }
+
+        // Option 1: Exclude the current number 'start'
+        dfs(n, k, start + 1, tmp, ans);
+
+        // Option 2: Include the current number 'start'
+        tmp.push_back(start);
+        dfs(n, k, start + 1, tmp, ans);
+        tmp.pop_back(); // Backtrack: Remove 'start' after exploring the branch
+    }
+};
+```
+
+## Solution 2. Backtracking - for loop method
+```cpp
+// OJ: https://leetcode.com/problems/combinations/
+// Author: github.com/lzl124631x
+// Time: O(C(N, K) * K)  // More accurate Time Complexity
+// Space: O(K)
+class Solution {
+    public:
+        vector<vector<int>> combine(int n, int k) {
+            vector<vector<int>> ans;
+            vector<int> tmp;
+            dfs(n, k, 1, tmp, ans);
+            return ans;
+        }
+    
+    private:
+        void dfs(int n, int k, int start, vector<int>& tmp, vector<vector<int>>& ans) {
             if (tmp.size() == k) {
                 ans.push_back(tmp);
                 return;
             }
             for (int i = start; i <= n - k + tmp.size() + 1; ++i) {
                 tmp.push_back(i);
-                dfs(i + 1);
+                dfs(n, k, i + 1, tmp, ans);
                 tmp.pop_back();
             }
-        };
-        dfs(1);
-        return ans;
-    }
-};
+        }
+    };
+    
+
 ```
