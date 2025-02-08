@@ -55,26 +55,35 @@
 // Time: O(MN * 4^K)
 // Space: O(K)
 class Solution {
-public:
-    bool exist(vector<vector<char>>& A, string s) {
-        int M = A.size(), N = A[0].size(), dirs[4][2] = {{0,1},{0,-1},{1,0},{-1,0}};
-        function<bool(int, int, int)> dfs = [&](int x, int y, int i) {
+    public:
+        bool exist(vector<vector<char>>& A, string s) {
+            int M = A.size(), N = A[0].size();
+            for (int i = 0; i < M; ++i) {
+                for (int j = 0; j < N; ++j) {
+                    if (dfs(A, s, i, j, 0)) return true;
+                }
+            }
+            return false;
+        }
+    
+    private:
+        bool dfs(vector<vector<char>>& A, string s, int x, int y, int i) {
+            int M = A.size(), N = A[0].size();
+            int dirs[4][2] = {{0,1},{0,-1},{1,0},{-1,0}};
             if (x < 0 || x >= M || y < 0 || y >= N || A[x][y] != s[i]) return false;
             if (i + 1 == s.size()) return true;
+    
             char c = A[x][y];
-            A[x][y] = 0;
-            for (auto &[dx, dy] : dirs) {
-                if (dfs(x + dx, y + dy, i + 1)) return true;
+            A[x][y] = 0;  // Mark as visited
+    
+            for (auto& dir : dirs) {
+                int dx = dir[0], dy = dir[1];
+                if (dfs(A, s, x + dx, y + dy, i + 1)) return true;
             }
-            A[x][y] = c;
+    
+            A[x][y] = c; // Backtrack: Restore the original value
             return false;
-        };
-        for (int i = 0; i < M; ++i) {
-            for (int j = 0; j < N; ++j) {
-                if (dfs(i, j, 0)) return true;
-            }
         }
-        return false;
-    }
-};
+    };
+    
 ```
