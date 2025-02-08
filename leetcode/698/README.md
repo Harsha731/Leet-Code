@@ -37,59 +37,84 @@ This problem is very similar to [473. Matchsticks to Square (Medium)](https://le
 // OJ: https://leetcode.com/problems/partition-to-k-equal-sum-subsets/
 // Author: github.com/lzl124631x
 // Time: O(N * 2^N)
-// Space: O(2^Nk)
+// Space: O(2^N)
 class Solution {
-public:
-    bool canPartitionKSubsets(vector<int>& A, int k) {
-        int sum = accumulate(begin(A), end(A), 0);
-        if (sum % k) return false;
-        int N = A.size();
-        sum /= k;
-        vector<int> dp(1 << N, -1); // -1 unvisited, 0 can't k-partition, 1 can k-partition
-        dp[(1 << N) - 1] = 1; // If we can use all elements, it's a valid k-partition
-        sort(begin(A), end(A), greater<>()); // Try the rocks earlier than sands
-        function<bool(int, int)> dfs = [&](int mask, int target) {
+    public:
+        bool canPartitionKSubsets(vector<int>& A, int k) {
+            // Calculate total sum and check divisibility by k
+            int sum = accumulate(begin(A), end(A), 0);
+            if (sum % k) return false; // Not divisible, impossible to partition
+            int N = A.size();
+            sum /= k; // Target sum per subset
+            vector<int> dp(1 << N, -1); // DP table: -1 unvisited, 0/1 visited
+            dp[(1 << N) - 1] = 1; // All elements used, valid partition
+            sort(begin(A), end(A), greater<>()); // Prioritize larger numbers
+    
+            // Start DFS with initial mask and target sum
+            return dfs(A, dp, sum, N, 0, sum);
+        }
+    
+        // Recursive DFS with memoization
+        bool dfs(const vector<int>& A, vector<int>& dp, int sum, int N, int mask, int target) {
+            // Memoization: Return cached result if available
             if (dp[mask] != -1) return dp[mask];
-            dp[mask] = 0;
+            dp[mask] = 0; // Assume cannot partition initially
+    
+            // ** Reset target if current subset is complete
             if (target == 0) target = sum;
-            for (int i = 0; i < N && !dp[mask]; ++i) {
-                if ((mask >> i & 1) || A[i] > target) continue; // If `A[i]` is used in `mask`, or `A[i] > target`, skip this `A[i]`
-                dp[mask] = dfs(mask | (1 << i), target - A[i]);
+    
+            // ** Try adding each element to the current subset  [different from the other approach]
+            for (int i = 0; i < N && !dp[mask]; ++i) {      
+                // ** !dp[mask] = 1 means no selection is possible using this type - For 2nd time, we can use the info from 1st time
+                if ((mask >> i & 1) || A[i] > target) continue; // Skip used or too large elements
+                dp[mask] = dfs(A, dp, sum, N, mask | (1 << i), target - A[i]);
             }
-            return dp[mask];
-        };
-        return dfs(0, sum);
-    }
-};
+            return dp[mask]; // Return whether a valid partition is found
+        }
+    };
 ```
 
 ## Solution 2. Backtrack to Fill Buckets 
+![Alt text](698.jpeg)
 
 ```cpp
 // OJ: https://leetcode.com/problems/partition-to-k-equal-sum-subsets/
 // Author: github.com/lzl124631x
 // Time: O(K^N)
 // Space: O(N * SUM(A) / K)
+
 class Solution {
-public:
-    bool canPartitionKSubsets(vector<int>& A, int k) {
-        int sum = accumulate(begin(A), end(A), 0), N = A.size();
-        if (sum % k) return false;
-        sum /= k;
-        sort(begin(A), end(A), greater<>()); // try rocks before sands
-        vector<int> s(k);
-        function<bool(int)> dfs = [&](int i) {
+    public:
+        bool canPartitionKSubsets(vector<int>& A, int k) {
+            // Calculate total sum and check divisibility by k
+            int sum = accumulate(begin(A), end(A), 0), N = A.size();
+            if (sum % k) return false; // Not divisible, impossible to partition
+            sum /= k; // Target sum per subset
+            sort(begin(A), end(A), greater<>()); // Prioritize larger numbers
+    
+            vector<int> s(k); // Initialize subset sums
+    
+            // Start DFS from the first element
+            return dfs(A, s, sum, N, k, 0);
+        }
+    
+        // Recursive DFS function to try assignments
+        bool dfs(const vector<int>& A, vector<int>& s, int sum, int N, int k, int i) {
+            // Base case: All elements assigned
             if (i == N) return true;
+    
+            // ** Try assigning the current element to each subset [Diiffernt in the next approach]
             for (int j = 0; j < k; ++j) {
-                if (s[j] + A[i] > sum) continue;
-                s[j] += A[i];
-                if (dfs(i + 1)) return true;
-                s[j] -= A[i];
-                if (s[j] == 0) break; // don't try empty buckets multiple times
+                if (s[j] + A[i] > sum) continue; // Exceeds target sum, skip
+                s[j] += A[i]; // Tentatively add to subset
+                if (dfs(A, s, sum, N, k, i + 1)) return true; // Recursively try next elements
+                s[j] -= A[i]; // Backtrack if assignment fails
+                if (s[j] == 0) break; // Avoid trying empty subsets again
             }
-            return false;
-        };
-        return dfs(0);
-    }
-};
+            return false; // No valid assignment found
+        }
+    };
+    
+
+
 ```
