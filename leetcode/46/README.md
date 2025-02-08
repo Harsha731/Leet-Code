@@ -80,7 +80,7 @@ public:
 };
 ```
 
-## Solution 2. Use NextPermutation
+## Solution 2. Use NextPermutation (Not important) - Their next question will be Permutation 2, not the other approach
 
 Reuse the solution for [31. Next Permutation (Medium)](https://leetcode.com/problems/next-permutation).
 
