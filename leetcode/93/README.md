@@ -53,37 +53,40 @@
 Plain backtracking. Maximum depth is 4. Be aware of the cases where ip segment starts with `0` or ip segment is greater than `255`.
 
 ```cpp
-// OJ: https://leetcode.com/problems/restore-ip-addresses
-// Author: github.com/lzl124631x
-// Time: O(1)
-// Space: O(1)
 class Solution {
-public:
-    vector<string> restoreIpAddresses(string s) {
-        vector<string> ans;
-        vector<int> tmp;
-        function<void(int)> dfs = [&](int i) {
-            if (i == s.size()) {
-                if (tmp.size() == 4) {
-                    string ip;
-                    for (int n : tmp) {
-                        if (ip.size()) ip += '.';
-                        ip += to_string(n);
-                    }
-                    ans.push_back(ip);
-                }
+    public:
+        // Helper function to check if a given string is a valid IP address segment
+        bool valid(string temp){
+            if(temp.size()>3 || temp.size()==0) return false; // segment length should be between 1 and 3
+            if(temp.size()>1 && temp[0]=='0')   return false; // segment should not start with 0, unless it is a single digit
+            if(temp.size() && stoi(temp)>255) return false; // segment should not be greater than 255
+            return true;
+        }
+    
+        // Backtracking function to generate all possible IP addresses
+        void solve(vector<string>& ans, string output, int ind, string s, int dots){
+            if(dots == 3){ // if we have already added 3 dots, check if the remaining segment is valid
+                if(valid(s.substr(ind)))
+                    ans.push_back(output+s.substr(ind));
                 return;
             }
-            for (int j = 0, n = 0; j < (s[i] == '0' ? 1 : 3) && i + j < s.size(); ++j) {
-                n = n * 10 + s[i + j] - '0';
-                if (n > 255) break;
-                tmp.push_back(n);
-                dfs(i + j + 1);
-                tmp.pop_back();
+            int sz = s.size();
+            for(int i=ind;i<min(ind+3, sz);i++){
+                if(valid(s.substr(ind, i-ind+1))){
+                    output.push_back(s[i]);
+                    output.push_back('.');
+                    solve(ans, output, i+1, s, dots+1);
+                    output.pop_back(); //backtrack
+                }
             }
-        };
-        dfs(0);
-        return ans;
-    }
-};
+    
+        }
+    
+        vector<string> restoreIpAddresses(string s) {
+            vector<string> ans;
+            string res;
+            solve(ans, res, 0, s, 0);
+            return ans;
+        }
+    };
 ```
