@@ -42,91 +42,120 @@ Say `A = [2,2]`, let `use[i] = 1 or 0` mean whether we use `A[i]`.
 ```cpp
 // OJ: https://leetcode.com/problems/subsets-ii/
 // Author: github.com/lzl124631x
-// Time: O(N^2 * 2^N)
+// Time: O(N * 2^N)
 // Space: O(N)
 class Solution {
-public:
-    vector<vector<int>> subsetsWithDup(vector<int>& A) {
-        sort(begin(A), end(A));
-        vector<vector<int>> ans;
-        vector<int> tmp;
-        int N = A.size();
-        function<void(int)> dfs = [&](int i) { // dfs(i) tries using and not using A[i]
+    public:
+        vector<vector<int>> subsetsWithDup(vector<int>& A) {
+            sort(begin(A), end(A));
+            vector<vector<int>> ans;
+            vector<int> tmp;
+            int N = A.size();
+            dfs(A, 0, tmp, ans);
+            return ans;
+        }
+    
+    private:
+        void dfs(vector<int>& A, int i, vector<int>& tmp, vector<vector<int>>& ans) { // dfs(i) tries using and not using A[i]
+            int N = A.size();
             if (i == N) {
                 ans.push_back(tmp);
                 return;
             }
             // use A[i]
             tmp.push_back(A[i]);
-            dfs(i + 1);
+            dfs(A, i + 1, tmp, ans);
             tmp.pop_back();
-            // skip A[i]. When A[i] is skipped, we shouldn't use any `A[j] == A[i] (j > i)` because that will cause duplication. We need to skip subsequent same characters and start with a different character.
+            // skip A[i]. When A[i] is skipped, we shouldn't use any `A[j] == A[i] (j > i)` because that will 
+            // cause duplication. We need to skip subsequent same characters and start with a different character.
             while (i + 1 < N && A[i + 1] == A[i]) ++i;
-            dfs(i + 1);
-        };
-        dfs(0);
-        return ans;
-    }
+            dfs(A, i + 1, tmp, ans);
+        }
 };
 ```
 
 ## Solution 2.
 
 ```cpp
+// Giving the length of susbet needed before itself
+
 // OJ: https://leetcode.com/problems/subsets-ii/
 // Author: github.com/lzl124631x
-// Time: O(N^2 * 2^N)
+// Time: O(N * 2^N)
 // Space: O(N)
 class Solution {
-private:
-public:
-    vector<vector<int>> subsetsWithDup(vector<int>& A) {
-        sort(begin(A), end(A));
-        vector<vector<int>> ans;
-        vector<int> tmp;
-        int N = A.size();
-        function<void(int, int)> dfs = [&](int start, int len) {
-            if (!len) {
+    public:
+        vector<vector<int>> subsetsWithDup(vector<int>& A) {
+            sort(begin(A), end(A));
+            vector<vector<int>> ans;
+            vector<int> tmp;
+            int N = A.size();
+            for (int len = 0; len <= N; ++len) {
+                dfs(A, 0, len, tmp, ans);
+            }
+            return ans;
+        }
+    
+    private:
+        void dfs(vector<int>& A, int start, int len, vector<int>& tmp, vector<vector<int>>& ans) {
+            int N = A.size();
+            if (len == 0) {
                 ans.push_back(tmp);
                 return;
             }
             for (int i = start; i <= N - len; ++i) {
                 if (i != start && A[i] == A[i - 1]) continue;
                 tmp.push_back(A[i]);
-                dfs(i + 1, len - 1);
+                dfs(A, i + 1, len - 1, tmp, ans);
                 tmp.pop_back();
             }
-        };
-        for (int len = 0; len <= N; ++len) dfs(0, len);
-        return ans;
-    }
-};
+        }
+    };
 ```
 
 ## Solution 3.
 
 ```cpp
+// Here, iteration
+// For 1 2 3 4 4 4, we are having subsets using 1,2,3 = 8 are there
+// For all these 8, we run a inner for loop (k=3 times) to add 4 in all those 8
+// By this duplication problem is solved
+
 // OJ: https://leetcode.com/problems/subsets-ii/
 // Author: github.com/lzl124631x
-// Time: O(N^2 * 2^N)
+// Time: O(N * 2^N)
 // Space: O(N)
 class Solution {
-public:
-    vector<vector<int>> subsetsWithDup(vector<int>& nums) {
-        vector<vector<int>> ans(1);
-        sort(nums.begin(), nums.end());
-        for (int i = 0; i < nums.size(); ) {
-            int cnt = 0, n = nums[i], len = ans.size();
-            while (i < nums.size() && nums[i] == n) ++cnt, ++i;
-            for (int j = 0; j < len; ++j) {
-                vector<int> sub = ans[j];
-                for (int k = 0; k < cnt; ++k) {
-                    sub.push_back(n);
-                    ans.push_back(sub);
+    public:
+        vector<vector<int>> subsetsWithDup(vector<int>& nums) {
+            vector<vector<int>> ans(1); // Initialize with the empty set
+            sort(nums.begin(), nums.end());
+    
+            for (int i = 0; i < nums.size(); ) {
+                int count = 0;  // Count of consecutive duplicate numbers
+                int num = nums[i]; // The current number
+                int len = ans.size(); // Size of the current result set
+    
+                // Count consecutive occurrences of the same number
+                while (i < nums.size() && nums[i] == num) {
+                    ++count;
+                    ++i;
+                }
+    
+                // Iterate through the existing subsets
+                for (int j = 0; j < len; ++j) {
+                    vector<int> subset = ans[j];
+    
+                    // Add the current number to the subset 'count' times
+                    for (int k = 0; k < count; ++k) {
+                        subset.push_back(num);
+                        ans.push_back(subset);
+                    }
                 }
             }
+    
+            return ans;
         }
-        return ans;
-    }
-};
+    };
+    
 ```
