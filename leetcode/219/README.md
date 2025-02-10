@@ -47,6 +47,7 @@ public:
         unordered_map<int, int> m;
         for (int i = 0; i < A.size(); ++i) {
             if (m.count(A[i]) && i - m[A[i]] <= k) return true;
+            // If it is already present, don't update with the new index, simply check
             m[A[i]] = i;
         }
         return false;
