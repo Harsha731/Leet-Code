@@ -1,4 +1,5 @@
-/*
+# [2958. Length of Longest Subarray With at Most K Frequency(Medium)](https://leetcode.com/problems/length-of-longest-subarray-with-at-most-k-frequency)
+
 You are given an integer array nums and an integer k.
 The frequency of an element x is the number of times it occurs in an array.
 An array is called good if the frequency of each element in this array is less than or equal to k.
@@ -30,6 +31,8 @@ Constraints:
 1 <= k <= nums.length
 */
 
+## Solution 1.
+```cpp
 class Solution {
     public:
         int maxSubarrayLength(vector<int>& nums, int k) {
@@ -48,4 +51,4 @@ class Solution {
             return cnt;
         }
 };
-
+```
