@@ -73,92 +73,45 @@ Room 0 held 1 meeting while rooms 1 and 2 each held 2 meetings, so we return 1.
 
 ## Solution 1. Heap
 
-Sort the meetings in ascending order of start time.
-
-We keep a min-heap `roomsInUse` whose elements are pairs of `{end time, room number}` of those rooms in-use. The room with the earliest end time is at the top.
-
-We scan meetings one by one. To find a room for the current meeting, we free all the rooms in `roomsInUse` that ends before the start time of the current meeting. 
-
-There are two additional cases to consider:
-1. If there is no meeting room available, and the end time of the next available room `e` is greater than the start time of the current meeting, then we must postpone the current meeting to start at `e`.
-2. After postponing a meeting to start at time `e`, the subsequent meetings that starts before time `e` needs to be postponed as well to at least time `e`. So, we need to log the start time used by the previous meeting `prevStartTime`, and the next meeting's start time should be at least `prevStartTime`.
-
-After freeing rooms, we pick the smallest room index from set `availableRooms`.
-
 ```cpp
+Tell which room held more number of meetings
+Give room with low index the high priority
+Delay - the meeting with lower start gets high priority
+
+Sort is used as lambda fucntion, it is implemented at first
+
 // OJ: https://leetcode.com/problems/meeting-rooms-iii
 // Author: github.com/lzl124631x
 // Time: O(MlogN)
 // Space: O(N)
 class Solution {
-public:
-    int mostBooked(int n, vector<vector<int>>& A) {
-        sort(begin(A), end(A), [](auto &a, auto &b) { return a[0] < b[0]; });
-        auto cmp = [](auto &a, auto &b) { return a[0] > b[0]; };
-        priority_queue<vector<long>, vector<vector<long>>, decltype(cmp)> roomsInUse(cmp); // end time, room number. The room with the smallest end time is at the top
-        vector<int> usage(n);
-        long prevStartTime = -1;
-        set<int> availableRooms;
-        for (int i = 0; i < n; ++i) availableRooms.insert(i);
-        for (auto &m : A) {
-            long start = m[0], end = m[1], duration = end - start;
-            if (start < prevStartTime) { // if the current start time is earlier than the previous start time, this meeting must be at least postponed to the same start time as the previous one
-                start = prevStartTime;
-                end = start + duration;
+    public:
+        int mostBooked(int n, vector<vector<int>>& A) {
+            sort(begin(A), end(A), [](auto &a, auto &b) { return a[0] < b[0]; }); // Sort meetings by start time
+            priority_queue<vector<long>, vector<vector<long>>, greater<>> roomsInUse; // end time, room number - min heap
+            vector<int> usage(n); // Track usage of each room
+            set<int> availableRooms; // Track available rooms (lower index preferred)
+            for (int i = 0; i < n; ++i) availableRooms.insert(i); // Initialize all rooms as available
+            for (auto &m : A) {
+                long start = m[0], end = m[1], room;
+                while (roomsInUse.size() && roomsInUse.top()[0] <= start) { // Free up rooms that end before current start
+                    availableRooms.insert(roomsInUse.top()[1]); // Add freed room to available rooms
+                    roomsInUse.pop();
+                }
+                if (availableRooms.size()) { // If there are available rooms
+                    room = *availableRooms.begin(); // Take the room with the smallest index
+                    availableRooms.erase(room); // Remove it from available rooms
+                    roomsInUse.push({end, room}); // Mark room as used, add end time to heap
+                } else { // If no rooms are available
+                    long time = roomsInUse.top()[0]; // Get end time of the room that will be available soonest
+                    room = roomsInUse.top()[1]; // Get the room number
+                    roomsInUse.pop(); // Remove it from the heap
+                    roomsInUse.push({ time + end - start, room }); // Re-add it with updated end time
+                }
+                ++usage[room]; // Increment the usage of the room
             }
-            if (availableRooms.empty() && roomsInUse.top()[0] > start) { // if no rooms are available, and the end time of the next available meeting room is greater than start time of the current meeting, we need to postpone this current meeting
-                start = roomsInUse.top()[0];
-                end = start + duration;
-            }
-            while (roomsInUse.size() && roomsInUse.top()[0] <= start) {
-                availableRooms.insert(roomsInUse.top()[1]);
-                roomsInUse.pop();
-            }
-            prevStartTime = start;
-            int room = *availableRooms.begin();
-            ++usage[room];
-            availableRooms.erase(room);
-            roomsInUse.push({end, room});
+            return max_element(begin(usage), end(usage)) - begin(usage); // Return the room with maximum usage
         }
-        return max_element(begin(usage), end(usage)) - begin(usage);
-    }
-};
-```
-
-## Solution 2. Heap
-
-```cpp
-// OJ: https://leetcode.com/problems/meeting-rooms-iii
-// Author: github.com/lzl124631x
-// Time: O(MlogN)
-// Space: O(N)
-class Solution {
-public:
-    int mostBooked(int n, vector<vector<int>>& A) {
-        sort(begin(A), end(A), [](auto &a, auto &b) { return a[0] < b[0]; });
-        priority_queue<vector<long>, vector<vector<long>>, greater<>> roomsInUse; // end time, room number. The room with the smallest end time, or the smallest room number when there are multiple rooms with the same smallest end time, is at the top.
-        vector<int> usage(n);
-        set<int> availableRooms;
-        for (int i = 0; i < n; ++i) availableRooms.insert(i);
-        for (auto &m : A) {
-            long start = m[0], end = m[1], room;
-            while (roomsInUse.size() && roomsInUse.top()[0] <= start) {
-                availableRooms.insert(roomsInUse.top()[1]);
-                roomsInUse.pop();
-            }
-            if (availableRooms.size()) {
-                room = *availableRooms.begin();
-                availableRooms.erase(room);
-                roomsInUse.push({end, room});
-            } else {
-                long time = roomsInUse.top()[0];
-                room = roomsInUse.top()[1];
-                roomsInUse.pop();
-                roomsInUse.push({ time + end - start, room });
-            }
-            ++usage[room];
-        }
-        return max_element(begin(usage), end(usage)) - begin(usage);
-    }
-};
+    };
+    
 ```
