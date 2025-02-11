@@ -34,29 +34,44 @@
 ## Solution 1.
 
 ```cpp
-// OJ: https://leetcode.com/problems/meeting-rooms-ii/
-// Author: github.com/lzl124631x
-// Time: O(NlogN)
-// Space: O(N)
-class Solution {
-public:
-    int minMeetingRooms(vector<vector<int>>& A) {
-        vector<int> starts, ends;
-        for (auto &v : A) {
-            starts.push_back(v[0]);
-            ends.push_back(v[1]);
-        }
-        sort(begin(starts), end(starts));
-        sort(begin(ends), end(ends));
-        int N = A.size(), ans = 0;
-        for (int i = 0, j = 0; i < N; ++ans, ++i) {
-            if (starts[i] < ends[j]) continue;
-            --ans;
-            ++j;
-        }
-        return ans;
+/*
+	Time Complexity: O(N logN)
+	Space complexity: O(N)
+	
+	where N is the number of elements in array.
+*/
+
+int minRooms(vector<vector<int>> intervals){
+    int n = intervals.size();
+
+    // Storing start time and end time in different arrays.
+    int startTime[n];
+    int endTime[n];
+
+    for (int i = 0; i < n; i++)    {
+        startTime[i] = intervals[i][0];
+        endTime[i] = intervals[i][1];
     }
-};
+
+    sort(startTime, startTime + n);
+    sort(endTime, endTime + n);
+
+    int result = 1;
+    int roomRequired = 0;
+
+    int i = 0, j = 0;
+    while (i < n && j < n) {
+        if (startTime[i] < endTime[j])  {
+            roomRequired++;
+            i++;
+        } else {
+            roomRequired--;
+            j++;
+        }
+        result = max(result, roomRequired);
+    }
+    return result;
+}
 ```
 
 ## Solution 2. Heap
