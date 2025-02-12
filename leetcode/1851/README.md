@@ -83,34 +83,49 @@ So overall, this solution takes `O(NlogN + QlogQ)` time and `O(N + Q)` space
 ```cpp
 // OJ: https://leetcode.com/problems/minimum-interval-to-include-each-query/
 // Author: github.com/lzl124631x
-// Time: O(NlogN + QlogQ + QlogN)
+// Time: O(NlogN + QlogQ + QlogN) - doubt
 // Space: O(N + Q)
+
 class Solution {
-    typedef pair<int, int> T;
 public:
-    vector<int> minInterval(vector<vector<int>>& A, vector<int>& Q) {
-        vector<pair<int, int>> QQ; // each element is a pair of query and the corresponding index
-        for (int i = 0; i < Q.size(); ++i) QQ.emplace_back(Q[i], i); 
-        sort(begin(QQ), end(QQ)); // sort in ascending order of query
-        sort(begin(A), end(A)); // sort intervals in ascending order
-        int i = 0, N = A.size(); // `i` is a read pointer scanning `A`.
-        vector<int> ans(Q.size(), -1);
-        map<int, int> m; // map `m` stores the mapping from a interval length to its corresponding count.
-        priority_queue<T, vector<T>, greater<>> pq; // min-heap. Each element is a pair of right edge and interval length
-        for (auto &[q, index] : QQ) {
-            for (; i < N && A[i][0] <= q; ++i) { // extend the window's right edge -- cover all the intervals whose left edge <= q
-                int len = A[i][1] - A[i][0] + 1;
-                m[len]++;
-                pq.emplace(A[i][1], len);
+    vector<int> minInterval(vector<vector<int>>& intervals, vector<int>& queries) {
+        // Sort intervals by start time
+        sort(intervals.begin(), intervals.end());
+        
+        // Augment queries with original indices
+        vector<pair<int, int>> aug;
+        for (int i = 0; i < queries.size(); ++i) {
+            aug.emplace_back(queries[i], i);
+        }
+        // Sort queries
+        sort(aug.begin(), aug.end());
+        
+        int k = 0; // Interval pointer
+        vector<int> ans(queries.size(), -1); // Initialize answer array
+        
+        // Min-heap for (interval length, right endpoint)
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> pq;
+        
+        for (auto& [query, i] : aug) {
+            // Add relevant intervals to the heap
+            for (; k < intervals.size() && intervals[k][0] <= query; ++k) {
+                // Calculate and push interval length
+                pq.emplace(intervals[k][1] - intervals[k][0], intervals[k][1]);
             }
-            while (pq.size() && pq.top().first < q) { // shrink the window's left edge -- pop all the intervals whose right edge < q
-                auto [right, len] = pq.top();
-                if (--m[len] == 0) m.erase(len);
+            
+            // Remove intervals ending before the query
+            while (pq.size() && pq.top().second < query) {
                 pq.pop();
             }
-            if (m.size()) ans[index] = m.begin()->first; // the map `m` stores the length of all the valid intervals and their corresponding count. We use the smallest length.
+            
+            // Update answer if valid intervals exist
+            if (pq.size()) {
+                ans[i] = 1 + pq.top().first; // Add 1 for inclusive interval length
+            }
         }
+        
         return ans;
     }
 };
+
 ```
