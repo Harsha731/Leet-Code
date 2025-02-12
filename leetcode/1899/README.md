@@ -67,6 +67,12 @@ The target triplet [5,5,5] is now an element of triplets.
 
 ## Solution 1.
 
+```
+Consider only if it is getting equal to the required x or y or z
+If any of three is more, ignore that triplet
+At last check if the three is possible or not
+```
+
 ```cpp
 // OJ: https://leetcode.com/problems/merge-triplets-to-form-target-triplet/
 // Author: github.com/lzl124631x
@@ -89,22 +95,3 @@ public:
 };
 ```
 
-Or
-
-```cpp
-// OJ: https://leetcode.com/problems/merge-triplets-to-form-target-triplet/
-// Author: github.com/lzl124631x
-// Time: O(N)
-// Space: O(1)
-class Solution {
-public:
-    bool mergeTriplets(vector<vector<int>>& A, vector<int>& T) {
-        vector<int> v(3);
-        for (int i = 0; i < A.size(); ++i) {
-            if (A[i][0] > T[0] || A[i][1] > T[1] || A[i][2] > T[2]) continue;
-            v = {max(v[0], A[i][0]), max(v[1], A[i][1]), max(v[2], A[i][2])};
-        }
-        return v == T;
-    }
-};
-```
