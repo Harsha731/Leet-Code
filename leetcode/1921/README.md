@@ -68,26 +68,61 @@ You can only eliminate 1 monster.
 * Find the amount of time it takes each monster to arrive.
 * Find the order in which the monsters will arrive.
 
-## Solution 1. Sorting
-
+## Solution 1: Sort By Arrival Time
 ```cpp
-// OJ: https://leetcode.com/problems/eliminate-maximum-number-of-monsters/
-// Author: github.com/lzl124631x
-// Time: O(NlogN)
-// Space: O(N)
+// Time complexity: O(n⋅logn)
+// Space complexity: O(n)
+
 class Solution {
-public:
-    int eliminateMaximum(vector<int>& dist, vector<int>& speed) {
-        vector<int> time;
-        int N = dist.size();
-        for (int i = 0; i < N; ++i) {
-            time.push_back((dist[i] + speed[i] - 1) / speed[i]); // round up the time.
+    public:
+        int eliminateMaximum(vector<int>& dist, vector<int>& speed) {
+            vector<float> arrival;
+            for (int i = 0; i < dist.size(); i++) {
+                arrival.push_back((float) dist[i] / speed[i]);
+            }
+            
+            sort(arrival.begin(), arrival.end());
+            int ans = 0;
+            
+            for (int i = 0; i < arrival.size(); i++) {
+                if (arrival[i] <= i) {
+                    break;
+                }
+                
+                ans++;
+            }
+            
+            return ans;
         }
-        sort(begin(time), end(time));
-        for (int i = 1; i < N; ++i) {
-            if (time[i] < i + 1) return i;
+    };
+```
+
+## Heap
+```cpp
+// Time complexity: O(n⋅logn)
+// Space complexity: O(n)
+
+class Solution {
+    public:
+        int eliminateMaximum(vector<int>& dist, vector<int>& speed) {
+            priority_queue<float, vector<float>, greater<float>> heap;
+            
+            for (int i = 0; i < dist.size(); i++) {
+                heap.push((float) dist[i] / speed[i]);
+            }
+    
+            int ans = 0;
+            while (!heap.empty()) {
+                if (heap.top() <= ans) {
+                    break;
+                }
+                
+                ans++;
+                heap.pop();
+            }
+            
+            return ans;
         }
-        return N;
-    }
-};
+    };
+
 ```
