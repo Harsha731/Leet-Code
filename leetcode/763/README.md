@@ -41,57 +41,39 @@ A partition like "ababcbacadefegde", "hijhklij" is incorrect, because it splits 
 **Similar Questions**:
 * [Merge Intervals (Medium)](https://leetcode.com/problems/merge-intervals/)
 
-## Solution 1. Counting + Bitmask
 
-For every character that appears in the current range, we must exhaust all its occurrences.
-
-```cpp
-// OJ: https://leetcode.com/problems/partition-labels/
-// Author: github.com/lzl124631x
-// Time: O(S)
-// Space: O(1)
-class Solution {
-public:
-    vector<int> partitionLabels(string S) {
-        int cnt[26] = {};
-        for (char c : S) cnt[c - 'a']++;
-        vector<int> ans;
-        for (int i = 0, prev = 0; i < S.size();) {
-            int mask = 0; // `mask` is a bitmask representing all the characters that we've seen in the current range and haven't exhausted all their occurrences.
-            do {
-                int key = S[i++] - 'a';
-                cnt[key]--;
-                mask |= 1 << key; 
-                if (cnt[key] == 0) mask ^= 1 << key; // If we've exhausted this character, remove it from the mask
-            } while (mask); // When `mask != 0`, there are still some characters that have remaining occurrences -- we keep looping
-            ans.push_back(i - prev);
-            prev = i;
-        }
-        return ans;
-    }
-};
-```
-
-## Solution 2. Extending Boundary
+## Solution 
 
 ```cpp
 // OJ: https://leetcode.com/problems/partition-labels/
 // Author: github.com/lzl124631x
-// Time: O(S)
-// Space: O(1)
+// Time: O(N)
+// Space: O(N)
+// j gives the maximum of the last index possible for all the characters in the current partition
+// i = j means all are covered in this part, so we do a cut here
+
 class Solution {
 public:
     vector<int> partitionLabels(string s) {
-        int N = s.size(), last[26] = {};
-        memset(last, -1, sizeof(last));
-        for (int i = 0; i < N; ++i) last[s[i] - 'a'] = i;
-        vector<int> ans;
-        for (int i = 0; i < N;) {
-            int start = i;
-            for (int end = i + 1; i < end; ++i) end = max(end, last[s[i] - 'a'] + 1);
-            ans.push_back(i - start);
+        int lastIdx[26]; // Last index of each char
+        for (int i = 0; i < s.size(); ++i) {
+            lastIdx[s[i] - 'a'] = i;
         }
-        return ans;
+
+        int end = 0, start = 0; // Two pointers
+        vector<int> result;
+
+        for (int i = 0; i < s.size(); ++i) {
+            end = max(end, lastIdx[s[i] - 'a']); // Update end
+
+            if (i == end) {
+                result.push_back(i - start + 1); // Add partition length
+                start = i + 1; // Move start
+            }
+        }
+
+        return result;
     }
 };
+
 ```
