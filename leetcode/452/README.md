@@ -52,53 +52,9 @@
 * [Meeting Rooms II (Medium)](https://leetcode.com/problems/meeting-rooms-ii/)
 * [Non-overlapping Intervals (Medium)](https://leetcode.com/problems/non-overlapping-intervals/)
 
-## Solution 1. Greedy
 
-```cpp
-// OJ: https://leetcode.com/problems/minimum-number-of-arrows-to-burst-balloons/
-// Author: github.com/lzl124631x
-// Time: O(NlogN)
-// Space: O(1)
-class Solution {
-public:
-    int findMinArrowShots(vector<vector<int>>& A) {
-        if (A.empty()) return 0;
-        sort(begin(A), end(A));
-        int ans = 1, arrow = A[0][1];
-        for (auto &b : A) {
-            if (b[0] <= arrow) arrow = min(arrow, b[1]);
-            else {
-                arrow = b[1];
-                ++ans;
-            }
-        }
-        return ans;
-    }
-};
-```
 
-Or
-
-```cpp
-// OJ: https://leetcode.com/problems/minimum-number-of-arrows-to-burst-balloons/
-// Author: github.com/lzl124631x
-// Time: O(NlogN)
-// Space: O(1)
-class Solution {
-public:
-    int findMinArrowShots(vector<vector<int>>& A) {
-        sort(begin(A), end(A));
-        int ans = 0;
-        for (int i = 0, N = A.size(); i < N; ++ans) {
-            int end = A[i][1];
-            for (; i < N && A[i][0] <= end; ++i) end = min(end, A[i][1]);
-        }
-        return ans;
-    }
-};
-```
-
-## Solution 2. Interval Scheduling Maximization (ISM)
+## Solution 1. Interval Scheduling Maximization (ISM)
 
 This is exactly an Interval Scheduling Maximization problem -- finding the maximum number of intervals that are independent with each other; the rest intervals overlap with this set of intervals.
 
