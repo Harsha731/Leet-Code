@@ -70,20 +70,30 @@ The answer is `dp[2N][N]`.
 // Author: github.com/lzl124631x
 // Time: O(N^2)
 // Space: O(N^2)
+// Half to A, Half to B
+
 class Solution {
-public:
-    int twoCitySchedCost(vector<vector<int>>& A) {
-        int N = A.size() / 2;
-        vector<vector<int>> dp(2 * N + 1, vector<int>(N + 1, INT_MAX));
-        dp[0][0] = 0;
-        for (int i = 0; i < 2 * N; ++i) {
-            for (int j = 0; j <= min(i + 1, N); ++j) {
-                dp[i + 1][j] = min(j - 1 >= 0 ? dp[i][j - 1] + A[i][0] : INT_MAX, j <= i ? dp[i][j] + A[i][1] : INT_MAX);
+    public:
+        int twoCitySchedCost(vector<vector<int>>& costs) {
+            int n = costs.size() / 2;
+            vector<vector<int>> dp(2 * n + 1, vector<int>(n + 1, INT_MAX));
+            dp[0][0] = 0;
+    
+            for (int i = 0; i < 2 * n; ++i) {
+                for (int j = 0; j <= min(i + 1, n); ++j) {
+                    // Cost of sending the ith person to city A
+                    int costA = (j > 0) ? dp[i][j - 1] + costs[i][0] : INT_MAX;
+                    
+                    // Cost of sending the ith person to city B
+                    int costB = (j <= i) ? dp[i][j] + costs[i][1] : INT_MAX;
+    
+                    dp[i + 1][j] = min(costA, costB);
+                }
             }
+    
+            return dp[2 * n][n];
         }
-        return dp[2 * N][N];
-    }
-};
+    };
 ```
 
 ## Solution 2. DP with Space Optimization
@@ -94,19 +104,30 @@ public:
 // Time: O(N^2)
 // Space: O(N)
 class Solution {
-public:
-    int twoCitySchedCost(vector<vector<int>>& A) {
-        int N = A.size() / 2;
-        vector<int> dp(N + 1, INT_MAX);
-        dp[0] = 0;
-        for (int i = 0; i < 2 * N; ++i) {
-            for (int j = min(i + 1, N); j >= 0; --j) {
-                dp[j] = min(j - 1 >= 0 ? dp[j - 1] + A[i][0] : INT_MAX, j <= i ? dp[j] + A[i][1] : INT_MAX);
+    public:
+        int twoCitySchedCost(vector<vector<int>>& costs) {
+            int n = costs.size() / 2;
+            vector<int> prev(n + 1, INT_MAX);
+            vector<int> curr(n + 1, INT_MAX);
+            prev[0] = 0;
+    
+            for (int i = 0; i < 2 * n; ++i) {
+                curr = vector<int>(n + 1, INT_MAX); // Reset curr for each iteration
+                for (int j = 0; j <= min(i + 1, n); ++j) {
+                    // Cost of sending the ith person to city A
+                    int costA = (j > 0) ? prev[j - 1] + costs[i][0] : INT_MAX;
+                    
+                    // Cost of sending the ith person to city B
+                    int costB = (j <= i) ? prev[j] + costs[i][1] : INT_MAX;
+    
+                    curr[j] = min(costA, costB);
+                }
+                prev = curr; // Update prev for the next iteration
             }
+    
+            return prev[n];
         }
-        return dp[N];
-    }
-};
+    };
 ```
 
 ## Solution 3. Greedy
@@ -120,13 +141,29 @@ So we can sort the array in ascending order of `cost[i][0] - cost[i][1]`. The fi
 // Author: github.com/lzl124631x
 // Time: O(NlogN)
 // Space: O(1)
+costs = [[10,20],[30,200],[400,50],[30,20]]
+-10, -170, 350, 10
+-170, -10, 10, 350
+[30, 200] [10, 20] [30, 20] [400, 50]
+ A    B    A   B    B   A    B    A
 class Solution {
-public:
-    int twoCitySchedCost(vector<vector<int>>& A) {
-        int N = A.size() / 2, ans = 0;
-        sort(begin(A), end(A), [](auto &a, auto &b) { return (a[0] - a[1]) < (b[0] - b[1]); });
-        for (int i = 0; i < 2 * N; ++i) ans += A[i][i >= N];
-        return ans;
-    }
-};
+    public:
+        int twoCitySchedCost(vector<vector<int>>& costs) {
+            int n = costs.size() / 2;
+            int totalCost = 0;
+    
+            // Sort based on the difference between cost to City A and City B
+            sort(costs.begin(), costs.end(), [](const auto& a, const auto& b) {
+                return (a[0] - a[1]) < (b[0] - b[1]);
+            });
+    
+            // The first 'n' people go to City A, and the rest go to City B
+            for (int i = 0; i < 2 * n; ++i) {
+                totalCost += costs[i][(i >= n)]; // If i >= n, assign to city B (index 1)
+            }
+    
+            return totalCost;
+        }
+    };
+    
 ```
