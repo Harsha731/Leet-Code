@@ -67,23 +67,46 @@ public:
 ```
 
 ## Solution 3. Interval Scheduling Maximization (ISM)
+```
+    _____________
+           ______
+        _____________
+                   _________
+
+Suppose, 1 is the prev and now we need to consider 2,3,4 with 1. 
+2 is not useful for the count
+3 is not useful as per greedy, because it makes the count decreased
+4 is to be considered
+```
 
 ```cpp
 // OJ: https://leetcode.com/problems/maximum-length-of-pair-chain/
 // Author: github.com/lzl124631x
 // Time: O(NlogN)
 // Space: O(1)
+
+
 class Solution {
-public:
-    int findLongestChain(vector<vector<int>>& A) {
-        sort(begin(A), end(A), [](auto &a, auto &b) { return a[1] < b[1]; });
-        int e = INT_MIN, ans = 0;
-        for (auto &v : A) {
-            if (e >= v[0]) continue;
-            e = v[1];
-            ++ans;
+    public:
+        int findLongestChain(vector<vector<int>>& pairs) {
+            // Sort pairs by the end of each pair (second element)
+            sort(pairs.begin(), pairs.end(), [](const vector<int>& a, const vector<int>& b) {
+                return a[1] < b[1];
+            });
+    
+            int end = INT_MIN; // Variable to keep track of the end of the current chain
+            int count = 0;     // Variable to keep count of the maximum length of the chain
+    
+            // Iterate through the sorted pairs
+            for (const auto& pair : pairs) {
+                // If the start of the current pair is greater than the end of the last pair in the chain
+                if (end < pair[0]) {
+                    end = pair[1]; // Update the end to the end of the current pair
+                    ++count;       // Increment the count of the chain length
+                }
+            }
+            
+            return count; // Return the length of the longest chain
         }
-        return ans;
-    }
-};
+    };
 ```
