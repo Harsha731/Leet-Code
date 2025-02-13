@@ -90,3 +90,45 @@ public:
     }
 };
 ```
+
+## Solution 2. Calculate the "Minimum Subarray"
+```cpp
+/*
+TC : O(N) and SC : O(1)
+Selected prefix sum || subarray with min sum || selected suffix sum
+
+Instead of finding the left most and right most, we find the centre part, i.e, the min sum sub arrya
+edge case is, if the subarray compasses all the elements in the array, then selected prefix + suffix sum have 0 elements, so we return the total sum instead 0 here
+
+Use kadane algo with min instead of max to update the current subarray sum
+*/
+
+class Solution {
+    public:
+        int maxSubarraySumCircular(vector<int>& nums) {
+            int curMax = 0;
+            int curMin = 0;
+            int maxSum = nums[0];
+            int minSum = nums[0];
+            int totalSum = 0;
+            
+            for (int num: nums) {
+                // Normal Kadane's
+                curMax = max(curMax, 0) + num;
+                maxSum = max(maxSum, curMax);
+                
+                // Kadane's but with min to find minimum subarray
+                curMin = min(curMin, 0) + num;
+                minSum = min(minSum, curMin);
+                
+                totalSum += num;  
+            }
+    
+            if (totalSum == minSum) {
+                return maxSum;
+            }
+            
+            return max(maxSum, totalSum - minSum);
+        }
+    };
+```
