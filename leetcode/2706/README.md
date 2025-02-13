@@ -33,16 +33,19 @@
 // Time: O(N)
 // Space: O(1)
 class Solution {
-public:
-    int buyChoco(vector<int>& A, int money) {
-        int val[2] = {INT_MAX, INT_MAX};
-        for (int n : A) {
-            if (n < val[0]) {
-                val[1] = val[0];
-                val[0] = n;
-            } else if (n < val[1]) val[1] = n;
+    public:
+        int buyChoco(vector<int>& a, int m) {
+            int x = INT_MAX, y = INT_MAX;   // x is smallest and y is next small
+            for (int n : a) {
+                if (n < x) {
+                    y = x;
+                    x = n;
+                } else if (n < y) {
+                    y = n;
+                }
+            }
+            return m >= x + y ? m - x - y : m;
         }
-        return money >= val[0] + val[1] ? money - val[0] - val[1] : money;
-    }
-};
+    };
+    
 ```
