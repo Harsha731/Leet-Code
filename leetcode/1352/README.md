@@ -57,6 +57,14 @@ productOfNumbers.getProduct(2); // return 32. The product of the last 2 numbers 
 ## Solution 1. Prefix Product
 
 ```cpp
+
+/*
+If we meet 0, the product including this 0 will always be 0.
+We only need to record the prefix product after it.
+So I clear the A and reinitilise it as [1],
+It is because, if we do initialize to 1, we provide ans = 0, by checking if k < v.size();
+*/
+
 // OJ: https://leetcode.com/problems/product-of-the-last-k-numbers/
 // Author: github.com/lzl124631x
 // Time: O(1) for all functions
