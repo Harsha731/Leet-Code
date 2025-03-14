@@ -47,28 +47,45 @@
 ## Solution 1.
 
 ```cpp
-// OJ: https://leetcode.com/problems/merge-two-sorted-lists/
-// Author: github.com/lzl124631x
-// Time: O(A + B)
-// Space: O(1)
-class Solution {
-public:
-    ListNode* mergeTwoLists(ListNode* a, ListNode* b) {
-        ListNode head, *tail = &head;
-        while (a && b) {
-            if (a->val <= b->val) {
-                tail->next = a;
-                a = a->next;
-            } else {
-                tail->next = b;
-                b = b->next;
-            }
-            tail = tail->next;
+// Dummy Node: A dummy node is used to simplify handling the merged list’s head.
+// Traversal: Compare the current nodes of both lists, attach the smaller node to the merged list, and move the respective pointer forward.
+// Attach Remaining: Once one list is exhausted, attach the remaining nodes from the other list.
+// Return: Return the merged list starting from the dummy node’s next pointer.
+// Time Complexity: O(n + m)
+// Space Complexity: O(1)
+
+// Iteration
+
+Node<int>* sortTwoLists(Node<int>* list1, Node<int>* list2) {
+    Node<int>* t1 = list1;
+    Node<int>* t2 = list2;
+
+    // Create a dummy node to simplify the logic
+    Node<int>* dummyNode = new Node<int>(-1);
+    Node<int>* temp = dummyNode;
+
+    // Merge the two lists
+    while (t1 != NULL && t2 != NULL) {
+        if (t1->data < t2->data) {
+            temp->next = t1;
+            temp = t1;
+            t1 = t1->next;
+        } else {
+            temp->next = t2;
+            temp = t2;
+            t2 = t2->next;
         }
-        tail->next = a ? a : b;
-        return head.next;
     }
-};
+
+    // Attach the remaining part of the non-empty list
+    if (t1) temp->next = t1;
+    else temp->next = t2;
+
+    // Return the merged sorted list, skipping the dummy node
+    Node<int>* sortedList = dummyNode->next;
+    delete dummyNode; // Free the dummy node
+    return sortedList;
+}
 ```
 
 ## Solution 2.
