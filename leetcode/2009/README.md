@@ -69,17 +69,19 @@ The resulting array is [1,2,3,4], which is continuous.
 * Sort the array.
 * For every index do a binary search to get the possible right end of the window and calculate the possible answer.
 
-We sort and remove the duplicat elements at start
-We move the j from start 0 to n-1
-We keep i=0 at start and if any (i, j) is not able to satisfy in [1, n] we shift the i
-Here, we can get the possible window size for that particular j
-Then, N-ans is the operations to be done to get continous array
+
 
 ## Solution 1. Sliding Window
 
 ``` cpp
 // Time: O(NlogN)
 // Space: O(1)
+
+/*   We sort and remove the duplicat elements at start
+We move the j from start 0 to n-1
+We keep i=0 at start and if any (i, j) is not able to satisfy in [1, n] we shift the i
+Here, we can get the possible window size for that particular j
+Then, N-ans is the operations to be done to get continous array   */
 
 class Solution {
 public:
