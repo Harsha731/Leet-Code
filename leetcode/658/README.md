@@ -41,19 +41,27 @@
 ```cpp
 // OJ: https://leetcode.com/problems/find-k-closest-elements/
 // Author: github.com/lzl124631x
-// Time: O(logN + K)
+// Time: O(N)
 // Space: O(1)
 class Solution {
 public:
-    vector<int> findClosestElements(vector<int>& A, int k, int x) {
-        int N = A.size(), j = lower_bound(begin(A), end(A), x) - begin(A), i = j - 1;
-        while (j - i - 1 < k) {
-            if (i == -1 || (j < N && abs(A[j] - x) < abs(A[i] - x))) ++j;
-            else --i;
+    vector<int> findClosestElements(vector<int>& arr, int k, int x) {
+        int left = 0, right = arr.size() - 1;
+
+        // Shrink the window until its size is k
+        while (right - left + 1 > k) {
+            // Compare distances of elements on both ends
+            if (abs(arr[left] - x) > abs(arr[right] - x)) {
+                ++left;
+            } else {
+                --right;
+            }
         }
-        return vector<int>(begin(A) + i + 1, begin(A) + j);
+
+        return vector<int>(arr.begin() + left, arr.begin() + left + k);
     }
 };
+
 ```
 
 ## Solution 2. Binary Search Left Edge (L < R)
@@ -67,16 +75,24 @@ We binary search the left edge.
 // Author: github.com/lzl124631x
 // Time: O(log(N - k) + k)
 // Space: O(1)
+
 class Solution {
 public:
-    vector<int> findClosestElements(vector<int>& A, int k, int x) {
-        int L = 0, R = A.size() - k;
-        while (L < R) {
-            int M = (L + R) / 2;
-            if (x - A[M] > A[M + k] - x) L = M + 1;
-            else R = M;
+    vector<int> findClosestElements(vector<int>& arr, int k, int x) {
+        int left = 0, right = arr.size() - k;
+
+        while (left < right) {
+            int mid = (left + right) / 2;
+            // Compare distances between x and the two ends of the window
+            if (x - arr[mid] > arr[mid + k] - x) {
+                left = mid + 1;
+            } else {
+                right = mid;
+            }
         }
-        return vector<int>(begin(A) + R, begin(A) + R + k);
+
+        return vector<int>(arr.begin() + left, arr.begin() + left + k);
     }
 };
+
 ```
