@@ -70,6 +70,38 @@ Binary Search (L <= R) doesn't fit this problem because `L` and `R` might go out
 
 We binary search the left edge.
 
+assume A[mid] ~ A[mid + k] is sliding window
+
+case 1: x - A[mid] < A[mid + k] - x, need to move window go left
+-------x----A[mid]-----------------A[mid + k]----------
+
+case 2: x - A[mid] < A[mid + k] - x, need to move window go left again
+-------A[mid]----x-----------------A[mid + k]----------
+
+case 3: x - A[mid] > A[mid + k] - x, need to move window go right
+-------A[mid]------------------x---A[mid + k]----------
+
+case 4: x - A[mid] > A[mid + k] - x, need to move window go right
+-------A[mid]---------------------A[mid + k]----x------
+
+
+If x - A[mid] > A[mid + k] - x,
+it means A[mid + 1] ~ A[mid + k] is better than A[mid] ~ A[mid + k - 1],
+and we have mid smaller than the right i.
+So assign left = mid + 1.
+
+I think there can be 2 more cases, where A[mid] == A[mid + k].
+
+case 5: x - A[mid] < A[mid + k] - x, need to move window go left
+-------x----A[mid]/A[mid + k]----------
+
+case 6: x - A[mid] > A[mid + k] - x, need to move window go right
+-------A[mid]/A[mid + k]-----x---------
+
+test case [1,1,2,2,2,2,2,3,3], k=3, x=3 is a example of case 6.
+
+Anyway, all 6 cases can be represented by: x - A[mid] > A[mid + k] - x
+
 ```cpp
 // OJ: https://leetcode.com/problems/find-k-closest-elements/
 // Author: github.com/lzl124631x
