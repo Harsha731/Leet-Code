@@ -98,19 +98,26 @@ We can turn this problem into two find maximum sliding window problem: one is to
 // Time: O(N)
 // Space: O(U) where U is the number of unique numbers in `A`
 class Solution {
-    int atMost(vector<int> &A, int k) {
-        int distinct = 0, i = 0, j = 0, N = A.size(), ans = 0;
-        unordered_map<int, int> cnt;
-        for (; j < N; ++j) {
-            distinct += ++cnt[A[j]] == 1;
-            while (distinct > k) distinct -= --cnt[A[i++]] == 0;
-            ans += j - i;
+    int atMostK(vector<int>& nums, int k) {
+        int i = 0, res = 0;
+        unordered_map<int, int> freq;
+
+        for (int j = 0; j < nums.size(); ++j) {
+            if (freq[nums[j]]++ == 0) --k;
+
+            while (k < 0) {
+                if (--freq[nums[i]] == 0) ++k;
+                ++i;
+            }
+            res += j - i + 1;
         }
-        return ans;
+        return res;
     }
+
 public:
-    int subarraysWithKDistinct(vector<int>& A, int k) {
-        return atMost(A, k) - atMost(A, k - 1);
+    int subarraysWithKDistinct(vector<int>& nums, int k) {
+        return atMostK(nums, k) - atMostK(nums, k - 1);
     }
 };
+
 ```
