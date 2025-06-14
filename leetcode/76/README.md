@@ -54,6 +54,19 @@ Since the largest window of s only has one 'a', return empty string.
 
 ## Solution 1. Minimum Sliding Window
 
+/*
+matched += cnt[s[j]]-- > 0;
+If s[j] is needed (i.e., cnt[s[j]] > 0), it means we matched one needed character.
+Then we decrement cnt[s[j]] because we used one.
+*/
+
+/*
+matched -= ++cnt[s[i++]] > 0;
+We're removing s[i] from the window.
+We increment cnt[s[i]] (to return the character back to the "needed" pool).
+If this makes a needed character > 0, we lose a match → decrease matched.
+*/
+
 ```cpp
 // OJ: https://leetcode.com/problems/minimum-window-substring/
 // Author: github.com/lzl124631x
@@ -66,6 +79,8 @@ public:
         for (char c : t) cnt[c]++;
         for (int i = 0, j = 0; j < M; ++j) {
             matched += cnt[s[j]]-- > 0;
+		// If s[j] is needed (i.e., cnt[s[j]] > 0), it means we matched one needed character.
+		// Then we decrement cnt[s[j]] because we used one.
             while (matched >= N) {
                 if (j - i + 1 < minLen) {
                     minLen = j - i + 1;
