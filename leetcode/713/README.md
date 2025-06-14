@@ -50,7 +50,7 @@ public:
         for (; j < N; ++j) {
             prod *= A[j];
             while (i <= j && prod >= k) prod /= A[i++];
-            ans += j - i + 1;
+            ans += j - i + 1;        // For each 'j', we have [i, j] elements possible
         }
         return ans;
     }
