@@ -77,15 +77,13 @@ public:
         int M = s.size(), N = t.size(), cnt[128] = {}, matched = 0, minLen = INT_MAX, start = -1;
         for (char c : t) cnt[c]++;
         for (int i = 0, j = 0; j < M; ++j) {
-            matched += cnt[s[j]]-- > 0;
-		// If s[j] is needed (i.e., cnt[s[j]] > 0), it means we matched one needed character.
-		// Then we decrement cnt[s[j]] because we used one.
+            matched += cnt[s[j]]-- > 0;			// 1
             while (matched >= N) {
                 if (j - i + 1 < minLen) {
                     minLen = j - i + 1;
                     start = i;
                 }
-                matched -= ++cnt[s[i++]] > 0;
+                matched -= ++cnt[s[i++]] > 0;		// 2
             }
         }
         return start == -1 ? "" : s.substr(start, minLen);
