@@ -73,30 +73,50 @@ The resulting array is [1,2,3,4], which is continuous.
 
 ## Solution 1. Sliding Window
 
-``` cpp
-// Time: O(NlogN)
-// Space: O(1)
+```cpp
+// Instead of   A.erase(unique(A.begin(), A.end()), A.end()); // Remove duplicates
 
-/*   We sort and remove the duplicat elements at start
-We move the j from start 0 to n-1
-We keep i=0 at start and if any (i, j) is not able to satisfy in [1, n] we shift the i
-Here, we can get the possible window size for that particular j
-Then, N-ans is the operations to be done to get continous array   */
+int idx = 0;
+for (int j = 1; j < A.size(); ++j) {
+    if (A[j] != A[idx]) {
+        A[++idx] = A[j];
+    }
+}
+A.resize(idx + 1); // Trim the vector to contain only unique elements
+```
+
+``` cpp
+// Time: O(N log N)
+// Space: O(1) (excluding input and output space)
+
+/*
+    Idea:
+    - We want to make the array contain all integers from 1 to N (size of array) with no duplicates.
+    - First, sort the array and remove duplicates since duplicates are useless for a strictly increasing sequence.
+    - Use a sliding window (i, j) to find the largest window where all elements can fit in a continuous segment of size N.
+    - For a valid window, we need:
+        A[j] - A[i] < N  => that means this subarray could be part of a continuous array of size N.
+    - For each valid window, the number of elements we can keep is (j - i + 1).
+    - So, the answer is: N - max(j - i + 1)
+*/
 
 class Solution {
 public:
     int minOperations(vector<int>& A) {
-        
-        int N = A.size(), i = 0, j, ans = 0;
+        int N = A.size(), i = 0, maxWindow = 0;
+
         sort(A.begin(), A.end());
         A.erase(unique(A.begin(), A.end()), A.end()); // Remove duplicates
 
-        for (j=0; j < A.size(); ++j) {
-            while (A[i] + N <= A[j]) ++i; // Keep A[i] in range [A[j] - N + 1, A[j]]
-            ans = max(ans, j - i + 1);
+        for (int j = 0; j < A.size(); ++j) {
+            // Slide i forward if the window size exceeds N
+            while (A[j] - A[i] >= N) ++i;
+
+            // maxWindow stores the longest valid subarray (no operations needed for it)
+            maxWindow = max(maxWindow, j - i + 1);
         }
 
-        return N - ans; // Minimum operations needed
+        return N - maxWindow; // Operations = Total elements - kept elements
     }
 };
 ```
