@@ -39,18 +39,26 @@
 // Author: github.com/lzl124631x
 // Time: O(A+B)
 // Space: O(1)
+
 class Solution {
-public:
-    string addBinary(string a, string b) {
-        int i = a.size() - 1, j = b.size() - 1, carry = 0;
-        string ans;
-        while (i >= 0 || j >= 0 || carry) {
-            if (i >= 0) carry += a[i--] - '0';
-            if (j >= 0) carry += b[j--] - '0';
-            ans += '0' + (carry & 1);
-            carry >>= 1;
-        }
-        return string(rbegin(ans), rend(ans));
+ public:
+  string addBinary(string a, string b) {
+    string ans;
+    int carry = 0;
+    int i = a.length() - 1;
+    int j = b.length() - 1;
+
+    while (i >= 0 || j >= 0 || carry) {
+      if (i >= 0)
+        carry += a[i--] - '0';
+      if (j >= 0)
+        carry += b[j--] - '0';
+      ans += carry % 2 + '0';       // carry can be 0/1/2
+      carry /= 2;
     }
+
+    reverse(begin(ans), end(ans));
+    return ans;
+  }
 };
 ```
